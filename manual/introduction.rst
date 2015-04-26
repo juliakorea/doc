@@ -24,7 +24,7 @@
   provide a single environment productive enough for prototyping and
   efficient enough for deploying performance-intensive applications.
 
-줄리아 프로그래밍 언어는 이런 역할을 맡는다:
+줄리아 프로그래밍 언어는 다음과 같은 역할을 한다:
 과학과 수학 분야의 컴퓨팅에 적합한,
 기존의 정적 타입 언어에 견줄만한 성능을 갖춘 유연한 동적 언어.
   The Julia programming language fills this role: it is a flexible dynamic
@@ -36,7 +36,7 @@
 줄리아의 성능을 보면 처음엔 상식적으로 요상하다.
 만약 작성한 코드가 왠지 느리게 돌아간다면 다른 것보다 우선 "성능 향상 팁"을 읽어보길 권한다.
 줄리아가 어떤 식으로 작동하는지 이해하였다면
-C만큼 빠른 코드의 작성은 한결 수월해질 것이다.
+C만큼 빠른 코드의 작성이 한결 수월해질 것이다.
   Because Julia's compiler is different from the interpreters used
   for languages like Python or R, you may find that Julia's performance
   is unintuitive at first. If you find that something is slow, we highly
@@ -74,7 +74,8 @@ R 매트랩 파이썬과 같은 언어처럼 쉬우면서도 뛰어난 표현력
 기존의 동적 언어와 비교해 줄리아가 특출난 점은:
 - 핵심 언어는 작게 꾸린다; 
   정수를 다루는 프리미티브 연산자(+ - * 같은)를 비롯하여 기본 라이브러리는 줄리아 자체로 작성되었다.
-- 타입을 구성하고 객체를 서술하기가 언어적으로 풍부하다, 타입 선언을 만들 때에도 선택적으로 사용할 수 있다.
+- 타입을 구성하고 객체를 서술하는 방법을 언어에서 풍부하게 지원한다,
+  타입 선언을 하는 경우도 이를 선택적으로 사용할 수 있다.
 - 인자 타입을 조합함으로서 함수의 작동 행위를 정의하는 "멀티플 디스패치"
 - 인자 타입에 따라 효율적이고 특화된 코드를 자동으로 생성
 - C처럼 정적으로 컴파일되는 언어에 근접한 좋은 성능
@@ -146,9 +147,9 @@ are:
   the amount of data being processed has easily kept pace with Moore's Law
   over the past decades.
 
-줄리아는 단일 언어에 사용하기 쉽고 강력하고 뛰어난 효율도 갖는다는
-전례없는 조합을 갖추는 것을 목표로 한다.
-추가로 줄리아로 얻는 이득은 다음과 같이:
+줄리아는 사용하기도 쉽고 강력하며 효율도 뛰어난 언어라는
+전에는 보지못한 조합을 만들 것임을 목표로 한다.
+추가로 줄리아로 얻는 이득은 다음과 같다:
 - 자유롭게 사용 가능하고 오픈 소스이다(MIT 라이센스)
 - 사용자가 정의한 타입 또한 내장한 타입과 같이 빠르고 아담하다
 - 성능을 위해 코드를 벡터화할 필요가 없다; 벡터화하지 않은 코드도 빠릅니다
