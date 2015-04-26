@@ -5,10 +5,10 @@
  소개 글
 **************
 
-과학 분야에서 컴퓨터 계산은 전통적으로 높은 성능을 필요로 하는데
-각 분야 전문가들은 많이들 느려도 동적인 언어로 넘어와 그 업무를 처리한다.
-이러한 응용 분야에 동적 언어를 선호하는 것에는 많은 이유가 있다고 보이며
-우리는 그 사용이 줄어들거라 예상치 않는다.
+과학 분야의 컴퓨팅은 통상적으로 높은 성능을 필요로 하는데
+그 분야 전문가들은 속도가 떨어짐에도 동적인 언어로 넘어와 그 업무를 처리한다.
+응용 분야에서 동적 언어를 선호하는 것에는 그럴만한 이유가 있을 것이며
+우리가 보기에 그런 현상이 줄어들 것 같지는 않다.
   Scientific computing has traditionally required the highest performance,
   yet domain experts have largely moved to slower dynamic languages for
   daily work. We believe there are many good reasons to prefer dynamic
