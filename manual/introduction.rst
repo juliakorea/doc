@@ -117,7 +117,8 @@ are:
 가장 그 정의와 맞물리는 타입을 찾아 디스패치하여 실행된다.
 이 모델은 수학용 프로그래밍과 잘 맞는데,
 객체 지향에서는 첫번째 인자가 연산자를 "소유"하는 방식으로 디스패치하기에 부자연스럽다.
-연산자는 단지 특별히 표기한 함수일 뿐이다 - `+`` 함수에 새로운 데이터 타입을 정의했을 경우 추가로 메서드를 정의하면 된다. 기존 코드는 새로운 데이터 타입과 맞물려 원할히 작동한다.
+연산자는 단지 특별히 표기한 함수일 뿐이다 - `+`` 함수에 새로운 데이터 타입을 정의했을 경우
+추가로 메서드를 정의하면 된다. 기존 코드는 새로운 데이터 타입과 맞물려 원할히 작동한다.
   While the casual programmer need not explicitly use types or multiple
   dispatch, they are the core unifying features of Julia: functions are
   defined on different combinations of argument types, and applied by
