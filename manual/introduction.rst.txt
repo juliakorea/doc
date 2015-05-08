@@ -95,9 +95,9 @@
 ++ 프리미티브(숫자와 같은 기본 타입의)이거나 별도로 정의하는 것을 통틀어 모든 객체는 타입을 가진다.
 ++ 그러나 대부분의 동적 언어는 타입 선언이 부족하여 컴파일러가 해당 값의 타입을 인지하지 못한다거나
 ++ 꽤 자주 타입에 대해 명시적으로 밝힐 수 없는 상태가 되곤 한다.
-++ 한편 정적 언어는 - 필히 -  컴파일러를 위할 뿐인 타입의 설명을 달아
-++ 타입은 오직 컴파일 시에만 존재해 실행시에는 이를 다루거나 표현할 수가 없다.
-++ 줄리아에서 타입은 그 자체가 런타임 객체이며 컴파일러에게 정보를 전달하는 용도로도 쓰인다.
+++ 한편 정적 언어는 타입 정보를 - 보통 반드시 - 컴파일러용으로 달기에
+++ 타입은 오로지 컴파일 시점에만 존재하고 실행시에는 이를 다루거나 표현할 수가 없다.
+++ 줄리아에서 타입은 그 자체가 런타임 객체이며 물론 컴파일러가 요하는 정보를 알려주기 위해서도 쓰인다.
 -- Although one sometimes speaks of dynamic languages as being "typeless",
 -- they are definitely not: every object, whether primitive or
 -- user-defined, has a type. The lack of type declarations in most dynamic
