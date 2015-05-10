@@ -110,13 +110,13 @@
 -- to the compiler.
 == 
 ++ (복잡하게 신경을 쓰지 않아도 괜찮은) 일상의 프로그래머에게는 타입의 명시나
-++ 멀티플 디스패치란게 필요치 않겠지만 줄리아의 특징들을 이어주는 핵심은 바로:
+++ 멀티플 디스패치란게 필요치 않겠지만 줄리아의 특징을 이어주는 핵심은 바로:
 ++ 함수들은 서로 다른 인자 타입들을 조합함으로서 정의되고
 ++ 가장 그 정의와 맞물리는 타입을 찾아 디스패치하여 실행된다.
 ++ 이 모델은 수학 프로그래밍과 잘 맞는데,
 ++ 객체 지향에선 연산자가 첫번째 인자를 "갖는" 방식이기에 부자연스럽다.
 ++ 연산자는 단지 특별히 표기한 함수일 뿐이다 ``+`` 함수에 새로운 데이터 타입을 정의했을 경우
-++ 메서드 정의만 추가하면 된다. 기존 코드는 새로운 데이터 타입과 원할하게 작동한다.
+++ 메서드 정의만 추가하면 된다. 기존 코드는 새로운 데이터 타입과 더불어 원할하게 작동한다.
 -- While the casual programmer need not explicitly use types or multiple
 -- dispatch, they are the core unifying features of Julia: functions are
 -- defined on different combinations of argument types, and applied by
@@ -129,11 +129,11 @@
 -- types.
 ==
 ++ 런타임 타입 추론(타입 지시를 선택적으로 추가하여)을 이유로
-++ 또 프로젝트의 시발점에서 그 초점을 성능으로 하였기에
+++ 또 프로젝트 시발점에서 성능을 초점으로 하였기에
 ++ 줄리아의 계산 효율은 다른 동적 언어들에 비해 우월하며
-++ 심지어 정적으로 컴파일된 경쟁 언어들마저 능가한다.
-++ 대규모의 수치 해석 문제들의 경우 속도는 매번 그리고
-++ 앞으로도 계속, 아마 항상 결정적 요소일 것이다:
+++ 심지어 정적으로 컴파일하는 경쟁 언어들마저 능가한다.
+++ 거대한 규모의 수치 해석 문제에 있어 속도는 매번 그리고
+++ 앞으로도, 아마 항상 결정적 요소일 것이다:
 ++ 처리되는 데이터의 양이 지난 수십년간 무어의 법칙을 따르고 있으니 말이다.
 -- Partly because of run-time type inference (augmented by optional type
 -- annotations), and partly because of a strong focus on performance from
