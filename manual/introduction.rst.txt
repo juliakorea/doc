@@ -6,16 +6,16 @@
 == **************
 ==
 ++ 과학 분야의 컴퓨팅은 매번 최고의 성능을 필요로 하지만
-++ 해당 분야의 전문가들은 속도가 떨어짐에도 동적인 언어를 채택해 그들의 업무를 처리한다.
-++ 동적인 언어의 적용을 선호하는 많은 이유를 지켜보자니
-++ 그 쓰임이 줄 것 같지도 않다.
+++ 많은 수의 그 분야 전문가들은 속도가 떨어짐에도 동적인 언어를 채택해 업무를 처리한다.
+++ 동적인 언어를 이렇듯 적용하는 것에는 충분히 그럴만한 이유가 있을 것이고
+++ 그 쓰임이 줄어들 것 같지는 않아 보인다.
 ++ 다행히 근래의 언어 디자인과 컴파일러 기법의 발달은
 ++ 성능을 포기했던 지점들을 해결함으로서
-++ 프로토타이핑 시 개별 환경의 생산성을 제공하고
-++ 성능을 중시하는 애플리케이션 구축 시 그 실효성을 갖출 수 있게 한다.
+++ 프로토타이핑 작업시 개별 환경의 생산성을,
+++ 성능이 중요한 애플리케이션 구축시 충분한 효용성을 갖추게 한다.
 ++ 줄리아 프로그래밍 언어는 다음과 같은 역할을 수행한다:
-++ 과학과 수학 분야의 컴퓨팅에 적합한,
-++ 기존의 정적 타입 언어에 견줄만한 성능을 갖춘 유연한 동적 언어.
+++ 과학과 수학 분야의 컴퓨팅에 적합한
+++ 기존의 정적 타입 언어와 견줄만한 성능을 갖춘 유연한 동적 언어.
 -- Scientific computing has traditionally required the highest performance,
 -- yet domain experts have largely moved to slower dynamic languages for
 -- daily work. We believe there are many good reasons to prefer dynamic
@@ -28,11 +28,11 @@
 -- language, appropriate for scientific and numerical computing, with
 -- performance comparable to traditional statically-typed languages.
 ==
-++ 줄리아 컴파일러가 파이썬 R과 같은 언어와는 다르기에
-++ 줄리아의 성능을 들여다보면 처음엔 좀 의아하다.
-++ 작성한 코드가 느린 것 같으면 "성능 향상 팁"을 읽어보길 권한다.
-++ 줄리아가 어떤 식으로 작동하는지 이해했다면,
-++ C로 짠거마냥 빠른 코드를 쉽게 작성할 수 있다.
+++ 줄리아 컴파일러가 파이썬 R 같은 언어와는 다르기에
+++ 줄리아의 성능을 들여다보면 처음엔 좀 의아할 것이다.
+++ 만약에 작성한 코드가 느린 듯 싶으면 "성능 향상 팁"을 읽어보길 권한다.
+++ 줄리아가 어떤 식으로 작동하는지 이해를 하면,
+++ C로 짠거마냥 빠른 코드는 그저 쉽게 작성할 수 있다.
 -- Because Julia's compiler is different from the interpreters used
 -- for languages like Python or R, you may find that Julia's performance
 -- is unintuitive at first. If you find that something is slow, we highly
@@ -40,14 +40,14 @@
 -- section before trying anything else. Once you understand how Julia
 -- works, it's easy to write code that's nearly as fast as C.
 ==
-++ 줄리아는 타입 추론과 LLVM으로 구현한 적시 컴파일(JIT)을 통해 이룬
-++ 선택적 타입, 멀티플 디스패치, 좋은 성능을 지니고 있다.
-++ 그리고 명령형, 함수형, 객체 지향 프로그래밍에서의 특징을 모아놓은 여러가지 패러다임을 추구한다.
+++ 줄리아는 타입 추론과 LLVM으로 구현한 적시 컴파일(JIT)을 사용해
+++ 선택적 타입, 멀티플 디스패치, 좋은 성능을 이루고 있다.
+++ 그리고 명령형, 함수형, 객체 지향 프로그래밍에서의 특징을 모아놓은 다양한 패러다임을 추구한다.
 ++ 줄리아는 수준 높은 수치 계산에 있어
-++ R 매트랩 파이썬처럼 쉬우면서도 뛰어난 표현력을 가진다.
-++ 뿐만 아니라 일반적인 형태의 프로그래밍도 지원한다.
-++ 이를 위해 줄리아는 수학 프로그래밍 언어를 기원으로 하여 구축하였고
-++ 리스프 펄 파이썬 루아 루비와 같은 인기 많은 동적 언어의 특징을 취합하고 있다.
+++ R 매트랩 파이썬처럼 쉬우면서도 표현력이 뛰어나다.
+++ 뿐만 아니라 일반적인 형태의 프로그래밍 역시 지원한다.
+++ 이를 위해 줄리아는 수학 프로그래밍 언어를 근간으로하여 구축하였고
+++ 리스프 펄 파이썬 루아 루비처럼 인기가 많은 동적 언어의 특징을 모두 취합하고 있다.
 -- Julia features optional typing, multiple dispatch, and good
 -- performance, achieved using type inference and `just-in-time (JIT)
 -- compilation <http://en.wikipedia.org/wiki/Just-in-time_compilation>`_,
@@ -66,14 +66,14 @@
 -- <http://en.wikipedia.org/wiki/Lua_(programming_language)>`_, and `Ruby
 -- <http://en.wikipedia.org/wiki/Ruby_(programming_language)>`_.
 ==
-++ 기존의 동적 언어와 비교해 줄리아가 특출난 점은:
+++ 기존의 동적 언어와 비교해 줄리아가 특별한 점은:
 ++ 
 ++ - 핵심 언어는 최소로 꾸린다;
 ++   정수를 다루는 프리미티브 연산자(+ - * 같은)를 비롯하여 기본 라이브러리는 줄리아 자체로 작성되었다.
-++ - 타입을 구성하고 객체를 서술하는 방법을 언어에서 풍부하게 지원한다,
-++   타입 선언을 하는 경우도 이를 선택적으로 사용할 수 있다.
+++ - 타입을 구성하고 객체를 서술하는 방법을 언어에서 풍부히 지원한다,
+++   타입 선언을 하는 경우에도 이를 선택적으로 사용할 수 있다.
 ++ - 인자 타입을 조합함으로서 함수의 작동 행위를 정의하는 "멀티플 디스패치"
-++ - 인자 타입에 따라 효율적이고 특화된 코드를 자동으로 생성
+++ - 인자 타입에 따라 효율적이고 특화된 코드를 자동으로 생성한다
 ++ - C처럼 정적으로 컴파일되는 언어에 근접하는 훌륭한 성능
 -- The most significant departures of Julia from typical dynamic languages
 -- are:
@@ -91,13 +91,13 @@
 -- -  Good performance, approaching that of statically-compiled languages
 --    like C
 ==
-++ 이따금 동적 언어에 대해 "타입이 없다"는 식으로 말하지만 사실 절대 그렇지 않다:
+++ 종종 동적 언어에 대해 "타입이 없다"는 식으로 말하는데 실상은 그렇지 않다:
 ++ 프리미티브(숫자와 같은 기본 타입의)이거나 별도로 정의하는 것을 통틀어 모든 객체는 타입을 가진다.
 ++ 그러나 대부분의 동적 언어는 타입 선언이 부족하여 컴파일러가 해당 값의 타입을 인지하지 못한다거나
 ++ 꽤 자주 타입에 대해 명시적으로 밝힐 수 없는 상태가 되곤 한다.
 ++ 한편 정적 언어는 타입 정보를 - 보통 반드시 - 컴파일러용으로 달기에
-++ 타입은 오로지 컴파일 시점에만 존재하고 실행시에는 이를 다루거나 표현할 수가 없다.
-++ 줄리아에서 타입은 그 자체가 런타임 객체이며 물론 컴파일러가 요하는 정보를 알려주기 위해서도 쓰인다.
+++ 타입은 오로지 컴파일 시점에만 존재하고 실행시에는 이를 다루거나 표현할 수 없다.
+++ 줄리아에서 타입은 그 자체로 런타임 객체이며 컴파일러가 요하는 정보를 알려주기 위해서도 쓰인다.
 -- Although one sometimes speaks of dynamic languages as being "typeless",
 -- they are definitely not: every object, whether primitive or
 -- user-defined, has a type. The lack of type declarations in most dynamic
@@ -109,14 +109,14 @@
 -- themselves run-time objects, and can also be used to convey information
 -- to the compiler.
 == 
-++ (특별한 신경을 쓰지 않아도 괜찮은) 일상의 프로그래머에겐 타입의 명시나
-++ 멀티플 디스패치란게 필요하지 않겠지만 줄리아의 특징들을 이어주는 핵심은 바로:
+++ (복잡하게 신경을 쓰지 않아도 괜찮은) 일상의 프로그래머에게는 타입의 명시나
+++ 멀티플 디스패치란게 필요치 않겠지만 줄리아의 특징들을 이어주는 핵심은 바로:
 ++ 함수들은 서로 다른 인자 타입들을 조합함으로서 정의되고
 ++ 가장 그 정의와 맞물리는 타입을 찾아 디스패치하여 실행된다.
 ++ 이 모델은 수학 프로그래밍과 잘 맞는데,
 ++ 객체 지향에선 연산자가 첫번째 인자를 "갖는" 방식이기에 부자연스럽다.
 ++ 연산자는 단지 특별히 표기한 함수일 뿐이다 ``+`` 함수에 새로운 데이터 타입을 정의했을 경우
-++ 추가로 메서드를 정의하면 된다. 기존 코드는 새로운 데이터 타입과 맞물려 원할히 작동한다.
+++ 메서드 정의만 추가하면 된다. 기존 코드는 새로운 데이터 타입과 원할하게 작동한다.
 -- While the casual programmer need not explicitly use types or multiple
 -- dispatch, they are the core unifying features of Julia: functions are
 -- defined on different combinations of argument types, and applied by
@@ -128,13 +128,13 @@
 -- ``+`` function. Existing code then seamlessly applies to the new data
 -- types.
 ==
-++ 부분적으로 런타임 타입 추론(타입 지시를 선택적으로 추가하여)을 이유로
-++ 그리고 프로젝트의 시발점에서 성능을 강조하였기에
+++ 런타임 타입 추론(타입 지시를 선택적으로 추가하여)을 이유로
+++ 또 프로젝트의 시발점에서 그 초점을 성능으로 하였기에
 ++ 줄리아의 계산 효율은 다른 동적 언어들에 비해 우월하며
 ++ 심지어 정적으로 컴파일된 경쟁 언어들마저 능가한다.
-++ 대규모의 수치 해석 문제의 경우 속도는 매번 그래왔듯이
-++ 앞으로도, 아마 항상 결정적 요소일 것이다:
-++ 처리되는 데이터의 양은 지난 수십년간 무어의 법칙을 따르고 있으니 말이다.
+++ 대규모의 수치 해석 문제들의 경우 속도는 매번 그리고
+++ 앞으로도 계속, 아마 항상 결정적 요소일 것이다:
+++ 처리되는 데이터의 양이 지난 수십년간 무어의 법칙을 따르고 있으니 말이다.
 -- Partly because of run-time type inference (augmented by optional type
 -- annotations), and partly because of a strong focus on performance from
 -- the inception of the project, Julia's computational efficiency exceeds
@@ -145,17 +145,17 @@
 -- over the past decades.
 ==
 ++ 줄리아는 사용하기도 쉽고 강력하며 효율도 뛰어난 언어라는
-++ 전에는 보지못한 조합의 완성을 목표로 한다.
-++ 덧붙여 다른 시스템과 견주어 줄리아가 제시하는 혜택은 다음과 같다:
+++ 전에는 접하지 못한 꿈의 조합을 목표로 한다.
+++ 이외에 다른 시스템과 견주어 줄리아가 주는 혜택은 다음과 같다:
 ++ 
-++ - 자유롭게 사용 가능하고 오픈 소스이다(MIT 라이센스)
-++ - 사용자가 정의한 타입 또한 내장한 타입과 같이 빠르고 아담하다
-++ - 성능을 위해 코드를 벡터화할 필요가 없다; 벡터화하지 않은 코드도 빠릅니다
+++ - 자유롭게 사용 가능하며 오픈 소스이다(MIT 라이센스)
+++ - 사용자가 정의한 타입 또한 내장한 타입처럼 빠르고 간결하다
+++ - 성능을 위해 코드를 벡터화할 필요가 없다; 벡터화하지 않은 코드도 빠르다
 ++ - 병렬과 분산 처리를 위해 고안되었다
 ++ - 경량의 그린 쓰레딩(코루틴)
-++ - 강요하지는 않지만 강력한 타입 시스템
+++ - 거슬리지 않는 강력한 타입 시스템
 ++ - 수와 타입을 위한 우아하고 확장 가능한 컨버젼 및 프로모션(타입 변환)
-++ - UTF-8을 비롯한 효율적인 유니코드 지원
+++ - UTF-8을 비롯, 효율적인 유니코드 지원
 ++ - C 함수 직접 호출(별도의 래퍼나 특정한 API가 필요하지 않음)
 ++ - 다른 프로세스를 관리하는 쉘과 비슷한 강력한 기능
 ++ - 리스프와 비슷한 매크로, 메타프로그래밍을 위한 장치들
