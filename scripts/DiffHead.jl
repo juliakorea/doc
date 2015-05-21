@@ -1,7 +1,7 @@
 using Base.Test
 
 function diff_manual(path)
-  translated = open(readall, "../$path.txt")
+  translated = open(readall, "$path.txt")
   lines = String[]
   for line in split(translated, "\n")
     len = length(line)
@@ -12,7 +12,7 @@ function diff_manual(path)
       end
     end
   end
-  original = open(readall, "$JULIA_HOME/../../doc/$path")
+  original = open(readall, "julia/doc/$path")
   @test original == join(lines) 
 end
 
