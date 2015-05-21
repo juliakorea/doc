@@ -1,7 +1,7 @@
 function gen_rst(path)
-  outfile = "../$path"
+  outfile = "$path"
   out = open(outfile, "w")
-  txt = open(readall, "../$path.txt")
+  txt = open(readall, "$path.txt")
   for line in split(txt, "\n")
     len = length(line)
     if len > 1
