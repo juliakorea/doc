@@ -1,3 +1,5 @@
 language: julia
+julia:
+  - nightly
 script:
   - julia scripts/DiffHead.jl
