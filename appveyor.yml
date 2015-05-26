@@ -10,6 +10,11 @@ branches:
 init:
   - git config --global core.autocrlf input
 
+clone_depth: 50
+
+build_script:
+  - echo
+
 test_script:
   - C:\projects\julia\bin\julia-debug -e "versioninfo()"
   - C:\projects\julia\bin\julia-debug scripts/DiffHead.jl
