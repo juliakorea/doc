@@ -1,6 +1,6 @@
 environment:
   matrix:
-  - JULIAVERSION: "download/win64"
+  - JULIAVERSION: "nightly/win64"
 
 branches:
   only:
