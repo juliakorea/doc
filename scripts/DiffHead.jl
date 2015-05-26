@@ -17,16 +17,21 @@ function diff_manual(path)
       end
     end
   end
+  exit_code = 0
   original = open(readall, normpath(target_dir, "julia/doc/$path"))
   print("$path_txt: ")
   if original == join(lines)
     print_with_color(:green, "ok")
   else
     print_with_color(:red, "needs an update")
+    exit_code = 1
   end
   println()
+  exit_code
 end
 
+exit_code = 0
 for path in ["manual/introduction.rst"]
-  diff_manual(path)
+  exit_code |= diff_manual(path)
 end
+exit(exit_code)

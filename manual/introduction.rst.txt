@@ -1,5 +1,5 @@
 == .. _man-introduction:
-==
+++
 == **************
 ++  소개 글
 --  Introduction
