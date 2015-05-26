@@ -1,0 +1,15 @@
+environment:
+  matrix:
+  - JULIAVERSION: "stable/win32"
+  - JULIAVERSION: "stable/win64"
+
+branches:
+  only:
+    - master
+
+init:
+  - git config --global core.autocrlf input
+
+test_script:
+  - C:\projects\julia\bin\julia-debug -e "versioninfo()"
+  - C:\projects\julia\bin\julia-debug scripts/DiffHead.jl
