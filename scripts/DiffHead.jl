@@ -1,7 +1,12 @@
 using Base.Test
 
 function diff_manual(path)
-  translated = open(readall, "$path.txt")
+  target_dir = relpath(".")
+  if nothing == Base.find_in_path(normpath(target_dir, "$path.txt"))
+    target_dir = relpath("..")
+  end
+  path_txt = normpath(target_dir, "$path.txt")
+  translated = open(readall, path_txt)
   lines = String[]
   for line in split(translated, "\n")
     len = length(line)
@@ -12,8 +17,14 @@ function diff_manual(path)
       end
     end
   end
-  original = open(readall, "julia/doc/$path")
-  @test original == join(lines) 
+  original = open(readall, normpath(target_dir, "julia/doc/$path"))
+  print("$path_txt: ")
+  if original == join(lines)
+    print_with_color(:green, "ok")
+  else
+    print_with_color(:red, "needs an update")
+  end
+  println()
 end
 
 for path in ["manual/introduction.rst"]

@@ -4,4 +4,4 @@ os:
 julia:
   - nightly
 script:
-  - julia scripts/DiffHead.jl
+  - julia --color=yes scripts/DiffHead.jl
