@@ -1,13 +1,13 @@
 environment:
   matrix:
-  - JULIAVERSION: "nightly/win64"
+    - JULIAVERSION: "download/win64"
 
 branches:
   only:
     - master
 
 install:
-  - ps: (new-object net.webclient).DownloadFile($("http://status.julialang.org/download/"+$env:JULIAVERSION), "C:\projects\julia-binary.exe")
+  - ps: (new-object net.webclient).DownloadFile($("http://status.julialang.org/"+$env:JULIAVERSION), "C:\projects\julia-binary.exe")
   - C:\projects\julia-binary.exe /S /D=C:\projects\julia
 
 init:
