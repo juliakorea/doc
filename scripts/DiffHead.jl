@@ -31,7 +31,7 @@ function diff_manual(path)
 end
 
 exit_code = 0
-for path in ["manual/introduction.rst"]
+for path in ["index.rst", "manual/introduction.rst"]
   exit_code |= diff_manual(path)
 end
 exit(exit_code)

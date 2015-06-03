@@ -22,6 +22,6 @@ function gen_rst(path)
   println("generated $out_path")
 end
 
-for path in ["manual/introduction.rst"]
+for path in ["index.rst", "manual/introduction.rst"]
   gen_rst(path)
 end
