@@ -1,0 +1,1542 @@
+\chapter{Case studies}
+\label{chap:casestudies}
+
+This chapter discusses several examples that illustrate the effectiveness of
+Julia's abstractions for technical computing.
+The first three sections provide an ``explication through elimination'' of
+core features (numbers and arrays) that have usually been built in to
+technical computing environments.
+The remaining sections introduce some libraries and real-world applications
+that benefit from Julia's design.
+
+\section{Conversion and comparison}
+\label{sec:conversion}
+
+Type conversion provides a classic example of a binary method.
+Multiple dispatch allows us to avoid deciding whether the converted-to type or the
+converted-from type is responsible for defining the operation.
+Defining a specific conversion is straightforward, and might look like this
+in Julia syntax:
+
+\begin{verbatim}
+convert(::Type{Float64}, x::Int32) = ...
+\end{verbatim}
+
+\noindent
+A call to this method would look like \texttt{convert(Float64, 1)}.
+
+Using conversion in generic code requires more sophisticated definitions.
+For example we might need to convert one value to the type of another,
+by writing \texttt{convert(typeof(y), x)}.
+What set of definitions must exist to make that call work in all reasonable cases?
+Clearly we don't want to write all $O(n^2)$ possibilities.
+We need abstract definitions that cover many points in the dispatch matrix.
+One such family of points is particularly important: those that describe converting
+a value to a type it is already an instance of.
+In our system this can be handled by a single definition that performs ``triangular''
+dispatch:
+
+\begin{verbatim}
+convert{T,S<:T}(::Type{T}, x::S) = x
+\end{verbatim}
+
+\noindent
+``Triangular'' refers to the rough shape of the dispatch matrix covered
+by such a definition: for all types \texttt{T} in the first argument slot,
+match values of any type less than it in the second argument slot.
+
+A similar trick is useful for defining equivalence relations.
+It is most likely unavoidable for programming languages to need multiple
+notions of equality.
+Two in particular are natural: an \emph{intensional}
+notion that equates objects that look identical, and an \emph{extensional}
+notion that equates objects that mean the same thing for some standard
+set of purposes.
+Intensional equality (\texttt{===} in Julia, described
+in section~\ref{sec:corecalc}) lends itself to being implemented once
+by the language implementer, since it can work by directly comparing
+the representations of objects.
+Extensional equality (\texttt{==} in Julia), on the other hand, must be
+extensible to user-defined data types.
+The latter function must call the former in order to have any basis for
+its comparisons.
+
+As with conversion, we would like to provide default definitions for
+\texttt{==} that cover families of cases.
+Numbers are a reasonable domain to pick, since all numbers should be
+equality-comparable to each other.
+We might try (\texttt{Number} is the abstract supertype of all numeric types):
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+==(x::Number, y::Number) = x === y
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+meaning that number comparison can simply fall back to intensional
+equality.
+However this definition is rather dubious.
+It gets the wrong answer every time the arguments are different representations
+(e.g.\ integer and floating point) of the same quantity.
+We might hope that its behavior will be ``patched up'' later by more specific
+definitions for various concrete number types, but it still covers a dangerous
+amount of dispatch space.
+If later definitions somehow miss a particular combination of number types,
+we could get a silent wrong answer instead of an error.
+(Note that statically checking method exhaustiveness is no help here.)
+
+``Diagonal'' dispatch lets us improve the definition:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+=={T<:Number}(x::T, y::T) = x === y
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+Now \texttt{===} will only be used on arguments of the same type,
+making it far more likely to give the right answer.
+Even better, any case where it does not give the right answer can be fixed with
+a single definition, i.e.\ \texttt{==(x::S, y::S)} for some
+concrete type \texttt{S}.
+The more general \texttt{(Number, Number)} case is left open, and in the next
+section we will take advantage of this to implement ``automatic'' type promotion.
+
+%- The abstractions of equality and comparison. Different equivalence classes between
+%is/===, isequal and ==
+%- Numeric vs lexicographic ordering?
+%cmp, lexcmp, vs isless, <
+
+
+\section{Numeric types and embeddings}
+\label{sec:embeddings}
+
+We might prefer ``number'' to be a single, concrete concept, but the history of
+mathematics has seen the concept extended many times, from integers to rationals to
+reals, and then to complex, quaternion, and more.
+These constructions tend to follow a pattern: each new set of numbers has a subset
+isomorphic to an existing set.
+For example, the reals are isomorphic to the complex numbers with zero imaginary part.
+
+Human beings happen to be good at equating and moving between isomorphic sets,
+so it is easy to imagine that the reals and complexes with zero imaginary
+part are one and the same.
+But a computer forces us to be specific, and admit
+that a real number is not complex, and a complex number is not real.
+And yet the close relationship between them is too compelling not to model in a
+computer somehow.
+Here we have a numerical analog to the famous ``circle and ellipse'' problem in
+object-oriented programming~\cite{cline1995c++}: the set of circles is
+isomorphic to the set of ellipses with equal axes, yet neither ``is a''
+relationship in a class hierarchy seems fully correct.
+An ellipse is not a circle, and in general a circle cannot serve as an ellipse
+(for example, the set of circles is not closed under the same operations that the
+set of ellipses is, so a program written for ellipses might not work on circles).
+This problem implies that a single built-in type hierarchy is not
+sufficient: we want to model custom \emph{kinds} of relationships between
+types (e.g.\ ``can be embedded in'' in addition to ``is a'').
+
+%% Two further problems should also be kept in mind. First, the natural isomorphisms
+%% between sets of numbers might not be isomorphisms on a real computer. For example,
+%% due to the behavior of floating-point arithmetic, an operation on complex numbers
+%% with zero imaginary part might not give an answer equal to the same operation on
+%% real numbers. Second, the contexts that demand use of one type of number or
+%% another are often not easily described by type systems.
+
+% ex: generic sum function accumulating result in at least
+% double precision. just using +::T->T->T doesn't work.
+
+% \subsection{Current approaches}
+
+Numbers tend to be among the most complex features of a language.
+Numeric types usually need to be a special case: in a typical language with
+built-in numeric types, describing their behavior is beyond the expressive power
+of the language itself.
+For example, in C arithmetic operators like \texttt{+} accept multiple types of
+arguments (ints and floats), but no user-defined C function can do this (the situation
+is of course improved in C++).
+In Python, a special arrangement is made for \texttt{+} to call either an
+\texttt{\_\_add\_\_} or \texttt{\_\_radd\_\_} method,
+effectively providing double-dispatch for arithmetic in a language that is
+idiomatically single-dispatch.
+
+\subsubsection{Implementing type embeddings}
+\label{sec:promotion}
+
+Most functions are naturally implemented in the value domain, but some are
+actually easier to implement in the type domain.
+One reason is that there is a bottom element, which most data types lack.
+
+It has been suggested on theoretical grounds \cite{categorytheoryoperators}
+that generic binary operators should have ``key variants'' where the
+arguments are of the same type.
+We implement this in Julia with a default definition that uses diagonal
+dispatch:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
++{T<:Number}(x::T, y::T) = no_op_err("+", T)
+\end{lstlisting}
+\end{singlespace}
+
+Then we can implement a more general definition for different-type arguments
+that tries to promote the arguments to a common type by calling \texttt{promote}:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
++(x::Number, y::Number) = +(promote(x,y)...)
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+\texttt{promote} returns a pair of the values of its arguments after conversion
+to a common type, so that a ``key variant'' can be invoked.
+
+\texttt{promote} is designed to be extended by new numeric types.
+A full-featured promotion operator is a tall order.
+We would like
+
+\begin{itemize}
+\item Each combination of types only needs to be defined in one order; we
+don't want to redundantly define the behavior of \texttt{(T,S)} and \texttt{(S,T)}.
+\item It falls back to join for types without any defined promotion.
+\item It must prevent promotion above a certain point to avoid circularity.
+%in promoting fallback definitions of operators.
+\end{itemize}
+
+The core of the mechanism is three functions: \texttt{promote\_type}, which
+performs promotion in the type domain only, \texttt{promote\_rule}, which is
+the function defined by libraries, and a utility function \texttt{promote\_result}.
+The default definition of \texttt{promote\_rule} returns \texttt{Bottom},
+indicating no promotion is defined.
+\texttt{promote\_type} calls \texttt{promote\_rule} with its arguments in
+both possible orders.
+If one order is defined to give \texttt{X} and the other is not defined,
+\texttt{promote\_result} recursively promotes \texttt{X} and \texttt{Bottom},
+giving \texttt{X}.
+If neither order is defined, the last definition below is called, which
+falls back to \texttt{typejoin}:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+promote{T,S}(x::T, y::S) =
+    (convert(promote_type(T,S),x), convert(promote_type(T,S),y))
+
+promote_type{T,S}(::Type{T}, ::Type{S}) =
+    promote_result(T, S, promote_rule(T,S), promote_rule(S,T))
+
+promote_rule(T, S) = Bottom
+
+promote_result(t,s,T,S) = promote_type(T,S)
+# If no promote_rule is defined, both directions give Bottom.
+# In that case use typejoin on the original types instead.
+promote_result{T,S}(::Type{T}, ::Type{S},
+                    ::Type{Bottom}, ::Type{Bottom}) = typejoin(T, S)
+\end{lstlisting}
+\end{singlespace}
+
+The obvious way to extend this system is to define \texttt{promote\_rule},
+but it can also be extended in a less obvious way.
+For the purpose of manipulating container types, we would like e.g.\ \texttt{Int}
+and \texttt{Real} to promote to \texttt{Real}.
+However, we do not want to introduce a rule that promotes arbitrary pairs of
+numeric types to \texttt{Number}, since that would make the above
+default definition of \texttt{+} circular.
+The following definitions accomplish this, by promoting to the larger
+numeric type if one is a subtype of the other:
+
+\begin{samepage}
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+promote_result{T<:Number,S<:Number}(::Type{T}, ::Type{S},
+                                    ::Type{Bottom}, ::Type{Bottom}) =
+    promote_sup(T, S, typejoin(T,S))
+
+# promote numeric types T and S to typejoin(T,S) if T<:S or S<:T
+# for example this makes promote_type(Integer,Real) == Real without
+# promoting arbitrary pairs of numeric types to Number.
+promote_sup{T<:Number          }(::Type{T},::Type{T},::Type{T}) = T
+promote_sup{T<:Number,S<:Number}(::Type{T},::Type{S},::Type{T}) = T
+promote_sup{T<:Number,S<:Number}(::Type{T},::Type{S},::Type{S}) = S
+promote_sup{T<:Number,S<:Number}(::Type{T},::Type{S},::Type) =
+    error("no promotion exists for ", T, " and ", S)
+\end{lstlisting}
+\end{singlespace}
+\end{samepage}
+
+\subsubsection{Application to ranges}
+
+\emph{Ranges} illustrate an interesting application of type promotion.
+A range data type, notated \texttt{a:s:b}, represents a sequence of values
+starting at \texttt{a} and ending at \texttt{b}, with a distance of \texttt{s}
+between elements (internally, this notation is translated to
+\texttt{colon(a, s, b)}).
+Ranges seem simple enough, but a reliable, efficient, and generic implementation
+is difficult to achieve.
+We propose the following requirements:
+
+\begin{itemize}
+\item The start and stop values can be passed as different types, but internally
+  should be of the same type.
+\item Ranges should work with ordinal types, not just numbers (examples include
+  characters, pointers, and calendar dates).
+\item If any of the arguments is a floating-point number, a special
+  \texttt{FloatRange} type designed to cope well with roundoff is returned.
+\end{itemize}
+
+In the case of ordinal types, the step value is naturally of a different type
+than the elements of the range.
+For example, one may add 1 to a character to get the ``next'' encoded character,
+but it does not make sense to add two characters.
+
+It turns out that the desired behavior can be achieved with six definitions.
+
+First, given three floats of the same type we can construct a \texttt{FloatRange}
+right away:
+
+\begin{verbatim}
+colon{T<:FloatingPoint}(start::T, step::T, stop::T) =
+    FloatRange{T}(start, step, stop)
+\end{verbatim}
+
+Next, if \texttt{a} and \texttt{b} are of the same type and there are no floats,
+we can construct a general range:
+
+\begin{verbatim}
+colon{T}(start::T, step, stop::T) = StepRange(start, step, stop)
+\end{verbatim}
+
+Now there is a problem to fix: if the first and last arguments are of some
+non-floating-point numeric type, but the step is floating point, we want to
+promote all arguments to a common floating point type.
+We must also do this if the first and last arguments are floats, but the step
+is some other kind of number:
+
+\begin{verbatim}
+colon{T<:Real}(a::T, s::FloatingPoint, b::T) = colon(promote(a,s,b)...)
+
+colon{T<:FloatingPoint}(a::T, s::Real, b::T) = colon(promote(a,s,b)...)
+\end{verbatim}
+
+These two definitions are correct, but ambiguous: if the step is a float
+of a different type than \texttt{a} and \texttt{b} both definitions are
+equally applicable.
+We can add the following disambiguating definition:
+
+\begin{verbatim}
+colon{T<:FloatingPoint}(a::T, s::FloatingPoint, b::T) =
+    colon(promote(a,s,b)...)
+\end{verbatim}
+
+All of these five definitions require \texttt{a} and \texttt{b} to be of the
+same type.
+If they are not, we must promote just those two arguments, and leave
+the step alone (in case we are dealing with ordinal types):
+
+\begin{verbatim}
+colon{A,B}(a::A, s, b::B) =
+    colon(convert(promote_type(A,B),a), s, convert(promote_type(A,B),b))
+\end{verbatim}
+
+This example shows that it is not always sufficient to have a built-in set of
+``promoting operators''.
+Library functions like this \texttt{colon} need more control.
+
+\subsubsection{On implicit conversion}
+
+In order to facilitate human styles of thinking, many programming languages offer
+some flexibility in when types are required to match.
+%This often takes the form of implicit conversion.
+For example, a C function declared to accept type \texttt{float}
+can also be called with an \texttt{int}, and the compiler will
+insert a conversion automatically.
+We have found that most cases where this behavior is desirable
+are handled simply by method applicability, as shown in this and the
+previous section.
+Most of the remaining cases involve assignment.
+Julia has a notion of a \emph{typed location}, which is a variable
+or mutable object field with an associated type.
+The core language requires types to match (as determined by subtyping)
+on assignment.
+However, updating assignments that are syntactically identifiable
+(via use of \texttt{=}) cause the front-end to insert calls to
+\texttt{convert} to try to convert the assignment right-hand side
+to the type of the assigned location.
+Abstract data types can easily mimic this behavior by (optionally)
+calling \texttt{convert} in their implementations of mutating
+operations.
+In our experience, this arrangement provides the needed convenience
+without complicating the language.
+Program analyses consuming lowered syntax trees (or any lower level
+representation) do not need to know anything about conversion
+or coercion.
+
+Fortress~\cite{fortresspec} also provides powerful type conversion
+machinery.
+However, it does so through a special \texttt{coerce} feature.
+This allows conversions to happen during dispatch, so a method can
+become applicable if arguments can be converted to its declared type.
+There is also a built-in notion of type widening.
+This allows conversions to be inserted between nested operator
+applications, which can improve the accuracy of mixed-precision code.
+It is not possible to provide these features in Julia without doing
+violence to our ``everything is a method call'' semantics.
+We feel that it is worth giving up these features for a simpler
+mental model.
+We also believe that the ability to provide so much ``magic'' numeric
+type behavior only through method definitions is compelling.
+
+\subsubsection{Number-like types in practice}
+
+Originally, our reasons for implementing all numeric types at the library
+level were not entirely practical.
+We had a principled opposition to including such definitions in a compiler,
+and guessed that being able to define numeric types would help ensure the
+language was powerful enough.
+However, defining numeric and number-like types and their interactions turns
+out to be surprisingly useful.
+Once such types are easy to obtain, people find more and more uses for them.
+
+Even among basic types that might reasonably be built in, there is enough
+complexity to require an organizational strategy.
+We might have
+
+\begin{itemize}
+  \item Ordinal types \texttt{Pointer}, \texttt{Char}, \texttt{Enum}
+
+  \item Integer types \texttt{Bool}, \texttt{Int8}, \texttt{Int16}, \texttt{Int32}, \texttt{Int64}, \texttt{Int128}, \texttt{UInt8}, \texttt{UInt16}, \texttt{UInt32}, \texttt{UInt64}, \texttt{UInt128}, \texttt{BigInt}
+
+  \item Floating point types \texttt{Float16}, \texttt{Float32}, \texttt{Float64}, \texttt{Float80}$^*$, \texttt{Float128}$^*$, \texttt{BigFloat}, \texttt{DoubleDouble}
+
+  \item Extensions \texttt{Rational}, \texttt{Complex}, \texttt{Quaternion}
+\end{itemize}
+
+\noindent
+Types with $^*$ have not been implemented yet, but the rest have.
+In external packages, there are types for interval arithmetic,
+dual and hyper-dual numbers for computing first and second derivatives,
+finite fields, and decimal floating-point.
+
+Some applications benefit in performance from fixed-point arithmetic.
+This has been implemented in a package as \texttt{Fixed32\{b\}}, where
+the number of fraction bits is a parameter.
+
+A problem in the design of image processing libraries was solved by
+defining a new kind of fixed-point type \cite{ufixed}.
+The problem is that image scientists often want to work with fractional
+pixel values in the interval $[0,1]$, but most graphics libraries (and memory
+efficiency concerns) require 8-bit integer pixel components with
+values in the interval $[0,255]$.
+The solution is a \texttt{Ufixed8} type that uses an unsigned 8-bit integer
+as its representation, but behaves like a fraction over $255$.
+
+Many real-world quantities are not numbers exactly, but benefit from the
+same mechanisms in their implementation.
+Examples include colors (which form a vector space, and where many different
+useful bases have been standardized), physical units, and DNA nucleotides.
+Date and time arithmetic is especially intricate and irregular, and
+benefits from permissiveness in operator definitions.
+% (more on this in section~\ref{sec:dates}).
+% dates: different cardinal and ordinal behavior
+% musical notes
+
+
+\section{Multidimensional array indexing}
+\label{sec:ndindexing}
+
+One-dimensional arrays are a simple and essential data structure found in
+most programming languages.
+The multi-dimensional arrays required in scientific computing, however, are
+a different beast entirely.
+Allowing any number of dimensions entails a significant increase in complexity.
+Why?
+The essential reason is that core properties of the data structure no
+longer fit in a constant amount of space.
+The space needed to store the sizes of the dimensions (the array shape) is
+proportional to the number of dimensions.
+This does not seem so bad, but becomes a large problem due to three additional
+facts:
+
+\begin{enumerate}
+\item Code that operates on the dimension sizes needs to be highly efficient.
+Typically the overhead of a loop is unacceptable, and such code needs to be fully
+unrolled.
+\item In some code the number of dimensions is a \emph{dynamic} property --- it is
+only known at run time.
+\item Programs may wish to treat arrays with different numbers of dimensions
+differently.
+A vector (1d) might have rather different behaviors than a matrix (2d)
+(for example, when computing a norm).
+This kind of behavior makes the number of dimensions a crucial part of program
+semantics, preventing it from remaining a compiler implementation detail.
+\end{enumerate}
+
+These facts pull in different directions.
+The first fact asks for static analysis.
+The second fact asks for run time flexibility.
+The third fact asks for dimensionality to be part of the type system, but
+partly determined at run time (for example, via virtual method dispatch).
+Current approaches choose a compromise.
+In some systems, the number of dimensions has a strict limit (e.g.\ 3 or 4),
+%% TODO: examples of systems limited to n==3
+so that separate classes for each case can be written out in full.
+Other systems choose flexibility, and just accept that most
+or all operations will be dynamically dispatched.
+Other systems might provide flexibility only at compile time, for example a
+template library where the number of dimensions must be statically known.
+
+Whatever trade-off is made, rules must be defined for how various operators
+act on dimensions.
+Here we focus on indexing, since selecting parts of arrays has particularly
+rich behavior with respect to dimensionality.
+For example, if a single row or column of a matrix is
+selected, does the result have one or two dimensions?
+Array implementations prefer to invoke general rules to answer such questions.
+Such a rule might say ``dimensions indexed with scalars are dropped'', or ``trailing
+dimensions of size one are dropped'', or ``the rank of the result
+is the sum of the ranks of the indexes'' (as in APL).
+A significant amount of work has been done on inferring properties like these
+for existing array-based languages
+(e.g.\ \cite{Joisha:2006:AAS:1152649.1152651,Garg:2014:JSI:2627373.2627382},
+although these methods go further and attempt to infer complete size
+information).
+
+C++ and Haskell are both examples of languages with sufficiently powerful
+static semantics to support defining efficient and reasonably flexible
+multi-dimensional arrays in libraries.
+In both languages, implementing these libraries is fairly difficult and
+places some limits on how indexing can behave.
+In C++, the popular Boost libraries include a multi-array
+type~\cite{garcia2005multiarray}.
+To index an array with this library, one builds up an \texttt{index\_gen}
+object by repeatedly applying the \texttt{[]} operator.
+On each application, if the argument is a \texttt{range} then the
+corresponding dimension is kept, and otherwise it is dropped.
+This is implemented with a template as follows:
+
+\begin{singlespace}
+\begin{lstlisting}[language=c++,style=ttcode]
+template <int NumRanges, int NumDims>
+struct index_gen {
+index_gen<NumRanges+1,NumDims+1> operator[](const range& r) const
+    { ... }
+
+index_gen<NumRanges+1,NumDims> operator[](index idx) const
+    { ... }
+}
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+The number of dimensions in the result is determined by arithmetic
+on template parameters and static overloading.
+Handling arguments one at a time recursively is a common pattern
+for feeding more complex type information to compilers.
+In fact, the Haskell library Repa~\cite{Keller:2010rs} uses
+essentially the same approach:
+
+\begin{singlespace}
+\begin{lstlisting}[language=haskell,style=ttcode]
+instance Slice sl => Slice (sl :. Int) where
+    sliceOfFull (fsl :. _) (ssl :. _) = sliceOfFull fsl ssl
+
+instance Slice sl => Slice (sl :. All) where
+    sliceOfFull (fsl :. All) (ssl :. s) = sliceOfFull fsl ssl :. s
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+The first instance declaration says that given an \texttt{Int} index,
+the dimension corresponding to \texttt{\_} is dropped.
+The second declaration says that given an \texttt{All} index,
+dimension \texttt{s} is kept.
+
+\iffalse
+Our goal here is a bit unusual: we are not concerned with which rules
+might work best, but merely with how they can be specified, so that
+domain experts can experiment.
+In fact different domains want different things.
+Working with images, each dimension might be quite different, e.g.\ representing
+time, space, or color, so you don't want to drop or rearrange dimensions.
+\fi
+
+%Here are our ground rules:
+%\begin{enumerate}
+%\item You can't manually implement the behavior inside the compiler
+%\item The compiler must be able to reasonably understand the program
+%\item The code must be reasonably easy to write
+%\end{enumerate}
+
+\iffalse
+%How are such rules implemented?
+In a language with built-in multidimensional arrays, the compiler will
+analyze indexing expressions and determine an answer using hard-coded
+logic.
+% TODO: example from one of these compilers
+However, this approach is not satisfying: we would rather
+implement the behavior in libraries, so that different kinds of arrays
+may be defined, or so that rules of similar complexity may be
+defined for other kinds of objects.
+In fact different domains want different things.
+Working with images, each dimension might be quite different, e.g.\ representing
+time, space, or color, so you don't want to drop or rearrange dimensions.
+%But these kinds of rules are unusually difficult to implement in libraries.
+%If a library writes out its indexing logic using imperative code, the host
+%language compiler is not likely to be able to analyze it.
+Using compile time abstraction (templates) provides better performance, but
+such libraries tend to be difficult to write (and read), and the full
+complement of indexing behavior expected by technical users strains the
+capabilities of such systems.
+\fi
+
+Our dispatch mechanism permits a novel solution \cite{Bezanson2014}.
+Indexing behavior can be defined with method signatures, using a combination
+of variadic methods and argument ``splatting'' (the ability
+to pass a structure of $n$ values as $n$ separate arguments to a function,
+known as \texttt{apply} in Lisp dialects, and written as \texttt{f(xs...)}
+in Julia).
+This solution is still a compromise among the factors outlined above,
+but it is a new compromise that provides a modest increment of power.
+% TODO more
+
+Below we define a function \texttt{index\_shape} that computes the
+shape of a result array given a series of index arguments.
+We show three versions, each implementing a different rule that users in
+different domains might want:
+
+% TODO: point out array = (shape, data), so those are the two parts
+% we need to handle. In julia the ``data'' part is not a first-class
+% object; it is not directly exposed to the user, but this is more
+% of an implementation detail.
+
+\vspace{-3ex}
+\begin{singlespace}
+\begin{verbatim}
+# drop dimensions indexed with scalars
+index_shape() = ()
+index_shape(i::Real, I...) = index_shape(I...)
+index_shape(i, I...)       = (length(i), index_shape(I...)...)
+
+# drop trailing dimensions indexed with scalars
+index_shape(i::Real...) = ()
+index_shape(i, I...)    = (length(i), index_shape(I...)...)
+
+# rank summing (APL)
+index_shape()        = ()
+index_shape(i, I...) = (size(i)..., index_shape(I...)...)
+\end{verbatim}
+\end{singlespace}
+
+Inferring the length of the result of \texttt{index\_shape} is sufficient
+to infer the rank of the result array.
+
+These definitions are concise, easy to write, and possible for a
+compiler to understand fully using straightforward techniques.
+
+The result type is determined using only data flow type inference, plus a
+rule for splicing an immediate container (the type of \texttt{f((a,b)...)} is
+the type of \texttt{f(a,b)}). Argument list destructuring takes place inside
+the type intersection operator used to combine argument types with method
+signatures.
+
+This approach does not depend on any heuristics. Each call to \texttt{index\_shape}
+simply requires one recursive invocation of type inference. This process reaches
+the base case \texttt{()} for these definitions, since each recursive call
+handles a shorter argument list (for less-well-behaved definitions, we might
+end up invoking a widening operator instead).
+
+%% \subsection{Even more elimination?}
+
+%% Some features of the language could be even further eliminated. For example data
+%% types could be implemented in terms of lambda abstractions. But certain patterns
+%% are so useful that they might as well be provided in a standard form. It also
+%% probably makes the compiler much more efficient not to need to pass around and
+%% repeatedly analyze full representations of the meanings of such ubiquitous constructs.
+
+\iffalse
+\section{Array views}
+
+tim holy in issue 8839:
+
+``without staged functions in my initial post in 8235. The take-home message: generating all methods through dimension 8 resulted in more than 5000 separate methods, and required over 4 minutes of parsing \& lowering time (i.e., a 4-minute delay while compiling julia). By comparison, the stagedfunction implementation loads in a snap, and of course can go even beyond 8 dimensions.''
+\fi
+
+\section{Numerical linear algebra}
+\label{sec:linalg}
+
+The crucial roles of code selection and code specialization in technical
+computing are captured well in the linear algebra software engineer's dilemma,
+described in the context of LAPACK and ScaLAPACK by Demmel and Dongarra,
+\textit{et al.}~\cite{lawn181}:
+\vspace{-4ex}
+\begin{singlespace}
+\begin{small}
+\begin{verbatim}
+(1) for all linear algebra problems (linear systems, eigenproblems, ...)
+(2)    for all matrix types (general, symmetric, banded, ...)
+(3)       for all data types (real, complex, single, double, higher precision)
+(4)          for all machine architectures
+                and communication topologies
+(5)                for all programming interfaces
+(6)                   provide the best algorithm(s) available in terms of
+                      performance and accuracy ("algorithms" is plural
+                      because sometimes no single one is always best)
+\end{verbatim}
+\end{small}
+\end{singlespace}
+
+Organizing this functionality has been a challenge.
+LAPACK is associated with dense matrices, but in reality supports 28
+matrix data types (e.g.\ diagonal, tridiagonal, symmetric, symmetric
+positive definite, triangular, triangular packed, and other combinations).
+Considerable gains in performance and accuracy are possible by exploiting
+these structured cases.
+LAPACK exposes these data types by assigning each a 2-letter code used to
+prefix function names.
+This approach, while lacking somewhat in abstraction, has the highly redeeming
+feature of making LAPACK easy to call from almost any language.
+Still there is a usability cost, and an abstraction layer is needed.
+
+\begin{singlespace}
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{|l|ll|}\hline
+Structured matrix types & \multicolumn{2}{|c|}{Factorization types} \\
+\hline
+Bidiagonal             &  Cholesky         &   \\
+Diagonal               &  CholeskyPivoted  &   \\
+SymmetricRFP           &  QR               &  \\
+TriangularRFP          &  QRCompactWY      &  \\
+Symmetric              &  QRPivoted & \\
+Hermitian              &  Hessenberg & \\
+AbstractTriangular     &  Eigen & \\
+LowerTriangular        &  GeneralizedEigen & \\
+UnitLowerTriangular    &  SVD & \\
+UpperTriangular        &  Schur & \\
+UnitUpperTriangular    &  GeneralizedSchur & \\
+SymTridiagonal         &  LDLt & \\
+Tridiagonal            &  LU & \\
+UniformScaling         &  CholeskyDenseRFP  & \\
+\hline
+\end{tabular}
+\end{center}
+\caption[Structured matrices and factorizations]{
+\small{
+Left column: structured array storage formats currently defined in Julia's
+standard library.
+Right column: data types representing the results of various matrix
+factorizations.
+}
+}
+\label{tab:matrixtypes}
+\end{table}
+\end{singlespace}
+
+% matrixlike but not arrays or factorizations:
+% QRPackedQ QRPackedWYQ QRCompactWYQ HessenbergQ
+
+Table~\ref{tab:matrixtypes} lists some types that have been defined in
+Julia (largely by Andreas Noack) for working with structured matrices
+and matrix factorizations.
+The structured matrix types can generally be used anywhere a 2-d
+array is expected.
+The factorization types are generally used for efficiently re-solving
+systems.
+% ? Cholesky has inv
+Sections \ref{sec:whydynamictyping} and \ref{sec:bindingtimedilemma}
+alluded to some of the ways that these types interact with language
+features.
+There are essentially two modes of use: ``manual'', where a programmer
+explicitly constructs one of these types, and ``automatic'', where a
+library returns one of them to user code written only in terms of generic
+functions.
+
+Structured matrices have their own algebra.
+There are embedding relationships like those discussed in section~\ref{sec:embeddings}:
+diagonal is embedded in bidiagonal, which is embedded in tridiagonal.
+Bidiagonal is also embedded in triangular.
+After promotion, these types are closed under \texttt{+} and \texttt{-}, but
+generally not under \texttt{*}.
+
+% matrix types not closed under operators:
+\iffalse
+function +(A::Bidiagonal, B::Bidiagonal)
+    if A.isupper==B.isupper
+        Bidiagonal(A.dv+B.dv, A.ev+B.ev, A.isupper)
+    else
+        Tridiagonal((A.isupper ? (B.ev,A.dv+B.dv,A.ev) : (A.ev,A.dv+B.dv,B.ev))...)
+    end
+end
+\fi
+
+\iffalse
+Multiple dispatch on special matrices
+
+28 LAPACK types via composition of 9 types, issue 8240
+
+storage formats:
+Matrix
+Banded
+Packed
+RFP (rectangular full packed, LAWN 199)
+
+symmetry labels:
+Hermitian
+Hessenberg
+Symmetric
+Triangular
+Trapezoid
+
+Bidiagonal{T} <: AbstractMatrix{T}
+Diagonal{T} <: AbstractMatrix{T}
+SymmetricRFP{T<:BlasFloat} <: AbstractMatrix{T}
+TriangularRFP{T<:BlasFloat} <: AbstractMatrix{T}
+Symmetric{T,S<:AbstractMatrix} <: AbstractMatrix{T}
+Hermitian{T,S<:AbstractMatrix} <: AbstractMatrix{T}
+AbstractTriangular{T,S<:AbstractMatrix} <: AbstractMatrix{T}
+LowerTriangular{T,S<:AbstractMatrix} <: AbstractTriangular{T,S}
+UnitLowerTriangular{T,S<:AbstractMatrix} <: AbstractTriangular{T,S}
+UpperTriangular{T,S<:AbstractMatrix} <: AbstractTriangular{T,S}
+UnitUpperTriangular{T,S<:AbstractMatrix} <: AbstractTriangular{T,S}
+SymTridiagonal{T} <: AbstractMatrix{T}
+Tridiagonal{T} <: AbstractMatrix{T}
+UniformScaling{T<:Number}
+
+abstract Factorization{T}
+Cholesky{T,S<:AbstractMatrix} <: Factorization{T}
+CholeskyPivoted{T,S<:AbstractMatrix} <: Factorization{T}
+QR{T,S<:AbstractMatrix} <: Factorization{T}
+QRCompactWY{S,M<:AbstractMatrix} <: Factorization{S}
+QRPivoted{T,S<:AbstractMatrix} <: Factorization{T}
+QRPackedQ{T,S<:AbstractMatrix} <: AbstractMatrix{T}
+QRPackedWYQ{S,M<:AbstractMatrix} <: AbstractMatrix{S}
+QRCompactWYQ{S, M<:AbstractMatrix} <: AbstractMatrix{S}
+Hessenberg{T,S<:AbstractMatrix} <: Factorization{T}
+HessenbergQ{T,S<:AbstractMatrix} <: AbstractMatrix{T}
+Eigen{T,V,S<:AbstractMatrix,U<:AbstractVector} <: Factorization{T}
+GeneralizedEigen{T,V,S<:AbstractMatrix,U<:AbstractVector} <: Factorization{T}
+SVD{T<:BlasFloat,Tr,M<:AbstractArray} <: Factorization{T}
+Schur{Ty<:BlasFloat, S<:AbstractMatrix} <: Factorization{Ty}
+GeneralizedSchur{Ty<:BlasFloat, M<:AbstractMatrix} <: Factorization{Ty}
+LDLt{T,S<:AbstractMatrix} <: Factorization{T}
+LU{T,S<:AbstractMatrix} <: Factorization{T}
+CholeskyDenseRFP{T<:BlasFloat} <: Factorization{T}
+\fi
+
+\iffalse
+QR factorization: want to support it on all input types, but many
+types (integer, rational) are not closed under the needed operations.
+compare to eigen~\cite{guennebaud2014eigen}: in C++, if you want a qrfact
+of an integer matrix,
+you might get a compile time error, or it might work but all the values
+will be truncated when stored. this is a big generic programming
+challenge. you can't expect types to have a ``type to use for QR fact''
+trait.
+
+qrfact computes the type of the result needed:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+function qrfact{T}(A::StridedMatrix{T}; pivot=false)
+    S = typeof(one(T)/norm(one(T)))
+    if S != T
+        qrfact!(convert(AbstractMatrix{S},A), pivot=pivot)
+    else
+        qrfact!(copy(A),pivot=pivot))
+    end
+end
+\end{lstlisting}
+\end{singlespace}
+
+This code is not statically typeable, and yet with specialization a
+compiler could in fact determine the type of each call site.
+It just happens to be convenient to specify this behavior with a
+branch.
+\fi
+
+
+\subsubsection{Calling BLAS and LAPACK}
+\label{sec:callingblas}
+
+Writing interfaces to BLAS~\cite{blas} and LAPACK is an avowed tradition
+in technical computing language implementation.
+Julia's type system is capable of describing the cases where routines
+from these libraries are applicable.
+For example the \texttt{axpy} operation in BLAS (computing $y\leftarrow \alpha x + y$)
+supports arrays with a single stride, and four numeric types.
+In Julia this can be expressed as follows:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+const BlasFloat = Union(Float64,Float32,Complex128,Complex64)
+
+axpy!{T<:BlasFloat}(alpha::Number,
+                    x::Union(DenseArray{T},StridedVector{T}),
+                    y::Union(DenseArray{T},StridedVector{T}))
+\end{lstlisting}
+\end{singlespace}
+
+%\noindent
+%TODO
+
+\section{Units}
+
+Despite their enormous importance in science, unit quantities have
+not reached widespread use in programming.
+This is not surprising considering the technical difficulties involved.
+Units are symbolic objects, so attaching them to numbers can bring
+significant overhead.
+To restore peak performance, units need to be ``lifted'' into a type
+system of some kind, to move their overhead to compile time.
+However at that point we encounter a trade-off similar to that present
+in multi-dimensional arrays.
+Will it be possible to have an array of numbers with different units?
+What if a program wants to return different units based on criteria
+the compiler cannot resolve?
+Julia's automatic blending of binding times is again helpful.
+
+The SIUnits package by Keno Fischer~\cite{Fischer:2014si} implements
+Julia types for SI units and unit quantities:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+  immutable SIUnit{m,kg,s,A,K,mol,cd} <: Number
+  end
+
+  immutable SIQuantity{T<:Number,m,kg,s,A,K,mol,cd} <: Number
+    val::T
+  end
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+This implementation uses a type parameter to store the exponent (an integer,
+or perhaps in the near future a rational number) of each base unit associated
+with a value.
+An \texttt{SIUnit} has only the symbolic part, and can be used to mention
+units without committing to a representation.
+Its size, as a data type, is zero.
+An \texttt{SIQuantity} contains the same symbolic information, but wraps a
+number used to represent the scalar part of the unit quantity.
+Definitions like the following are used to provide convenient names for units:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+  const Meter    = SIUnit{1,0,0,0,0,0,0}()
+  const KiloGram = SIUnit{0,1,0,0,0,0,0}()
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+The approach described in section~\ref{sec:promotion} is used to combine
+numbers with units.
+Arithmetic is implemented as follows:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+function +{T,S,m,kg,s,A,K,mol,cd}(x::SIQuantity{T,m,kg,s,A,K,mol,cd},
+                                  y::SIQuantity{S,m,kg,s,A,K,mol,cd})
+  val = x.val+y.val
+  SIQuantity{typeof(val),m,kg,s,A,K,mol,cd}(val)
+end
+
+function +(x::SIQuantity, y::SIQuantity)
+  error("Unit mismatch.")
+end
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+In the first definition, the representation types of the two
+arguments do not have to match, but the units do (checked via diagonal
+dispatch).
+Any combination of \texttt{SIQuantity}s that is not otherwise implemented
+is a unit mismatch error.
+
+When storing unit quantities in arrays, the array constructor in Julia's
+standard library is able to automatically select an appropriate type.
+If all elements have the same units, the symbolic unit information is
+stored only once in the array's type tag, and the array data uses a
+compact representation:
+
+\vspace{-2ex}
+\begin{singlespace}
+\begin{verbatim}
+julia> a = [1m,2m,3m]
+3-element Array{SIQuantity{Int64,1,0,0,0,0,0,0},1}:
+ 1 m
+ 2 m
+ 3 m
+
+julia> reinterpret(Int,a)
+3-element Array{Int64,1}:
+ 1
+ 2
+ 3
+\end{verbatim}
+\end{singlespace}
+
+\noindent
+If different units are present, a wider type is chosen via the array
+constructor invoking \texttt{promote\_type}:
+
+\vspace{-2ex}
+\begin{singlespace}
+\begin{verbatim}
+julia> a = [1m,2s]
+2-element Array{SIQuantity{Int64,m,kg,s,A,K,mol,cd},1}:
+ 1 m
+ 2 s
+\end{verbatim}
+\end{singlespace}
+
+Unit quantities are different from most number types in that they are not
+closed under multiplication.
+Nevertheless, generic functions behave as expected.
+Consider a generic \texttt{prod} function that multiplies elements of a
+collection.
+With units, its result type can depend on the size of the collection:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+julia> prod([2m,3m]), typeof(prod([2m,3m]))
+(6 m~$^2$~, SIQuantity{Int64,2,0,0,0,0,0,0})
+
+julia> prod([2m,3m,4m]), typeof(prod([2m,3m,4m]))
+(24 m~$^3$~, SIQuantity{Int64,3,0,0,0,0,0,0})
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+For simple uses of units, Julia's compiler will generally be able to
+infer result types.
+For more complex cases like \texttt{prod} it may not be able to, but
+this will only result in a loss of performance.
+This is the trade-off a Julia programmer accepts.
+
+
+%\section{Dates}
+%\label{sec:dates}
+
+%compare to python DateTime, compare code length
+
+
+\section{Algebraic modeling with JuMP}
+\label{sec:jump}
+
+An entire subfield of technical computing is devoted to solving optimization
+problems.
+Linear programming, the problem of finding variable values that maximize a
+linear function subject to linear constraints, is especially important and
+widely used, for example in operations research.
+
+Real-world problem instances can be quite large, requiring many variables
+and constraints.
+Simply writing down a large linear program is challenging enough to
+require automation.
+Specialized languages known as Algebraic Modeling Languages (AMLs)
+have been developed for this purpose.
+One popular AML is AMPL~\cite{fourer1993ampl}, which allows users to
+specify problems using a high-level mathematical syntax.
+Here is an example model of a ``knapsack'' problem (from~\cite{LubinDunningIJOC})
+in AMPL syntax:
+
+\vspace{-3ex}
+\begin{singlespace}
+\begin{verbatim}
+var x{j in 1..N} >= 0.0, <= 1.0;
+
+maximize Obj:
+  sum {j in 1..N} profit[j] * x[j];
+
+subject to CapacityCon:
+  sum {j in 1..N} weight[j] * x[j] <= capacity;
+\end{verbatim}
+\end{singlespace}
+
+\noindent
+This syntax is ``compiled'' to a numeric matrix representation that can
+be consumed by standard solver libraries.
+Although solving the problem can take a significant amount of time,
+building the problem representation is often the bottleneck.
+AMPL is highly specialized to this task and offers good performance.
+
+Providing the same level of performance and convenience for linear programming
+within a general purpose language has proven difficult.
+However many users would prefer this, since it would make it easier to
+provide data to the model and use the results within a larger system.
+Using Julia, Miles Lubin and Iain Dunning solved this problem, creating the
+first embedded AML, JuMP~\cite{LubinDunningIJOC}, to match both the performance
+and notational advantages of specialized tools.
+
+The solution is a multi-stage program: first the input syntax is converted to
+conventional loops and function calls with a macro, then the types of
+arguments are used to decide how to update the model, and finally code
+specialized for the structure of the input problem runs.
+The second stage is handled by a combination of generic functions and
+Julia's standard specialization process.
+Model parameters can refer to variables in the surrounding Julia program,
+without JuMP needing to understand the entire context.
+
+Lubin and Dunning provide an example of how this works.
+The input
+
+\vspace{-3ex}
+\[ \texttt{@addConstraint(m, sum{weight[j]*x[j], j=1:N} + s == capacity)} \]
+
+\noindent
+is lowered to (lightly edited):
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+aff = AffExpr()
+for i = 1:N
+  addToExpression(aff, 1.0*weight[i], x[i])
+end
+addToExpression(aff, 1.0, s)
+addToExpression(aff, -1.0, capacity)
+addConstraint(m, Constraint(aff,"=="))
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+\texttt{addToExpression} includes the following methods (plus others):
+
+\begin{samepage}
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+addToExpression(ex::Number,   c::Number,   x::Number)
+addToExpression(ex::Number,   c::Number,   x::Variable)
+addToExpression(ex::Number,   c::Number,   x::AffExpr)
+addToExpression(ex::Number,   c::Variable, x::Variable)
+addToExpression(ex::Number,   c::AffExpr,  x::AffExpr)
+addToExpression(aff::AffExpr, c::Number,   x::Number)
+addToExpression(aff::AffExpr, c::Number,   x::Variable)
+addToExpression(aff::AffExpr, c::Variable, x::Variable)
+addToExpression(aff::AffExpr, c::Number,   x::AffExpr)
+addToExpression(aff::AffExpr, c::Number,   x::QuadExpr)
+\end{lstlisting}
+\end{singlespace}
+\end{samepage}
+
+When the arguments are all numbers, \texttt{ex + c*x} is computed directly.
+Or, given an \texttt{AffExpr} and a variable, the \texttt{AffExpr}'s lists of
+variables and coefficients are extended.
+Given two variables, a quadratic term is added.
+With this structure, new kinds of terms can be added with minimal code,
+without needing to update the more complicated syntax transformation code.
+
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{|r|r|r|r|r|}\hline
+\textbf{$L$} & \textbf{JuMP/Julia} & \textbf{AMPL} & \textbf{Gurobi/C++} & \textbf{PuLP/PyPy} \\
+\hline \hline
+1000    & 1.0 & 0.7 & 0.8 & 4.8 \\
+\hline
+5000    & 4.2 & 3.3 & 3.9 & 26.4 \\
+\hline
+10000   & 8.9 & 6.7 & 8.3 & 50.6 \\
+\hline
+50000   & 48.3 & 35.0 & 39.3 & 225.6 \\
+\hline
+\end{tabular}
+\end{center}
+\caption[Performance of linear programming tools]{
+\small{
+Performance (time in seconds) of several linear programming tools for
+generating models in MPS format (excerpted from \cite{LubinDunningIJOC}).
+$L$ is the number of locations solved for in a facility location problem.
+}
+}
+\label{jumpperf}
+\end{table}
+
+Table~\ref{jumpperf} shows performance results.
+JuMP is only marginally slower than AMPL or direct use of the Gurobi solver's
+C++ API.
+The C++ implementation, unlike the other systems compared in the table,
+is not solver-independent and does not provide convenient high-level syntax.
+PuLP~\cite{mitchell2011pulp} is Python-based, and was benchmarked under the
+PyPy JIT compiler~\cite{pypyjit}.
+
+
+\section{Boundary element method}
+\label{sec:BEM}
+
+There are lots of general
+packages~\cite{LoggOlgaardEtAl2012a,Rathgeber2015} implementing the
+finite-element method (FEM)~\cite{Zienkiewicz13} to solve partial
+differential equations (PDEs), but it is much more difficult to create
+such a ``multi-physics'' package for the boundary-element method
+(BEM)~\cite{Bonnet99,Chew09} to solve surface-integral equations
+(SIEs).  One reason is that BEM requires integrating functions with singularities
+many times in the inner loop of the code that builds the problem matrix, and
+doing this efficiently requires integration code, typically written by hand, that is specialized to
+the specific problem being solved.
+
+Recent work \cite{ReidWhJo14} managed a more general solution
+using Mathematica to generate C++ code for different cases, in combination with some hand-written code.
+This worked well, but was difficult to implement and the resulting system
+is difficult to apply to new problems..
+We see the familiar pattern of using multiple languages and
+code-generation techniques, with coordination of the overall process done
+either manually or with ad hoc scripts.
+To polish the implementation for use as a practical library, a likely next
+step would be to add a Python interface, adding yet another layer of complexity.
+Instead, we believe that the entire problem can be solved efficiently in Julia,
+relying on Julia's rich dispatch system and integrated code-generation facilities,
+and especially on staged functions to automate the generation of singular-integration
+code while retaining the interface of a simple function library.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% writeup by SGJ
+
+Thanks to Professor Steven Johnson for providing the following section describing
+the problem.
+
+\subsubsection{Galerkin matrix assembly for singular kernels}
+
+A typical problem in computational science is to form a discrete approximation
+of some infinite-dimensional linear operator $\mathcal{L}$ with some finite set of
+basis functions $\{ b_m \}$ via a Galerkin approach\cite{Boyd01,Bonnet99,Zienkiewicz13}, which leads to a
+matrix $L$ with entries
+$L_{mn} = \langle b_m, \mathcal{L} b_n \rangle = \langle b_m, b_n \rangle_\mathcal{L}$
+where $\langle \cdot, \cdot \rangle$ denotes some inner product
+(e.g.\ $\langle u, v \rangle = \int u v$ is typical) and
+$\langle \cdot, \cdot \rangle_\mathcal{L}$ is the \emph{bilinear form} of the problem.
+Computing these matrix elements is known as the matrix \emph{assembly} step, and its
+performance is a crucial concern for solving partial differential equations (PDEs) and
+integral equations (IEs).
+
+\iffalse
+\subsubsection{The ``easy'' case: nonsingular assembly}
+
+For example, in the finite-element method (FEM)~\cite{Zienkiewicz13}, the basis functions $b_m$
+are typically low-order polynomials defined piecewise over geometric elements
+(typically triangles or tetrahedra), and $\mathcal{L}$ is typically a differential
+operator like $-\nabla \cdot c(x) \nabla$ for some coefficients $c(x)$, which leads to
+a bilinear form
+$\langle b_m, b_n \rangle_\mathcal{L} = \int \nabla b_m \cdot c(x) \nabla b_n$
+(after integration by parts).
+Because the basis functions are localized and $\mathcal{L}$ consists of local operations,
+the matrix $L$ is sparse and $L_{mn}$ need only be computed for $m$ and $n$ corresponding
+to neighboring elements.
+Moreover, these integrals are straightforward to evaluate by standard cubature schemes
+because the integrands are \emph{nonsingular}: they typically have no divergences or
+discontinuities.
+In particular, because the functions $b_m$ and $c$ are usually smooth within a single
+element, one can use a fixed low-order cubature rule: you evaluate the integrand at a
+handful of precomputed points within each element, multiply by precomputed weights, and
+sum to obtain the approximate integral.
+
+Even so, the basis functions and the coefficient function $c(x)$ may need to be
+evaluated tens of millions of times for even a moderate-size mesh in three dimensions,
+so production FEM implementations in traditional high-level dynamic languages such as
+Matlab and Python are forced to offload matrix assembly to external C and C++ code.
+For example, the popular FEniCS~\cite{LoggOlgaardEtAl2012a} and
+Firedrake~\cite{Rathgeber2015} FEM packages for
+Python both implement domain-specific compilers: a symbolic expression for the bilinear
+form is combined with fragments of user-specified C++ code to define functions like
+$c(x)$, compiled to C++ code, and then compiled to object code which is dynamically
+loaded.
+In Julia, we believe this could be simplified considerably because functions like
+$c(x)$ could be defined directly in Julia and code generation/compilation could be
+performed entirely within Julia without a C++ intermediary.
+Indeed, preliminary experiments with pure Julia FEM implementations
+[TODO ref http://www.codeproject.com/Articles/579983/Finite-Element-programming-in-Julia]
+have demonstrated performance comparable to sophisticated solutions like FEniCS in
+Python~\cite{FEniCS12} and FreeFem++ in C++~\cite{MR3043640}.
+
+\subsubsection{Singular assembly for integral operators}
+
+\fi
+
+A challenging case of Galerkin matrix assembly arises for singular
+\emph{integral} operators $\mathcal{L}$, which act by
+convolving their operand against a singular ``kernel'' function
+$K(x)$: $u = \mathcal{L} v$ means that $u(x) = \int K(x - x') v(x')
+dx'$.
+For example, in electrostatics and other Poisson problems, the
+kernel is $K(x) = 1/|x|$ in three dimensions and $\ln |x|$ in two
+dimensions, while in scalar Helmholtz (wave) problems it is
+$e^{ik|x|}/|x|$ in three dimensions and a Hankel function
+$H^{(1)}_0(k|x|)$ in two dimensions.
+Formally, Galerkin discretizations lead to matrix assembly problems
+similar to those above:
+$L_{mn} =: \langle b_m, \mathcal{L} b_n \rangle = \int b_m(x) K(x - x') b_n(x') dx\,dx'$.
+However, there are several important differences from FEM:
+
+\begin{itemize}
+\item The kernel $K(x)$ nearly always diverges for $|x|=0$, which means that generic
+cubature schemes are either unacceptably inaccurate (for low-order schemes) or
+unacceptably costly (for adaptive high-order schemes, which require huge numbers
+of cubature points around the singularity), or both.
+
+\item Integral operators typically arise for \emph{surface} integral
+equations (SIEs)~\cite{Bonnet99,Chew09}, and involve unknowns on a surface.
+The analogue of the FEM discretization is then a boundary element method
+(BEM)~\cite{Bonnet99,Chew09}, which discretizes a surface into elements
+(e.g.\ triangles), with basis functions that are low-order
+polynomials defined piecewise in the elements.
+However, there are also volume integral equations (VIEs) which have FEM-like
+volumetric meshes and basis functions.
+
+\item The matrix $L$ is typically dense, since $K$ is long-range.
+For large problems, $L$ is often stored and applied implicitly via
+fast-multipole methods and similar schemes~\cite{Chew01,Liu14}, but even in this
+case the diagonal $L_{mm}$ and the entries $L_{mn}$ for adjacent
+elements must typically be computed explicitly.
+(Moreover, these are the integrals in which the $K$ singularity is present.)
+\end{itemize}
+
+These difficulties are part of the reason why there is currently \emph{no}
+truly ``generic'' BEM software, analogous to FEniCS~\cite{FEniCS12} for FEM: essentially
+all practical BEM code is written for a specific integral kernel and
+a specific class of basis functions arising in a particular physical problem.
+Changing anything about the kernel or the basis---for example, going
+from two- to three-dimensional problems---is a major undertaking.
+
+\subsubsection{Novel solution using Julia}
+
+Julia's dispatch and specialization features make this problem
+significantly easier to address:
+
+\begin{itemize}
+\item Dispatch on structured types allows the cubature scheme to be selected %at compile time
+based on the dimensionality, the degree of the singularity, the degree of
+the polynomial basis, and so on, and allows specialized schemes to be added
+easily for particular problems with no run time penalty.
+
+\item Staged functions allow computer algebra systems to be invoked at
+compile time to generate specialized cubature schemes for particular
+kernels.
+New developments in BEM integration schemes \cite{ReidWhJo14} have
+provided efficient cubature-generation algorithms of this sort, but it
+has not yet been practical to integrate them with run time code in
+a completely automated way.
+\end{itemize}
+
+A prototype implementation of this approach follows.
+First we define nominal function types that represent kernel functions:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+abstract AbstractKernel
+
+# any kernel that decays as X^p for X ~$\ll$~ s and X^q for X ~$\gg$~ s
+abstract APowerLaw{p,q,s} <: AbstractKernel
+
+# ~$r^p$~ power law
+type PowerLaw{p} <: APowerLaw{p,p}; end
+\end{lstlisting}
+\end{singlespace}
+
+\noindent
+Next we add a type representing the integral
+$\mathcal{K}_n(X) = \int_0^1 w^n K(wX) dw$, and implement it for the
+case $K(x) = x^p$:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+type FirstIntegral{K<:AbstractKernel,n}; end
+
+function call{p,n}(::FirstIntegral{PowerLaw{p},n}, X::Number)
+    return p >= 0 ? X^p / (1 + n + p) : inv(X^(-p) * (1 + n + p))
+end
+\end{lstlisting}
+\end{singlespace}
+
+Code for instances of this function is specialized for $p$ and $n$.
+Here is a sample session creating a function instance, and showing the
+LLVM~\cite{LLVM} code generated for it:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+F = FirstIntegral{PowerLaw{-1}, 3}()
+
+@code_llvm F(2.5)
+
+define double @julia_call_90703(%jl_value_t*, double) {
+top:
+  %2 = fmul double %1, 3.000000e+00
+  %3 = fdiv double 1.000000e+00, %2
+  ret double %3
+}
+\end{lstlisting}
+\end{singlespace}
+
+Analytically known special cases can be added for other kernels.
+Here are two more.
+Notice that a Helmholtz kernel is also a power law kernel
+\footnote{The \texttt{exprel} function used here is available in the
+external GSL package.}:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+import GSL
+exprel(n, x) = GSL.sf_exprel_n(n, x)
+
+type Helmholtz{k} <: APowerLaw{-1,-1}; end  # ~$e^{ikr} / 4\pi r$~
+
+function call{k,n}(::FirstIntegral{Helmholtz{k},n}, X::Number)
+    ikX = im*k*X
+    return exp(ikX) * exprel(n, -ikX) / (4~$\pi$~*n*X)
+end
+
+# magnetic field integral equation
+type MFIE{k} <: APowerLaw{-3,-3}; end  # ~$(ikr - 1) * e^{ikr} / 4\pi r^3$~
+
+function call{k,n}(::FirstIntegral{MFIE{k},n}, X::Number)
+    ikX = im*k*X
+    return exp(ikX) * (im*k*exprel(n-1,-ikX)/((n-1)*X) -
+                       exprel(n-2,-ikX)/((n-2)*X^2)) / (4~$\pi$~*X)
+end
+\end{lstlisting}
+\end{singlespace}
+
+It is possible to implement \texttt{FirstIntegral} for the general
+case of any \texttt{APowerLaw} using numerical integration, however
+this procedure is too slow to be useful.
+Instead, we would like to compute the integral for a range of
+parameter values in advance, construct a Chebyshev approximation,
+and use efficient polynomial evaluation at run time.
+Julia's staged methods provide an easy way to automate this process.
+Appendix~\ref{appendix:integration} presents a full working implementation of
+the general case, computing Chebyshev coefficients at compile time.
+The final generated code is a straight-line sequence of adds and multiplies.
+Here we show a rough outline of how the method works:
+
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+@generated function call{P<:APowerLaw,n}(K::FirstIntegral{P,n},
+                                         X::Real)
+    # compute Chebyshev coefficients c based on K
+    # ...
+    quote
+        X <= 0 && throw(DomainError())
+        ~$\xi$~ = 1 - (X + $(2^(1/q)))^$q
+        C = @evalcheb ~$\xi$~ $(c...)
+        return $p < 0 ? C * (X^$p + $(s^p)) : C
+    end
+end
+\end{lstlisting}
+\end{singlespace}
+
+The method signature reflects the shape of the problem: the user might
+implement any kernel at all, but if it does not take the form of an
+\texttt{APowerLaw\{p\}} then this numerical procedure is not useful.
+\texttt{p} must be known, and cannot be easily extracted from an arbitrary
+opaque function.
+If the interface allowed an opaque function to be passed, the value of
+\texttt{p} would need to be passed separately, which decouples the
+property from the function, and requires a custom lookup table for caching
+generated code.
+
+One might hope that with a sufficient amount of constant propagation and
+functional purity analysis, a compiler could automatically move
+computation of the Chebyshev coefficients to compile time.
+That does indeed seem possible.
+The point of \texttt{@generated}, then, is to make it so easy to
+get the desired staging that one does not have to worry
+about what amazing feats the compiler might be capable of.
+Without it, one would face a difficult debugging challenge when the
+compiler, for whatever opaque reasons, did not perform the desired
+optimizations.
+% maybe:
+% this idea can be extended to a general philosophy of embracing
+% performance tweaking, and trying to make it as easy as possible.
+% another example is adding a single OpenMP #pragma to a loop instead of
+% hoping for an auto-parallelizing compiler.
+
+To complete the picture, here is pseudocode for how this library would be
+used to solve a boundary element problem over a triangle mesh.
+The three cases inside the loop are a translation of the three formulas
+from figure 1 in \cite{ReidWhJo14} (only the first formula's code is shown in
+full for simplicity):
+
+%  # n depends on complicated stuff
+\begin{singlespace}
+\begin{lstlisting}[language=julia]
+FP = [(FirstIntegral{K,i}(), polynomial(i)) for i in N]
+for trianglepair in mesh
+    i, j = indexes based on triangles
+    if common(trianglepair)
+        M[i,j] = integrate(y->sum([F(y)*P(y) for (F,P) in FP]),
+                           0, 1)
+    elseif commonedge(trianglepair)
+        # a 2d integral
+    elseif commonvertex(trianglepair)
+        # a 3d integral
+    else
+        # separate triangles
+    end
+end
+\end{lstlisting}
+\end{singlespace}
+% common edge case
+% #M[i,j] = integrate((y1,y2)->sum([Fce[p](y1,y2) * Pce[p](y1,y2) for p=1:n_ce]), 0, 1)
+
+% common vertex case
+% #M[i,j] = integrate((y1,y2,y3)->sum([Fcv[p](y1,y2,y3) * Pcv[p](y1,y2,y3) for p=1:n_cv]), 0, 1)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{Computational geometry}
+
+%robust predicates (dispatch over points, lines) and VoronoiDelaunay.jl
+%benchmarked against CGAL
+
+
+\section{Beating the incumbents}
+\label{sec:beating}
+
+There is anecdotal evidence that libraries written in Julia are occasionally
+faster than their equivalents in established languages like C++, or
+than built-in functions in environments like MATLAB~\cite{matlab}.
+Here we collect a few examples.
+
+Special functions (e.g.\ Bessel functions, the error function, etc.) are
+typically evaluated using polynomial approximations.
+Traditional libraries often read polynomial coefficients from arrays.
+When we wrote some of these functions in Julia we used a macro
+to expand the polynomials in line, storing the coefficients in the
+instruction stream, leading to better performance.
+There is an efficient algorithm for evaluating polynomials at complex-valued
+arguments~\cite{knuth1969art}, but it is fairly subtle and so not always
+used.
+%- erfinv and digamma using horner macro
+If the code can be generated by a macro, though, it is much easier to take
+advantage of, and Julia's \texttt{@evalpoly} does so.
+
+%\texttt{@evalpoly} macro has separate cases for real and complex in order to
+%automatically take advantage of a subtle algorithm .
+%A macro is perfect for generating the neccessary code, however it lacks
+%the type information needed to select between the two cases.
+%In Julia, it can generate a branch with a type check, and rely on the
+%unused case being removed by automatic specialization. (A generic
+%function with two definitions could be generated instead, but in
+%high-performance programming the ``force inlining'' behavior of macros
+%is welcome.)
+
+Julia's function for generating normally distributed random numbers is
+significantly faster than that found in many numerical environments.
+We implemented the popular ziggurat method~\cite{Marsaglia:Tsang:2000:JSSOBK:v05i08},
+which consists of a commonly used fast path and a rarely used more complicated
+procedure.
+The fast path and check for the rare case can be put in a small function,
+which can be inlined at call sites in user code.
+We attribute most of the performance gain to this trick.
+This demonstrates that removing ``glue code'' overhead can be worthwhile.
+
+%grisu: 6kLOC to 1kLOC (PR 7291), less than factor of 2 slower than c++
+Julia has long used the Grisu algorithm for printing floating-point
+numbers~\cite{Loitsch:2010:PFN:1809028.1806623}, at first calling the
+original implementation in C++.
+An opportunity to do an unusually direct comparison arose when this
+code was ported to Julia~\cite{grisu}.
+The Julia implementation is at worst 20\% slower, but wins on
+productivity: the C++ code is around 6000 lines, the Julia code
+around 1000 lines.
+% TODO can we say why?
