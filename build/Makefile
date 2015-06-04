@@ -61,8 +61,6 @@ clean:
 cleanall: clean
 
 html: $(SPHINX_BUILD)
-	#cp -r ../index.rst .
-	cp -r ../manual/*.rst manual/
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."

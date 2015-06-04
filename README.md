@@ -7,5 +7,7 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/m4pdut3nhv
 # 업데이트
 
 	$ ./update.sh
-	manual/introduction.rst.txt: ok
-	generated manual/introduction.rst
+	src/index.rst.txt: ok
+	src/manual/introduction.rst.txt: ok
+	generated build/index.rst
+	generated build/manual/introduction.rst

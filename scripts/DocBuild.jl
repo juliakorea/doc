@@ -1,14 +1,17 @@
-function gen_rst(path)
-  target_dir = relpath(".")
-  if nothing == Base.find_in_path(normpath(target_dir, "$path.txt"))
-    target_dir = relpath("..")
+function gen_rst(src, target, path)
+  src_dir = relpath(src)
+  src_path = normpath(src_dir, "$path.txt")
+  target_dir = relpath(target)
+  if nothing == Base.find_in_path(src_path)
+    src_dir =  relpath("../$src")
+    src_path = normpath(src_dir, "$path.txt")
+    target_dir = relpath("../$target")
   end
-  path_txt = normpath(target_dir, "$path.txt")
 
-  out_path = normpath(target_dir, path)
-  out = open(out_path, "w")
+  target_path = normpath(target_dir, path)
+  out = open(target_path, "w")
 
-  txt = open(readall, path_txt)
+  txt = open(readall, src_path)
   for line in split(txt, "\n")
     len = length(line)
     if len > 1
@@ -19,9 +22,9 @@ function gen_rst(path)
     end
   end
   close(out)
-  println("generated $out_path")
+  println("generated $target_path")
 end
 
 for path in ["index.rst", "manual/introduction.rst"]
-  gen_rst(path)
+  gen_rst("src", "build", path)
 end
