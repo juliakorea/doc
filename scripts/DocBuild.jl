@@ -25,6 +25,8 @@ function gen_rst(src, target, path)
   println("generated $target_path")
 end
 
-for path in ["index.rst", "manual/introduction.rst"]
+push!(LOAD_PATH, "scripts")
+using SrcPath
+for path in SRC_PATH
   gen_rst("src", "build", path)
 end

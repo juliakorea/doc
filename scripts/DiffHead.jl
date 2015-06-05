@@ -35,7 +35,9 @@ function diff_manual(src, target, path)
 end
 
 exit_code = 0
-for path in ["index.rst", "manual/introduction.rst"]
+push!(LOAD_PATH, "scripts")
+using SrcPath
+for path in SRC_PATH
   exit_code |= diff_manual("src", "julia/doc", path)
 end
 exit(exit_code)
