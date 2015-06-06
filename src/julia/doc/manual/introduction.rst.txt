@@ -97,7 +97,7 @@
 ++ 그러나 대부분의 동적 언어는 타입 선언이 부족해 컴파일러가 해당 값의 타입을 인지하지 못한다거나
 ++ 종종 타입에 대해 무엇인지 명시적으로 밝힐 수 없는 상태가 되곤 한다.
 ++ 한편 정적 언어는 타입 정보를 - 보통 반드시 - 컴파일러용으로 달기에
-++ 타입은 오직 컴파일 시점에만 존재해서 실행시에는 이를 다루거나 표현할 수가 없다.
+++ 타입은 오직 컴파일 시점에만 존재해서 실행시에는 이를 다루거나 표현할 수 없다.
 ++ 줄리아에서 타입은 그 자체로 런타임 객체이며 컴파일러가 요하는 정보를 알려주는 데에도 쓰인다.
 -- Although one sometimes speaks of dynamic languages as being "typeless",
 -- they are definitely not: every object, whether primitive or
