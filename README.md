@@ -6,10 +6,10 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/m4pdut3nhv
 
 # 업데이트
 
-	$ ./update.sh
-  ../julia/doc/index.rst: ok
-  ../julia/doc/manual/introduction.rst: ok
-  ../phdthesis/chap6.tex: ok
-  generated build/index.rst
-  generated build/manual/introduction.rst
-  generated build/phdthesis/chap6.tex
+    $ ./update.sh
+    ../julia/doc/index.rst: ok
+    ../julia/doc/manual/introduction.rst: ok
+    ../phdthesis/chap6.tex: ok
+    generated build/index.rst
+    generated build/manual/introduction.rst
+    generated build/phdthesis/chap6.tex
