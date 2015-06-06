@@ -1,5 +1,5 @@
-Conclusion
-==========
+Conclusion (번역 중)
+====================
 
 It is probably not possible to define technical computing precisely.
 That is just as well, since being “domain specific” is not our goal.

@@ -1,14 +1,7 @@
 using Base.Test
 
-function diff_manual(src, target, path)
-  src_path = normpath(relpath(src), "$path.txt")
-  target_dir = relpath(target)
-  if nothing == Base.find_in_path(src_path)
-    src_path = normpath(relpath("../$src"), "$path.txt")
-    target_dir = relpath("../$target")
-  end
-
-  print("$src_path: ")
+function diff_head(codex_path, src_path)
+  print("$codex_path: ")
   txt = open(readall, src_path)
   lines = String[]
   for line in split(txt, "\n")
@@ -22,8 +15,7 @@ function diff_manual(src, target, path)
   end
 
   exit_code = 0
-  target_path = normpath(target_dir, path)
-  original = open(readall, target_path)
+  original = open(readall, codex_path)
   if original == join(lines)
     print_with_color(:green, "ok")
   else
@@ -36,8 +28,8 @@ end
 
 exit_code = 0
 push!(LOAD_PATH, "scripts")
-using SrcPath
-for path in SRC_PATH
-  exit_code |= diff_manual("src", "julia/doc", path)
+using settings
+for item in doc_items
+  exit_code |= diff_head(item.codex_path, item.src_path)
 end
 exit(exit_code)

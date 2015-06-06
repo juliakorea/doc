@@ -1,15 +1,5 @@
-function gen_rst(src, target, path)
-  src_dir = relpath(src)
-  src_path = normpath(src_dir, "$path.txt")
-  target_dir = relpath(target)
-  if nothing == Base.find_in_path(src_path)
-    src_dir =  relpath("../$src")
-    src_path = normpath(src_dir, "$path.txt")
-    target_dir = relpath("../$target")
-  end
-
-  target_path = normpath(target_dir, path)
-  out = open(target_path, "w")
+function gen_rst(src_path, build_path)
+  out = open(build_path, "w")
 
   txt = open(readall, src_path)
   for line in split(txt, "\n")
@@ -22,11 +12,20 @@ function gen_rst(src, target, path)
     end
   end
   close(out)
-  println("generated $target_path")
+  println("generated $build_path")
 end
 
 push!(LOAD_PATH, "scripts")
-using SrcPath
-for path in SRC_PATH
-  gen_rst("src", "build", path)
+using settings
+
+build_dir = is_scripts ? "../build" : "build"
+for file in juliadoc.files
+  src_path = get_src_path(juliadoc.name, file)
+  build_path = normpath(build_dir, file)
+  gen_rst(src_path, build_path)
+end
+for file in phdthesis.files
+  src_path = get_src_path(phdthesis.name, file)
+  build_path = normpath(build_dir, phdthesis.name, file)
+  gen_rst(src_path, build_path)
 end

@@ -1,4 +1,5 @@
-== \chapter{Conclusion}
+-- \chapter{Conclusion}
+++ \chapter{Conclusion (번역 중)}
 == 
 == %% A generation of dynamic languages have been designed by trying variants of
 == %% the class-based object oriented paradigm. This process has been aided by
