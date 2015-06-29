@@ -14,9 +14,8 @@ type DocItem
   src_path
 end
 
-juliadoc = DocSet("julia/doc", """
-                    index.rst
-                    manual/introduction.rst
+juliadoc = DocSet("JuliaManual.jl/doc", """
+                    manual/introduction.md
                   """ |> split)
 
 phdthesis = DocSet("phdthesis", """

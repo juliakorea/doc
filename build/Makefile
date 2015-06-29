@@ -1,11 +1,11 @@
 # Makefile for Sphinx documentation
 
-default: helpdb.jl html
+default: html
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
 PAPER         =
-# JULIAHOME     = $(abspath ..)
+JULIAHOME     = $(abspath ..)
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -19,22 +19,20 @@ ACTIVATE      = $(JULIA_ENV)/bin/activate
 SPHINX_BUILD  = $(JULIA_ENV)/bin/sphinx-build
 
 $(ACTIVATE):
-	$(MAKE) -C $(JULIAHOME)/deps install-virtualenv
 	touch -c $@
 
 $(SPHINX_BUILD): $(ACTIVATE) requirements.txt
-	. $(ACTIVATE) && pip install sphinx==1.2.3 \
-	              && pip install -r requirements.txt
+	pip3 install sphinx==1.2.3 \
+	&& pip3 install -r requirements.txt
 	touch -c $@
 
-SPHINXBUILD = . $(ACTIVATE) && sphinx-build
+SPHINXBUILD = sphinx-build
 
 .PHONY: help clean cleanall html dirhtml singlehtml pickle json htmlhelp qthelp devhelp \
 	epub latex latexpdf text man changes linkcheck doctest gettext
 
 help:
 	@echo "Please use 'make <target>' where <target> is one of"
-	@echo "  helpdb.jl  to make the REPL help db"
 	@echo "  html       to make standalone HTML files"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
@@ -61,7 +59,8 @@ clean:
 cleanall: clean
 
 html: $(SPHINX_BUILD)
-	pandoc -s -t rst phdthesis/chap6.tex -o phdthesis/chap6.rst
+	@pandoc -t rst -s manual/introduction.md -o manual/introduction.rst
+	@pandoc -t rst -s phdthesis/chap6.tex -o phdthesis/chap6.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
@@ -172,10 +171,6 @@ doctest: $(SPHINX_BUILD)
 	PATH=$(PATH):$(build_bindir) $(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
-
-helpdb.jl: stdlib/*.rst $(SPHINX_BUILD)
-	$(SPHINXBUILD) -b jlhelp $(ALLSPHINXOPTS) _build/jlhelp
-	mv _build/jlhelp/jlhelp.jl helpdb.jl
 
 manual/unicode-input-table.rst: $(JULIAHOME)/base/latex_symbols.jl
 	$(JULIAHOME)/julia tabcomplete.jl > manual/unicode-input-table.rst
