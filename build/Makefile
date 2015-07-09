@@ -59,8 +59,6 @@ clean:
 cleanall: clean
 
 html: $(SPHINX_BUILD)
-	@pandoc -t rst -s manual/introduction.md -o manual/introduction.rst
-	@pandoc -t rst -s phdthesis/chap6.tex -o phdthesis/chap6.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
