@@ -15,6 +15,7 @@ type DocItem
 end
 
 juliadoc = DocSet("julia/doc", """
+                    index.rst
                     manual/introduction.rst
                   """ |> split)
 

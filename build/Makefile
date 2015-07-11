@@ -54,11 +54,12 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf _build/*
+	-rm -rf _build/* index.rst manual stdlib phdthesis src
 
 cleanall: clean
 
 html: $(SPHINX_BUILD)
+	pandoc -t rst -s phdthesis/chap6.tex -o phdthesis/chap6.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
