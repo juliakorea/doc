@@ -30,7 +30,7 @@
 -- general languages are still preferred.
 ++ 시장을 지배할 만큼 잘 만드는게 결코 쉽지 않다는 것, 그만큼 우리가 만드는
 ++ 보편적인 언어를 개선할 기회가 클 것으로 보인다.
-++ 서두에서 언급한 바 대로, 테크니컬 컴퓨팅의 모습은 부정확하게 정의되었고, 단지 그렇게 된 것이다.
+++ 서두에서 언급한 대로, 테크니컬 컴퓨팅의 모습은 부정확하게 정의되었고, 단지 그렇게 된 것이다.
 ++ 본 논문으로 보다 보편적인 틀에서, 이 시장을 이해하기 위한 작은 걸음을 내딛어 본다.
 -- We speculate that wherever this property fails to hold, there is an opportunity
 -- to improve our general purpose languages.
