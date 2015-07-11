@@ -1,2 +1,6 @@
 _build/
-src
+index.rst
+manual/*
+stdlib/*
+phdthesis/*
+src/*

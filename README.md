@@ -4,6 +4,9 @@ Linux, OSX: [![Build Status](https://api.travis-ci.org/juliakorea/doc.svg?branch
 Windows: [![Build status](https://ci.appveyor.com/api/projects/status/m4pdut3nhvdu3unw?svg=true)](https://ci.appveyor.com/project/wookay/doc)
 
 
+ * http://juliakorea.github.io/latest/ 에서 보실 수 있습니다.
+ * [git 도우미](https://github.com/juliakorea/doc/wiki/git)
+
 # 업데이트
 
     $ ./update.sh
