@@ -2,6 +2,7 @@ language: julia
 os:
   - linux
 julia:
+  - release
   - nightly
 script:
   - julia --color=yes scripts/DiffHead.jl
