@@ -5,7 +5,7 @@ export juliadoc, phdthesis
 export get_src_path, is_scripts
 
 type DocSet
-  name 
+  name
   files
 end
 
@@ -39,7 +39,7 @@ function get_doc_items(sets)
   else
     codex_path = is_scripts ? "../codex" : "codex"
   end
-  items = []
+  items = DocItem[]
   for set in sets
     for file in set.files
       item = DocItem(
