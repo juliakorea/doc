@@ -19,7 +19,14 @@ function diff_head(codex_path, src_path)
   if original == join(lines)
     print_with_color(:green, "ok")
   else
-    print_with_color(:red, "needs an update")
+    print_with_color(:red, "needs an update\n")
+    (path, fd::IOStream) = Base.mktemp()
+    write(fd, join(lines))
+    close(fd)
+    try
+      Base.run(`git diff $codex_path $path`)
+    end
+    Base.rm(path)
     exit_code = 1
   end
   println()
