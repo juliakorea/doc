@@ -17,6 +17,7 @@ end
 juliadoc = DocSet("julia/doc", """
                     index.rst
                     manual/introduction.rst
+                    manual/getting-started.rst
                   """ |> split)
 
 phdthesis = DocSet("phdthesis", """
