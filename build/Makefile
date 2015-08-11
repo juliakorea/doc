@@ -65,6 +65,13 @@ html: $(SPHINX_BUILD)
 	@echo "Build finished. The HTML pages are in _build/html."
 	cp -r _build/html/* ../../juliakorea.github.io/latest/
 
+f:
+	pandoc -t rst -s phdthesis/chap6.tex -o phdthesis/chap6.rst
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
+	@echo
+	@echo "Build finished. The HTML pages are in _build/html."
+	cp -r _build/html/* ../../juliakorea.github.io/latest/
+
 dirhtml: $(SPHINX_BUILD)
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) _build/dirhtml
 	@echo
