@@ -14,12 +14,12 @@
 == %% language designers wanting reusable program analyses, and tools for
 == %% developing lattices and their operators.
 == 
-++ 테크니컬 컴퓨팅은 아무튼 그 정의를 정확히 내리기 어렵다.
-++ 그런 연유로 우리는 ``특정 영역''을 목표로 하지 않는다.
+++ 테크니컬 컴퓨팅을 가지고 무엇이다 확정하기는 어려운 일이다.
+++ 그런 이유로, 우리는 ``특정 영역''을 한정하여 목표로 하지 않았다.
 ++ 프로그래밍 언어는 어떠한 목적으로도 사용할 수 있는 보편성이 중요하다고
-++ 프로그래밍 언어 도입\cite{Meyerovich:2013:EAP:2509136.2509515}에 관한 최근 논문은 말하고 있다.
+++ 프로그래밍 언어 도입\cite{Meyerovich:2013:EAP:2509136.2509515}에 관한 최근 논문이 말하고 있다.
 ++ 특수한 분야에서만 쓰이는 언어는 보통 그 분야에 제일 잘나가는 언어가 아니다.
-++ 여기에서도 보편적인 언어가 선호되어 너른 인기를 끌고 있다.
+++ 여기서도 보편적인 언어가 선호되며 너른 인기를 끈다.
 -- It is probably not possible to define technical computing precisely.
 -- That is just as well, since being ``domain specific'' is not our goal.
 -- Programming languages want to be general purpose, and evidence suggests
@@ -28,10 +28,10 @@
 -- found that when a language is popular only within a certain niche, it is not
 -- usually the most popular language in that niche --- broadly popular,
 -- general languages are still preferred.
-++ 시장을 지배할 만큼 잘 만드는게 결코 쉽지 않다는 것, 그만큼 우리가 만드는
-++ 보편적인 언어를 개선할 기회가 클 것으로 보인다.
-++ 서두에서 언급한 대로, 테크니컬 컴퓨팅의 모습은 부정확하게 정의되었고, 단지 그렇게 된 것이다.
-++ 본 논문과 보다 보편적인 틀에서, 이 시장을 이해하기 위한 작은 걸음을 내딛어 보자.
+++ 시장을 지배할 만큼 잘 만드는게 결코 쉽지 않다는 것은, 우리가 만드는
+++ 보편적인 언어에서 이를 개선할 여지가 많이 있다는 것이다.
+++ 서두에서 언급한 것 처럼, 테크니컬 컴퓨팅의 모습은 부정확하게 정의되었고, 되는 대로 만들어진 것 뿐이다.
+++ 보다 보편적인 틀에서 이 분야를 이해하기 위한 한걸음을 내딛어 보자.
 -- We speculate that wherever this property fails to hold, there is an opportunity
 -- to improve our general purpose languages.
 -- As noted in the introduction, at least some forms of technical computing,
@@ -49,16 +49,16 @@
 == % technical computing was ripe for such a treatment
 == 
 ++ 테크니컬 컴퓨팅 사용자들은 우선 처리할 일을 프로그래밍 언어로 직접 기술하는게
-++ 드물다. 이게 우리가 유심히 관찰하다 프로젝트를 시작하게 된 계기다.
-++ 현재 많은 수의 테크니컬 컴퓨팅 언어가 각 상황의 예를 나열하고 있긴 하지만 말이다.
+++ 드물다. 우리는 이 점을 주의깊게 관찰하며 프로젝트를 시작하였다.
+++ 현재 많은 수의 테크니컬 컴퓨팅 언어가 기능으로서 나열하고 있긴 하지만 말이다.
 -- We began by observing that technical computing users have priorities
 -- that have rarely been addressed directly by programming languages.
 -- Arguably, even many of the current technical computing languages only
 -- address these priorities for a subset of cases.
 == % in particular, they want flexible notation, and code specialized
 == % for information regardless of when that information is known.
-++ 어떻게 보면 부분적인 정보(partial information)를 표기할 적합한 방법이 없는 것이다.
-++ 부분적인 정보는 많은 쓸모가 있다.
+++ 어떻게 보면 부분적인 정보(partial information)를 표기할 적합한 방법이 없는 문제다.
+++ 부분적인 정보는 여러 군데에서 쓸모가 있다.
 ++ 각종 값을 설명하고 코드에 적용할 때.
 ++ 컴파일러가 결정할 성능 모델에 영향을 줄 각종 정보를 다룰 때.
 ++ 스테이지 프로그래밍을 이끌 때: 코드 생성은 전체를 대상으로 하는게 아닌, 계산을 필요로 하는 지점만을 파악한다,
@@ -74,7 +74,7 @@
 -- generated code can be reused enough to be worthwhile.
 ++ 이는 결국 타입 시스템이 하는 일이다.
 ++ 그렇지만 우리가 관심을 갖는 영역의 프로그래머, 동적 언어를 쓰는 사람이
-++ 거부하는 것이기도 하다.
+++ 강하게 거부하는 것이기도 하다.
 ++ 한편 타입을 활발히 사용하는 변화는 곳곳에서 발견되고 지지되고 있다.
 ++ 그리고 부분적인 정보를 기반으로 하는, 런타임에 유용한 행위를 찾아내는 많은 방법들이 있다.
 ++
@@ -118,9 +118,9 @@
 ++ 하지만 크게 보면 성능을 위해선 많은 것을 다뤄야 한다.
 ++ \emph{알고리즘 선별}~\cite{Ansel:2009:PLC:1542476.1542481,Ansel:2014:OEF:2628071.2628092} 아이디어에서
 ++ 다루는 ``코드 선택''을 보면, 예를 들어 프로그램의 어떤 지점에 몇몇의 알고리즘을 선별해 가장 빠른 것을 자동으로 고른다.
-++ 줄리아는 작은 단위로 간결하게 함수를 작성하고, 적용에 필요한 타입을 달아주고 있는데
-++ 자연스레 이러한 기능과 맞아 떨어지고 있다.
-++ 객체의 실행 단위별로 디스패치 하는 것도 가능할 만하다.
+++ 줄리아는 작은 단위의 간결한 함수를 작성하고, 적용에 필요한 타입을 달아주고 있는데
+++ 이러한 기능과 자연스레 맞아 떨어진다.
+++ 객체의 실행 단위별로 디스패치 하는 것도 시도해 볼 만하다.
 -- If we are interested in abstraction, then type specialization is the
 -- first priority for getting performance.
 -- However in a broader view there is much more to performance.
@@ -147,8 +147,8 @@
 == %There are several key aspects of performance programming that our design
 == %does not directly address, e.g. storage and in-place optimizations.
 == 
-++ 줄리아는 분산 컴퓨팅 라이브러리를 포함하고 있으므로, 메모리 공유 방식의 병렬화에 대한
-++ 탐색을 충분히 하지 못하였다. Cilk 모델~\cite{Joerg96,Randall98}은 우리가 목표로 하는
+++ 줄리아는 분산 컴퓨팅 라이브러리를 포함하고 있으며, 메모리 공유 방식의 병렬화에 대한
+++ 탐색은 아직 충분히 하지 못하였다. Cilk 모델~\cite{Joerg96,Randall98}은 우리가 목표로 하는
 ++ 성능과 추상화에 대한 좋은 본보기다.
 -- While Julia includes a distributed computing library, we have not
 -- sufficiently explored shared memory parallelism.
@@ -159,17 +159,17 @@
 ++ \section{앞으로 할 작업들}
 -- \section{Other future work}
 == 
-++ 실무용 시스템에서는, 초기 디자인에서 제껴둔 걸 돌아보는 작업을 우리는 해야 한다.
-++ 최적화를 기반으로 하는 다변성(polymorphism)에서 우리는 분리해서 컴파일하는 기능을 지원하지 않고 있다.
-++ 다행히 누구도 단념하지 않았다: C++ 템플릿은 같은 문제를 갖고 있는데,
-++ 분리해서 컴파일된 모듈을 여전히 생성할 수 있다.
+++ 실무용 시스템에서는, 초기 디자인에서 버려둔 것을 다시 돌아보는 작업을 해야 한다.
+++ 최적화를 기반으로 하는 다변성(polymorphism)에서 우리는 분리하여 컴파일하는 기능을 지원하지 않고 있다.
+++ 다행히 아직 누구도 단념하지 않았다: C++ 템플릿은 같은 문제를 갖고 있는데,
+++ 여전히 분리하여 컴파일한 모듈을 생성할 수 있다.
 ++ 우리는 같은 방식으로 해 낼 계획인데, 같은 자원을 들여 각 모듈의 관련 코드를 다시-분석하는
 ++ 방법으로서 말이다.
 ++ 또 다른 접근법은 모듈을 분리하는 대신 계층을 사용하는 것이다.
 ++ ``봉인한(sealed)'' 계층이라 더 이상 확장할 수 없는 ---
 ++ 이는 언어의 한 기능으로도 적합하다.
 ++ 이 라이브러리를 사용하는 애플리케이션은 보다 효율적으로 컴파일 할 수 있다.
-++ 계층을 추가하여(느린 것부터 바꾸는) 특정 상황에 적합한 지원을 한다. 
+++ 계층을 추가하여서(느린 것부터 바꾸는) 특정 상황에 적합한 지원을 한다. 
 ++ 바로 ``텔레스코핑 언어''에서 이를 핵심~\cite{telescoping}으로 다룬다.
 -- As with any practical system, we must begin the process of trying to get back
 -- what our design initially trades away.
@@ -190,11 +190,11 @@
 -- This is essentially the ``telescoping languages'' approach~\cite{telescoping}.
 == 
 ++ 줄리아에서 고차원적 프로그래밍을 하는 방식은 다소 난해하다.
-++ 맵예제~\ref{sec:implementingmap} \texttt{map} 함수는 \texttt{Bottom} 타입을
-++ 원소로 하는 배열을 돌려준다. 입력이 비어있는 경우를 대처는 할 수 있지만 여전히
+++ ~\ref{sec:implementingmap}의 \texttt{map} 함수는 \texttt{Bottom} 타입을
+++ 원소로 하는 배열을 돌려준다. 입력이 비어있는 경우를 대처할 수 있지만 여전히
 ++ 많은 프로그래머들을 헤깔리게 하고 당황하게 만들고 있다.
-++ 애로우 타입(nominal arrow types)을 위한 별도의 문법을 둬 이 상황이
-++ 나아지게 할 수는 있다.
+++ 애로우 타입(nominal arrow types)을 위한 별도의 문법을 지원하면
+++ 이를 처리할 수 있을 것이다.
 -- An ideal approach to higher-order programming in Julia remains somewhat
 -- elusive.
 -- For example the \texttt{map} function in section~\ref{sec:implementingmap}
@@ -210,7 +210,7 @@
 ++ 예컨데, 언어적으로 더 나은 대안을 찾으려 한다면 제어 흐름(control flow)과
 ++ 맞물리는 타입을 찾아낼 필요가 있다.
 ++ \texttt{TypeCheck.jl}~\cite{typecheckjl}와 같은 도구는 타입 정보의 추론을
-++ 막론하여 사용할 수가 있다.
+++ 막론하여 사용할 수 있다.
 -- Approaches to static type checking are also worth thinking about.
 -- Most importantly, we feel we have the priorities right: first introduce
 -- at least some kind of type information, then gradually add checks and
@@ -259,8 +259,8 @@
 -- \section{Project status}
 == 
 ++ 줄리아는 자유 소프트웨어이며, 우리는 대부분의 코드를 작성하고 읽고 고치는 과정을
-++ 진두지휘 하고 있다. 줄리아의 대부분은 라이브러리로서 존재하며, 시스템을 아우르는
-++ 기여를 할 수 있게 진입 장벽을 낮추었다.
+++ 진두지휘 하고 있다. 줄리아의 대부분은 라이브러리로서 존재하며, 시스템을 아울러
+++ 누구나 기여를 할 수 있게 진입 장벽을 낮추었다.
 ++ 현재 590개의 패키지가 패키지 관리 시스템에 등록되어 있고, 대부분 줄리아로 쓰여졌다.
 -- Not only is Julia free software, but we want to make
 -- the most of it by facilitating reading and modifying its code.
