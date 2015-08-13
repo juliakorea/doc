@@ -1,4 +1,4 @@
-module settings
+module Setting
 
 export doc_items
 export juliadoc, phdthesis
