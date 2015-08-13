@@ -5,4 +5,7 @@ julia:
   - release
   - nightly
 script:
+  - julia --code-coverage test/runtests.jl
   - julia --color=yes scripts/DiffHead.jl
+after_success:
+  - julia -e 'Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder("scripts"))'

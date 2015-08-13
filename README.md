@@ -2,6 +2,7 @@
 
 Linux, OSX: [![Build Status](https://api.travis-ci.org/juliakorea/doc.svg?branch=master)](https://travis-ci.org/juliakorea/doc)
 Windows: [![Build status](https://ci.appveyor.com/api/projects/status/m4pdut3nhvdu3unw?svg=true)](https://ci.appveyor.com/project/wookay/doc)
+[![Coverage Status](https://coveralls.io/repos/juliakorea/doc/badge.svg?branch=master&service=github)](https://coveralls.io/github/juliakorea/doc?branch=master)
 
 
  * http://juliakorea.github.io/latest/ 에서 보실 수 있습니다.

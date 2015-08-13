@@ -1,22 +1,7 @@
-function gen_rst(src_path, build_path)
-  out = open(build_path, "w")
-
-  txt = open(readall, src_path)
-  for line in split(txt, "\n")
-    len = length(line)
-    if len > 1
-      if "--" == line[1:2]
-      else
-        println(out, line[min(4,len+1):end])
-      end
-    end
-  end
-  close(out)
-  println("generated $build_path")
-end
-
 push!(LOAD_PATH, "scripts")
-using settings
+
+using Setting
+using DocUtil
 
 build_dir = is_scripts ? "../build" : "build"
 
