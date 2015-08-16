@@ -2,7 +2,7 @@ module Setting
 
 export doc_items
 export juliadoc, phdthesis
-export get_src_path, is_scripts
+export get_src_path, get_codex_path, is_scripts
 
 type DocSet
   name
@@ -33,14 +33,22 @@ function get_src_path(name, file)
   normpath(src_dir, name, "$file.$extension")
 end
 
-function get_doc_items(sets)
-  work_path = is_scripts ? "../.." : ".."
-  
-  if isdir(normpath(work_path, juliadoc.name))
+
+function get_codex_path(work_path, sub, is_scripts)
+  codex_path = ""
+  if isdir(normpath(work_path, sub))
     codex_path = work_path
   else
     codex_path = is_scripts ? "../codex" : "codex"
   end
+  codex_path
+end
+
+
+function get_doc_items(sets)
+  work_path = is_scripts ? "../.." : ".."
+  codex_path = get_codex_path(work_path, juliadoc.name, is_scripts)
+
   items = DocItem[]
   for set in sets
     for file in set.files
