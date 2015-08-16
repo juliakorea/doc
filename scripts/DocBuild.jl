@@ -5,10 +5,6 @@ using DocUtil
 
 build_dir = is_scripts ? "../build" : "build"
 
-mkdir_if_not_exist(path) = !isdir(path) && begin
-  println("mkdir $path")
-  mkdir(path)
-end
 mkdir_if_not_exist(normpath(build_dir, "manual"))
 mkdir_if_not_exist(normpath(build_dir, "phdthesis"))
 
