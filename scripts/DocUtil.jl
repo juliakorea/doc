@@ -1,6 +1,7 @@
 module DocUtil
 
-export diff_head, gen_rst, mkdir_if_not_exist
+export diff_head, gen_rst
+
 
 function diff_head(codex_path, src_path)
   print("$codex_path: ")
@@ -51,12 +52,6 @@ function gen_rst(src_path, build_path)
   end
   close(out)
   println("generated $build_path")
-end
-
-
-mkdir_if_not_exist(path) = !isdir(path) && begin
-  println("mkdir $path")
-  mkdir(path)
 end
 
 end
