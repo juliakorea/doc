@@ -42,7 +42,7 @@
 ==     3
 == 
 ++ 대화형 실행 환경을 종료하기 위해서는 ``^D`` 를 입력하거나
-++ (컨트롤 키와 ``d`` 키를 ++ 함께 누른다.)
+++ (컨트롤 키와 ``d`` 키를 함께 누른다.)
 ++ ``quit()`` 를 대화형 실행 환경 입력창에 타이핑한다.
 ++ 대화형 실행 환경을 실행하면, 위와 같이 ``julia`` 배너가 보여지고,
 ++ 커서창이 사용자의 입력을 기다리며 깜빡이고 있다. 사용자가
@@ -111,6 +111,11 @@
 ==     foo
 ==     bar
 ==
+++ ``--`` 구분자는 명령어와 줄리아에 넘겨줄 인자를 구분하는데 사용한다::
+-- The ``--`` delimiter can be used to separate command-line args to the scriptfile from args to Julia::
+==
+==     $ julia --color=yes -O -- foo.jl arg1 arg2..
+==
 ++ Julia는 ``-p`` 옵션이나 ``--machinefile`` 옵션을 이용하여
 ++ 병렬 환경에서 실행시킬 수 있다.
 ++ ``-p n`` 옵션은 n개의 worker 프로세스를 생성하지만,
@@ -168,97 +173,105 @@
 -- There are various ways to run Julia code and provide options, similar to
 -- those available for the ``perl`` and ``ruby`` programs::
 == 
-++ ::
+++ .. code-block:: shell
 ++ 
-==     julia [options] [program] [args...]
-++      -v, --version             버전 정보를 표시한다.
-++      -h, --help                이 메시지를 표시한다.
-++      -q, --quiet               시작할 때 배너를 재거한다.
-++      -H, --home <dir>          Julia 실행파일의 위치를 지정한다.
-++ 
-++      -e, --eval <expr>         <expr>를 실행만 한다.
-++      -E, --print <expr>        <expr>를 실행하고 표시한다.
-++      -P, --post-boot <expr>    <expr>를 실행하되, 대화형 실행환경을 유지한다.
-++      -L, --load <file>         <file>을 모든 프로세서에 로드한다.
-++      -J, --sysimage <file>     <file>이라는 시스템 이미지 파일을 로드한 뒤 실행한다.
-++      -C, --cpu-target <target> <target>까지의 CPU기능만을 사용한다.
-++ 
-++      -p, --procs {N|auto}      N개의 추가 worker 프로세스를 생성한다.
-++                                'auto'는 현재 Julia를 실행하는 컴퓨터의 최대 코어수만큼 worker 프로세스를 생성한다. 
-++      --machinefile <file>      <file>에 나열된 호스트에서 worker 프로세스를 생성한다.
-++ 
-++      -i                        isinteractive() 결과를 강제적으로 true로 만든다.
-++      --color={yes|no}          모든 텍스트에 색상을 표시하거나 표시하지 않는다.
-++ 
-++      --history-file={yes|no}   작업내역을 저장하거나 로드한다.
-++      --no-history-file         히스토리 파일을 로드하지 않는다.
-++                                (권장되지 않음, --history-file=no을 사용하는 것이 좋다.)
-++      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다.
-++      -f, --no-startup          ~/.juliarc를 불러오지 않는다.
-++                                (권장되지 않음, --startup-file=no를 사용하는 것이 좋다.)
+==     julia [switches] -- [programfile] [args...]
+++      -v, --version             버전 정보를 표시한다
+++      -h, --help                이 메시지를 표시한다
+++
+++      -J, --sysimage <file>     <file>이라는 시스템 이미지 파일을 로드한 뒤 실행한다
+++      --precompiled={yes|no}    가능하다면 시스템 이미지에 미리 컴파일해둔 코드를 사용한다
+++      -H, --home <dir>          Julia 실행파일의 위치를 지정한다
+++      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
+++      -f, --no-startup          ~/.juliarc를 불러오지 않는다
+++                                (조만간 폐기됨, --startup-file=no를 사용하는 것이 좋다)
 ++      -F                        ~/.juliarc를 불러온다.
-++                                (권장되지 않음, --startup-file=yes를 사용하는 것이 좋다.)
+++                                (조만간 폐기됨, --startup-file=yes를 사용하는 것이 좋다)
+++      --handle-signals={yes|no} Julia의 기본 시그널 핸들러의 작동을 켜거나 끈다
+++
+++      -e, --eval <expr>         <expr>를 실행만 한다
+++      -E, --print <expr>        <expr>를 실행하고 표시한다
+++      -P, --post-boot <expr>    <expr>를 실행하되, 대화형 실행환경을 유지한다 (조만간 폐기됨, 대신 -i -e를 사용)
+++      -L, --load <file>         <file>을 모든 프로세서에 로드한다
 ++ 
-++      --compile={yes|no|all}    컴파일러를 활성화거나 비활성화한다. 혹은 전체 컴파일을 요청한다. 
+++      -p, --procs {N|auto}      N개의 추가 worker 프로세스를 생성한다
+++                                "auto"는 현재 Julia를 실행하는 컴퓨터의 최대 코어수만큼 worker 프로세스를 생성한다
+++      --machinefile <file>      <file>에 나열된 호스트에서 worker 프로세스를 생성한다
 ++ 
+++      -i                        대화형 모드; REPL을 돌리며 isinteractive()는 true 이다
+++      -q, --quiet               시작할 때 배너를 재거한다
+++      --color={yes|no}          모든 텍스트에 색상을 표시하거나 표시하지 않는다
+++      --history-file={yes|no}   작업내역을 저장하거나 로드한다
+++      --no-history-file         히스토리 파일을 로드하지 않는다
+++                                (조만간 폐기됨, --history-file=no을 사용하는 것이 좋다)
+++ 
+++      --compile={yes|no|all}    컴파일러를 활성화거나 비활성화한다. 혹은 전체 컴파일을 요청한다
+++      -C, --cpu-target <target> <target>까지의 CPU기능만을 사용한다
+++      -O, --optimize            코드 실행시간에 관련된 최적화를 실행한다
+++      --inline={yes|no}         inlining을 허용할지 결정한다 (@inline로 선언된 함수를 덮어쓴다)
+++      --check-bounds={yes|no}   배열의 경계 체크를 항상 생략하거나 실행한다 (변수 선언을 무시)
+++      --math-mode={ieee|user}   IEEE 부동소수점 표준을 쓰거나 (변수 선언을 무시)
+++                                소스에서 선언된 부동소수점을 따른다
+++ 
+++      --depwarn={yes|no|error}  문법과 함수가 폐기됐다는 경고를 활성화하거나 비활성화한다
+++                                ("error"는 경고를 에러로 바꾼다)
+++
+++      --output-o name           오브젝트 파일을 생성한다 (시스템 이미지 데이터를 포함)
+++      --output-ji name          시스템 이미지 데이터 파일을 생성한다 (.ji)
+++      --output-bc name          LLVM 비트코드를 생성한다 (.bc)
+++
+++      --output-incremental=no   점진적으로 증가하는 출력 파일을 생성한다 (완결하기 보다는)
+++
 ++      --code-coverage={none|user|all}, --code-coverage
-++                                소스 코드 라인의 실행 횟수를 기록한다. (기본값 : 'user')
-++ 
+++                                소스 코드 라인의 실행 횟수를 기록한다 (기본값 : "user")
 ++      --track-allocation={none|user|all}, --track-allocation
-++                                각 소스 코드 라인에 의해 할당되는 바이트 수를 기록한다.
-++ 
-++      -O, --optimize
-++                                코드 실행시간에 관련된 최적화를 실행한다.
-++      --check-bounds={yes|no}   배열의 경계 체크를 항상 생략하거나 실행한다. (변수 선언을 무시)
-++      --dump-bitcode={yes|no}   시스템 이미지를 위한 이진코드를 dump한다. (--build 옵션과 함께 쓰인다.)
-++      --depwarn={yes|no|error}  문법과 함수에 관련한 deprecation 경고를 활성화하거나 비활성화한다.
-++                                ('error'는 경고를 에러로 바꾼다.)
-++ 
-++      --inline={yes|no}         inlining을 허용할지 결정한다. (@inline로 선언된 함수를 덮어쓴다.)
-++      --math-mode={ieee|user}   IEEE 부동소수점 표준을 쓰거나 (변수 선언을 무시),
-++                                소스에서 선언된 부동소수점을 따른다.
+++                                각 소스 코드 라인에 의해 할당되는 바이트 수를 기록한다
+++
 --      -v, --version             Display version information
 --      -h, --help                Print this message
---      -q, --quiet               Quiet startup without banner
+--
+--      -J, --sysimage <file>     Start up with the given system image file
+--      --precompiled={yes|no}    Use precompiled code from system image if available
 --      -H, --home <dir>          Set location of julia executable
+--      --startup-file={yes|no}   Load ~/.juliarc.jl
+--      -f, --no-startup          Don't load ~/.juliarc (deprecated, use --startup-file=no)
+--      -F                        Load ~/.juliarc (deprecated, use --startup-file=yes)
+--      --handle-signals={yes|no} Enable or disable Julia's default signal handlers
 -- 
 --      -e, --eval <expr>         Evaluate <expr>
 --      -E, --print <expr>        Evaluate and show <expr>
---      -P, --post-boot <expr>    Evaluate <expr>, but don't disable interactive mode
+--      -P, --post-boot <expr>    Evaluate <expr>, but don't disable interactive mode (deprecated, use -i -e instead)
 --      -L, --load <file>         Load <file> immediately on all processors
---      -J, --sysimage <file>     Start up with the given system image file
---      -C, --cpu-target <target> Limit usage of cpu features up to <target>
--- 
+--
 --      -p, --procs {N|auto}      Integer value N launches N additional local worker processes
---                                'auto' launches as many workers as the number of local cores
+--                                "auto" launches as many workers as the number of local cores
 --      --machinefile <file>      Run processes on hosts listed in <file>
 -- 
---      -i                        Force isinteractive() to be true
+--      -i                        Interactive mode; REPL runs and isinteractive() is true
+--      -q, --quiet               Quiet startup (no banner)
 --      --color={yes|no}          Enable or disable color text
--- 
 --      --history-file={yes|no}   Load or save history
 --      --no-history-file         Don't load history file (deprecated, use --history-file=no)
---      --startup-file={yes|no}   Load ~/.juliarc.jl
---      -f, --no-startup          Don't load ~/.juliarc   (deprecated, use --startup-file=no)
---      -F                        Load ~/.juliarc         (deprecated, use --startup-file=yes)
 -- 
 --      --compile={yes|no|all}    Enable or disable compiler, or request exhaustive compilation
+--      -C, --cpu-target <target> Limit usage of cpu features up to <target>
+--      -O, --optimize            Run time-intensive code optimizations
+--      --inline={yes|no}         Control whether inlining is permitted (overrides functions declared as @inline)
+--      --check-bounds={yes|no}   Emit bounds checks always or never (ignoring declarations)
+--      --math-mode={ieee,fast}   Disallow or enable unsafe floating point optimizations (overrides @fastmath declaration)
 -- 
+--      --depwarn={yes|no|error}  Enable or disable syntax and method deprecation warnings ("error" turns warnings into errors)
+--
+--      --output-o name           Generate an object file (including system image data)
+--      --output-ji name          Generate a system image data file (.ji)
+--      --output-bc name          Generate LLVM bitcode (.bc)
+-- 
+--      --output-incremental=no   Generate an incremental output file (rather than complete)
+--
 --      --code-coverage={none|user|all}, --code-coverage
---                               Count executions of source lines (omitting setting is equivalent to 'user')
--- 
---     --track-allocation={none|user|all}, --track-allocation
---                               Count bytes allocated by each source line
--- 
---     -O, --optimize
---                               Run time-intensive code optimizations
---     --check-bounds={yes|no}   Emit bounds checks always or never (ignoring declarations)
---     --dump-bitcode={yes|no}   Dump bitcode for the system image (used with --build)
---     --depwarn={yes|no|error}  Enable or disable syntax and method deprecation warnings ('error' turns warnings into errors)
--- 
---     --inline={yes|no}         Control whether inlining is permitted (overrides functions declared as @inline)
---     --math-mode={ieee|user}   Always use IEEE semantics for math (ignoring declarations),
---                               or adhere to declarations in source code
+--                                Count executions of source lines (omitting setting is equivalent to "user")
+--      --track-allocation={none|user|all}, --track-allocation
+--                                Count bytes allocated by each source line
 == 
 ++ 다른 읽을 거리
 ++ --------------
