@@ -100,7 +100,7 @@
 ==     $ julia -e 'for x in ARGS; println(x); end' foo bar
 ==     foo
 ==     bar
---
+==
 ++ 아니면 저 코드를 스크립트 파일에 넣고 실행시켜도 가능하다. 
 -- Or you could put that code into a script and run it::
 ==
