@@ -19,6 +19,7 @@ juliadoc = DocSet("julia/doc", """
                     manual/introduction.rst
                     manual/getting-started.rst
                     manual/variables.rst
+                    manual/integers-and-floating-point-numbers.rst
                   """ |> split)
 
 phdthesis = DocSet("phdthesis", """
