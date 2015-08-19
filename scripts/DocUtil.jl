@@ -27,7 +27,7 @@ function diff_head(codex_path, src_path)
     write(fd, join(lines))
     close(fd)
     try
-      Base.run(`git diff $codex_path $path`)
+      Base.run(`git diff $path $codex_path`)
     end
     Base.rm(path)
     exit_code = 1
