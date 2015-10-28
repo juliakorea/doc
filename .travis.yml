@@ -10,5 +10,5 @@ script:
 after_success:
   - julia -e 'Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder("scripts"))'
 notifications:
-  - email: false
-  - slack: juliakorea:jAjxl8uv5xEFsvacdrIm7lJk
+  email: false
+  slack: juliakorea:jAjxl8uv5xEFsvacdrIm7lJk
