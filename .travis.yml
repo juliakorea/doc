@@ -10,9 +10,9 @@ script:
 after_success:
   - julia -e 'Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder("scripts"))'
 notifications:
-  - email: false
-  - slack: juliakorea:jAjxl8uv5xEFsvacdrIm7lJk
-  - webhooks:
+  email: false
+  slack: juliakorea:jAjxl8uv5xEFsvacdrIm7lJk
+  webhooks:
     urls:
       - https://dockbit.com/webhooks/c7786e3b11feb377f1d3f1132d5bcb5a5be8353f
     on_success: always
