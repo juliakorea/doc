@@ -848,7 +848,7 @@
 ==     -9223372036854775809
 == 
 ==     julia> typeof(y)
-==     Base.GMP.BigInt
+==     BigInt
 == 
 ++ :class:`BigFloat` 타입에서 기본 정밀도(가수부의 비트수)와 반올림 모드는
 ++ :func:`set_bigfloat_precision`\ 와 :func:`set_rounding`\ 를 호출함으로써
