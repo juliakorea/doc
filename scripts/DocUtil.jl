@@ -6,7 +6,7 @@ export diff_head, gen_rst, mkdir_if_not_exist
 function diff_head(codex_path, src_path)
   print("$codex_path: ")
   txt = open(readall, src_path)
-  lines = String[]
+  lines = AbstractString[]
   for line in split(txt, "\n")
     len = length(line)
     if len > 1
