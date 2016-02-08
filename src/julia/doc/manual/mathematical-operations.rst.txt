@@ -15,13 +15,13 @@
 -- providing portable, efficient implementations of a comprehensive
 -- collection of standard mathematical functions.
 == 
-++ 산술 연산
+++ 산술 연산자
 -- Arithmetic Operators
 == --------------------
 ==
 ++ 다음의 `arithmetic operators
 ++ <https://en.wikipedia.org/wiki/Arithmetic#Arithmetic_operations>`_
-++ 는 모든 원시 수치타입에 관하여 지원된다.
+++ 는 모든 원시 수치타입에 걸쳐서 사용할 수 있다:
 -- The following `arithmetic operators
 -- <https://en.wikipedia.org/wiki/Arithmetic#Arithmetic_operations>`_
 -- are supported on all primitive numeric types:
@@ -36,9 +36,9 @@
 ++ ``x - y``   이항 뺄셈      뺄셈을 수행
 ++ ``x * y``   곱셈           곱셈을 수행
 ++ ``x / y``   나눗셈         나눗셈을 수행
-++ ``x \ y``   역수           ``y / x`` 와 같음
-++ ``x ^ y``   제곱           ``x``의 ``y``\ th 제곱을 반환
-++ ``x % y``   나머지         ``rem(x,y)`` 와 같음.
+++ ``x \ y``   역수           ``y / x``
+++ ``x ^ y``   제곱           ``x``\ 의 ``y``\ 제곱
+++ ``x % y``   나머지         ``rem(x,y)``\ 와 같음.
 -- ``+x``      unary plus     the identity operation
 -- ``-x``      unary minus    maps values to their additive inverses
 -- ``x + y``   binary plus    performs addition
@@ -50,7 +50,7 @@
 -- ``x % y``   remainder      equivalent to ``rem(x,y)``
 == ==========  ============== ======================================
 == 
-++ ``Bool`` 타입의 부정연산 또한 가지고 있다.
+++ ``Bool`` 타입의 부정연산 또한 수행할 수 있다:
 -- as well as the negation on ``Bool`` types:
 == 
 == ==========  ============== ============================================
@@ -92,7 +92,7 @@
 == 
 ++ 위키피디아에 명시된 `bitwise
 ++ operators <https://en.wikipedia.org/wiki/Bitwise_operation#Bitwise_operators>`_
-++ 은 모든 원시 정수 타입에 대해 Julia에서 모두 지원하고 있다.
+++ 에 대해서는 모든 원시 정수 타입에 걸쳐서 Julia에서 모두 지원하고 있다.
 -- The following `bitwise
 -- operators <https://en.wikipedia.org/wiki/Bitwise_operation#Bitwise_operators>`_
 -- are supported on all primitive integer types:
@@ -117,7 +117,7 @@
 -- ``x << y``   logical/arithmetic shift left
 == ===========  =========================================================================
 == 
-++ 다음은 비트 연산을 이용한 몇 가지 간단한 예제들이다.
+++ 다음은 비트 연산을 이용한 몇 가지 간단한 예제들이다:
 -- Here are some examples with bitwise operators:
 == 
 == .. doctest::
@@ -140,13 +140,13 @@
 ==     julia> ~UInt8(123)
 ==     0x84
 == 
-++ 갱신 연산자들
+++ 갱신 연산자
 -- Updating operators
 == ------------------
-++ 모든 이항 산술연산자와 비트 연산자는 연산 결과를 왼쪽 피연산자에
-++ 다시 대입하는 갱신 연산자 버전이 있다. ``=`` 기호를 연산자 바로 뒤에 지정하면
-++ 연산자 갱신을 수행할 수 있다. 예를 들어,
-++ ``x += 3``\ 은 ``x = x + 3``\ 와 같다.::
+++ 모든 이항 산술 연산자와 비트 연산자는 연산 결과를 왼쪽 피연산자에
+++ 다시 대입하는 갱신 연산자 버전이 있다. 이 갱신 연산자는 ``=`` 기호를 
+++ 연산자 바로 뒤에 지정함으로써 수행할 수 있다. 
+++ 예를 들어, ``x += 3``\ 은 ``x = x + 3``\ 와 같다::
 -- Every binary arithmetic and bitwise operator also has an updating
 -- version that assigns the result of the operation back into its left
 -- operand. The updating version of the binary operator is formed by placing a
@@ -162,7 +162,7 @@
 ==       julia> x
 ==       4
 == 
-++ 모든 이항 연산과 비트 연산의 갱신 연산자들은 다음과 같다.::
+++ 모든 이항 연산과 비트 연산의 갱신 연산자들은 다음과 같다::
 -- The updating versions of all the binary arithmetic and bitwise operators
 -- are::
 == 
@@ -192,9 +192,9 @@
 -- Numeric Comparisons
 == -------------------
 == 
-++ 표준 비교 연산은 모든 원시 수치 타입에 관하여 정의되어 있다.
+++ 표준 비교 연산은 모든 원시 수치 타입에 관하여 정의되어 있다:
 -- Standard comparison operations are defined for all the primitive numeric
-== types:
+-- types:
 == 
 == =================== ========================
 ++ 연산자              이름
@@ -214,7 +214,7 @@
 -- :obj:`>=` :obj:`≥`  greater than or equal to
 == =================== ========================
 == 
-++ 다음은 몇 가지 간단하 예제들이다.:
+++ 다음은 몇 가지 간단하 예제들이다:
 -- Here are some simple examples:
 == 
 == .. doctest::
@@ -252,10 +252,10 @@
 ==     julia> 3 < -0.5
 ==     false
 == 
-++ 정수는 일반적인 방법으로(비트간의 비교) 비교가능하다.
+++ 정수는 일반적인 방법으로(비트간의 비교) 비교가능하며, 
 ++ 부동소수점은 
 ++ `IEEE 754 standard <https://en.wikipedia.org/wiki/IEEE_754-2008>`_
-++ 에 따라 비교할 수 있다.:
+++ 에 따라 비교할 수 있다:
 -- Integers are compared in the standard manner — by comparison of bits.
 -- Floating-point numbers are compared according to the `IEEE 754
 -- standard <https://en.wikipedia.org/wiki/IEEE_754-2008>`_:
@@ -272,7 +272,7 @@
 -- -  ``NaN`` is not equal to, not less than, and not greater than anything,
 --    including itself.
 == 
-++ 마지막 문장은 아마 놀라운 일일 것이기 때문에 따로 정리할 필요가 있다.
+++ 마지막 문장을 보고 놀라는 사람도 있을 수 있기 때문에 따로 정리하였다:
 -- The last point is potentially surprising and thus worth noting:
 == 
 == .. doctest::
@@ -297,8 +297,8 @@
 ==     julia> [1 NaN] == [1 NaN]
 ==     false
 == 
-++ Julia는 해시 키 비교와 같은 상황에서 유용한 특정한 값에 대해 테스트할 수 있는 
-++ 몇 가지 함수들을 제공한다.
+++ Julia는 해시 키 비교와 같은 상황에서 유용한 숫자 테스트용 함수를 
+++ 몇 가지 제공한다:
 -- Julia provides additional functions to test numbers for special values,
 -- which can be useful in situations like hash key comparisons:
 == 
@@ -333,7 +333,7 @@
 ==     julia> isequal(NaN,NaN32)
 ==     true
 == 
-++ :func:`isequal`\ 는 부호 있는 0을 구별할 때도 쓸 수 있다.
+++ :func:`isequal`\ 는 부호 있는 0을 구별할 때도 쓸 수 있다:
 -- :func:`isequal` can also be used to distinguish signed zeros:
 == 
 == .. doctest::
@@ -370,7 +370,7 @@
 == 
 ++ Python(`notable exception of
 ++ Python <https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Comparison_operators>`_\ )
-++ 을 포함한 다른 언어와는 달리 Julia에서는 비교 연산이 임의적으로 중첩할 수 있다.
+++ 을 포함한 다른 언어와는 달리 Julia에서는 비교 연산이 임의적으로 중첩할 수 있다:
 -- Unlike most languages, with the `notable exception of
 -- Python <https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Comparison_operators>`_,
 -- comparisons can be arbitrarily chained:
@@ -431,7 +431,7 @@
 ++ 그러나, 중첩 비교 연산 시의 순서는 따로 정의되지 않았다.
 ++ 출력과 같이 부수적인 효과가 있는 표현식은 중첩 비교 연산에서 쓰지 않는 것이 바람직하다.
 ++ 그러나 어쩔 수 없이 부수적인 효과가 들어있는 표현식을 써야만 한다면,
-++ :obj:`&&` 연산자를 명시적으로 써서 명시적으로 비교 연산을 수행해야 한다.
+++ :obj:`&&` 연산자를 써서 명시적으로 비교 연산을 수행해야 한다.
 ++ (:ref:`man-short-circuit-evaluation` 참고).
 -- The middle expression is only evaluated once, rather than twice as it
 -- would be if the expression were written as
@@ -445,7 +445,7 @@
 -- Operator Precedence
 == ~~~~~~~~~~~~~~~~~~~
 == 
-++ Julia는 다음과 같은 순서로 연산을 수행한다. (높은 우선순위부터 낮은 우선순위로 표기)
+++ Julia는 다음과 같은 순서로 연산을 수행한다. (높은 우선순위부터 낮은 우선순위로 표기):
 -- Julia applies the following order of operations, from highest precedence
 -- to lowest:
 == 
@@ -674,8 +674,8 @@
 ++ :func:`log2(x) <log2>`               2를 밑으로 하는 ``x``\ 의 로그값
 ++ :func:`log10(x) <log10>`             10을 밑으로 하는 ``x``\ 의 로그값(상용로그)
 ++ :func:`log1p(x) <log1p>`             0 근처의 ``x`` 값에 대한 정확한 ``log(1+x)`` 값
-++ :func:`exponent(x) <exponent>`       부동소수점 ``x``\ 의 지수 비트 값
-++ :func:`significand(x) <significand>` 부동소수점 ``x``\ 의 가수 비트 값
+++ :func:`exponent(x) <exponent>`       부동소수점 ``x``\ 의 지수부 값
+++ :func:`significand(x) <significand>` 부동소수점 ``x``\ 의 가수부 값
 -- :func:`sqrt(x) <sqrt>` ``√x``        square root of ``x``
 -- :func:`cbrt(x) <cbrt>` ``∛x``        cube root of ``x``
 -- :func:`hypot(x,y) <hypot>`           hypotenuse of right-angled triangle with other sides of length ``x`` and ``y``
