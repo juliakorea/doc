@@ -57,8 +57,8 @@
 -- ================  =======  ==============  ============== ==================
 ++ 타입              부호여부  비트 수        최솟값         최댓값
 -- Type              Signed?  Number of bits  Smallest value Largest value
-++ ----------------  --------  ---------      -------------- ------------------
--- ----------------  -------  --------------  -------------- ------------------
+++ ================  ========  =========      ============== ==================
+-- ================  =======  ==============  ============== ==================
 == :class:`Int8`        ✓         8            -2^7             2^7 - 1
 == :class:`UInt8`                 8             0               2^8 - 1
 == :class:`Int16`       ✓         16           -2^15            2^15 - 1
@@ -80,8 +80,8 @@
 -- ================ ========= ==============
 ++ 타입             정밀도  비트수
 -- Type             Precision Number of bits
-++ ---------------- ------- --------------
--- ---------------- --------- --------------
+++ ================ ======= ==============
+-- ================ ========= ==============
 == :class:`Float16` half_          16
 == :class:`Float32` single_        32
 == :class:`Float64` double_        64
@@ -683,7 +683,7 @@
 ==     julia> 1.1 + 0.1
 ==     1.2000000000000002
 == 
-==     julia> with_rounding(Float64,RoundDown) do
+==     julia> setrounding(Float64,RoundDown) do
 ==            1.1 + 0.1
 ==            end
 ==     1.2
@@ -851,32 +851,31 @@
 ==     BigInt
 == 
 ++ :class:`BigFloat` 타입에서 기본 정밀도(가수부의 비트수)와 반올림 모드는
-++ :func:`set_bigfloat_precision`\ 와 :func:`set_rounding`\ 를 호출함으로써
+++ :func:`setprecision`\ 와 :func:`setrounding`\ 를 호출함으로써
 ++ 변경할 수 있으며, 한 번 호출된 이후에는 그 설정이 계속 유지된다.
 ++ 특정 블럭의 코드에서만 정밀도와 반올림을 변경하기 위해서는
-++ :func:`with_bigfloat_precision`\ 와 :func:`with_rounding`\ 를 호출한다:
+++ ``do`` 블럭의 코드에서와 같은 함수를 호출한다:
 -- The default precision (in number of bits of the significand) and
 -- rounding mode of :class:`BigFloat` operations can be changed globally
--- by calling :func:`set_bigfloat_precision` and
--- :func:`set_rounding`, and all further calculations will take
+-- by calling :func:`setprecision` and
+-- :func:`setrounding`, and all further calculations will take
 -- these changes in account.  Alternatively, the precision or the
 -- rounding can be changed only within the execution of a particular
--- block of code by :func:`with_bigfloat_precision` or
--- :func:`with_rounding`:
+-- block of code by using the same functions with a ``do`` block:
 == 
 == .. doctest::
 == 
-==     julia> with_rounding(BigFloat,RoundUp) do
+==     julia> setrounding(BigFloat, RoundUp) do
 ==            BigFloat(1) + parse(BigFloat, "0.1")
 ==            end
 ==     1.100000000000000000000000000000000000000000000000000000000000000000000000000003
 == 
-==     julia> with_rounding(BigFloat,RoundDown) do
+==     julia> setrounding(BigFloat, RoundDown) do
 ==            BigFloat(1) + parse(BigFloat, "0.1")
 ==            end
 ==     1.099999999999999999999999999999999999999999999999999999999999999999999999999986
 == 
-==     julia> with_bigfloat_precision(40) do
+==     julia> setprecision(40) do
 ==            BigFloat(1) + parse(BigFloat, "0.1")
 ==            end
 ==     1.1000000000004
@@ -952,20 +951,10 @@
 == .. doctest::
 == 
 ==     julia> (x-1)(x+1)
-==     ERROR: MethodError: `call` has no method matching call(::Int64, ::Int64)
-==     Closest candidates are:
-==       Union(!Matched::Any...)
-==       BoundsError()
-==       BoundsError(!Matched::Any...)
-==       ...
+==     ERROR: MethodError: `Int64` has no method matching Int64(::Int64)
 == 
 ==     julia> x(x+1)
-==     ERROR: MethodError: `call` has no method matching call(::Int64, ::Int64)
-==     Closest candidates are:
-==       Union(!Matched::Any...)
-==       BoundsError()
-==       BoundsError(!Matched::Any...)
-==       ...
+==     ERROR: MethodError: `Int64` has no method matching Int64(::Int64)
 == 
 ++ 두 표현식은 함수로써 인식된다: 괄호앞에 붙는 수치형 리터럴이 아닌
 ++ 표현식들은 모두 함수와 함수의 매개변수로 인식된다.
@@ -1039,7 +1028,7 @@
 == ====================== =====================================================
 ++ 함수                   설명
 -- Function               Description
-== ---------------------- -----------------------------------------------------
+== ====================== =====================================================
 ++ :func:`zero(x) <zero>` ``x`` 타입이나 변수 ``x``\ 의 타입의 리터럴 0
 ++ :func:`one(x) <one>`   ``x`` 타입이나 변수 ``x``\ 의 타입의 리터럴 1
 -- :func:`zero(x) <zero>` Literal zero of type ``x`` or type of variable ``x``
@@ -1068,4 +1057,3 @@
 == 
 ==     julia> one(BigFloat)
 ==     1.000000000000000000000000000000000000000000000000000000000000000000000000000000
-== 

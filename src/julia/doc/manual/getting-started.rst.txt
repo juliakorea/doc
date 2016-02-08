@@ -81,23 +81,27 @@
 ==     $ julia script.jl arg1 arg2...
 ==
 ++ 예제와 같이 julia 실행 명령 뒤에 오는 매개변수들은
-++ 전역 상수 ``ARGS`` 라고 불리우는
-++ ``script.ji`` 프로그램의 명령줄 인자로 작동한다.
-++ ``ARGS`` 는 이 뿐만이 아니라
-++ ``-e`` 옵션을 통해서 julia 스크립트를 실행할 때도 설정할 수 있다.
+++ 전역 상수 ``ARGS``\ 라고 불리우는
+++ ``script.ji``\ 라는 프로그램의 명령줄 인자로 작동한다.
+++ 이 프로그램의 이름은 전역 상수 ``PROGRAM_FILE``\ 에도 설정된다.
+++ 또한 ``ARGS`` 는 이 뿐만이 아니라
+++ ``-e`` 옵션을 통해서 julia 스크립트를 실행할 때도 설정할 수 있음을 알 필요가 있다.
+++ 그러나 이 경우에는 ``PROGRAM_FILE``\ 은 아무것도 설정되지 않은 채로 실행될 것이다.
 ++ (아래의 ``julia`` 도움말을 보도록 하자.)
 ++ 예를 들어, 단순히 스크립트에 주어진 명령줄 인자를 출력할 때는
 ++ 다음과 같이 입력하면 된다.
 -- As the example implies, the following command-line arguments to julia
 -- are taken as command-line arguments to the program ``script.jl``, passed
--- in the global constant ``ARGS``. ``ARGS`` is also set when script code
--- is given using the ``-e`` option on the command line (see the ``julia``
--- help output below). For example, to just print the arguments given to a
--- script, you could do this::
+-- in the global constant ``ARGS``. The name of the script itself is passed
+-- in as the global ``PROGRAM_FILE``. Note that ``ARGS`` is also set when script
+-- code is given using the ``-e`` option on the command line (see the ``julia``
+-- help output below) but ``PROGRAM_FILE`` will be empty. For example, to just
+-- print the arguments given to a script, you could do this::
 ==
 ++ .. code-block:: shell
 ++
-==     $ julia -e 'for x in ARGS; println(x); end' foo bar
+==     $ julia -e 'println(PROGRAM_FILE); for x in ARGS; println(x); end' foo bar
+== 
 ==     foo
 ==     bar
 ==
@@ -106,8 +110,9 @@
 ==
 ++ .. code-block:: shell
 ++
-==     $ echo 'for x in ARGS; println(x); end' > script.jl
+==     $ echo 'println(PROGRAM_FILE); for x in ARGS; println(x); end' > script.jl
 ==     $ julia script.jl foo bar
+==     script.jl
 ==     foo
 ==     bar
 ==
@@ -181,6 +186,8 @@
 ++
 ++      -J, --sysimage <file>     <file>이라는 시스템 이미지 파일을 로드한 뒤 실행한다
 ++      --precompiled={yes|no}    가능하다면 시스템 이미지에 미리 컴파일해둔 코드를 사용한다
+
+++      --compilecache={yes|no}   모듈의 사전 증분 컴파일을 활성화/비활성화
 ++      -H, --home <dir>          Julia 실행파일의 위치를 지정한다
 ++      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
 ++      -f, --no-startup          ~/.juliarc를 불러오지 않는다
@@ -232,6 +239,7 @@
 --
 --      -J, --sysimage <file>     Start up with the given system image file
 --      --precompiled={yes|no}    Use precompiled code from system image if available
+--      --compilecache={yes|no}   Enable/disable incremental precompilation of modules
 --      -H, --home <dir>          Set location of julia executable
 --      --startup-file={yes|no}   Load ~/.juliarc.jl
 --      -f, --no-startup          Don't load ~/.juliarc (deprecated, use --startup-file=no)
