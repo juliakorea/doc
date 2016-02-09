@@ -277,7 +277,7 @@
 ++ :func:`typemin`\ 과 :func:`typemax`\ 가 제공하는 값들은
 ++ 항상 매개변수의 타입과 같은 타입을 가진다.
 ++ (위 예제에서 쓰는 :ref:`for loops <man-loops>`\ ,
-++ :ref:`man-strings`\ , :ref:`man-string-interpolation`\ ,
+++ :ref:`man-strings`\ , :ref:`man-string-interpolation`\ 
 ++ 과 같은 표현들은 아직 소개하지 않은 것들이다.
 ++ 그러나 약간의 프로그래밍 지식이 있다면 이해하기에 별 문제가 없을 것이다.)
 -- The values returned by :func:`typemin` and :func:`typemax` are always of the
@@ -691,7 +691,7 @@
 ++ 기본 반올림 모드는 항상 :const:`RoundNearest`\ 이다.
 ++ 이는 가장 근접한 표현 가능한 값으로 반올림하되,
 ++ 만약 두 표현 가능한 값 중간에 주어진 값이 걸쳐 있으면
-++ 가수부 값중 짝수(바이너리이므로 0)로 반올림 하는 모드이다.
+++ 가수부 값 중 짝수(바이너리이므로 0)로 반올림 하는 모드이다.
 -- The default mode used is always :const:`RoundNearest`, which rounds to the nearest
 -- representable value, with ties rounded towards the nearest value with an even
 -- least significant bit.
@@ -729,7 +729,7 @@
 --   however, it is not available for free online.
 ++ - 부동소수점이 어떻게 표현되는지에 대한 간략하면서도 명쾌한 설명은
 ++   John D. Cook의 `블로그 글
-++   <http://www.johndcook.com/blog/2009/04/06/anatomy-of-a-floating-point-number/>`_
+++   <http://www.johndcook.com/blog/2009/04/06/anatomy-of-a-floating-point-number/>`_\ 
 ++   을 참고하면 된다. 같은 주제에 관하여 이와 더불어서 그의
 ++   `소개글 
 ++   <http://www.johndcook.com/blog/2009/04/06/numbers-are-a-leaky-abstraction/>`_\
@@ -743,7 +743,7 @@
 --   to some of the issues arising from how this representation differs in
 --   behavior from the idealized abstraction of real numbers.
 ++ - Bruce Dawson의 `series of blog posts on floating-point
-++   numbers <https://randomascii.wordpress.com/2012/05/20/thats-not-normalthe-performance-of-odd-floats/>`_ 도
+++   numbers <https://randomascii.wordpress.com/2012/05/20/thats-not-normalthe-performance-of-odd-floats/>`_\ 도
 ++   추천하는 바이다.
 -- - Also recommended is Bruce Dawson's `series of blog posts on floating-point
 --   numbers <https://randomascii.wordpress.com/2012/05/20/thats-not-normalthe-performance-of-odd-floats/>`_.
@@ -751,7 +751,7 @@
 ++   부동소수점 연산을 할 때 맞닥뜨릴 수 있는 수치적인 정확도에 관한 문제들에
 ++   대해서는 David Goldberg의 논문, `What Every Computer Scientist Should Know About Floating-Point
 ++   Arithmetic
-++   <http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.22.6768&rep=rep1&type=pdf>`_ 을
+++   <http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.22.6768&rep=rep1&type=pdf>`_\ 을
 ++   참고하는 것이 좋다.
 -- - For an excellent, in-depth discussion of floating-point numbers and issues of
 --   numerical accuracy encountered when computing with them, see David Goldberg's
