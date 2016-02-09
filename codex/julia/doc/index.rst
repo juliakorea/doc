@@ -45,7 +45,7 @@
    manual/embedding
    manual/packages
    manual/profile
-   manual/stackstraces
+   manual/stacktraces
    manual/performance-tips
    manual/workflow-tips
    manual/style-guide
