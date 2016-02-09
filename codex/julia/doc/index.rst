@@ -45,6 +45,7 @@
    manual/embedding
    manual/packages
    manual/profile
+   manual/stackstraces
    manual/performance-tips
    manual/workflow-tips
    manual/style-guide
@@ -79,6 +80,7 @@
    stdlib/test
    stdlib/c
    stdlib/profile
+   stdlib/stacktraces
 
 .. _devdocs:
 
