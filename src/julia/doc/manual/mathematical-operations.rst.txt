@@ -564,8 +564,8 @@
 == --------------------
 == 
 ++ Julia는 수학 함수와 연산자의 종합 콜렉션을 제공하고 있다. 이런 수학적 연산은
-++ 정수, 부동소수점 실수, 소수, 복소수, 증명되어질 수 있는 어떠한 수학적 정의 등을 포함하는
-++ 합당하게 정의되어진 수치값들을 바탕으로 정의된다.
+++ 정수, 부동소수점 실수, 유리수, 복소수를 비롯한 어떠한 합당한 수학적 정의에 의한 수에 
+++ 대해서도 정의할 수 있다.
 -- Julia provides a comprehensive collection of mathematical functions and
 -- operators. These mathematical operations are defined over as broad a
 -- class of numerical values as permit sensible definitions, including
@@ -756,7 +756,7 @@
 ++ :func:`erfc(x) <erfc>`                              상보 오차함수, 즉 큰 ``x``\ 에서의 보다 정확한 ``1-erf(x)``.
 ++ :func:`erfinv(x) <erfinv>`                          :func:`erf`\ 의 역함수
 ++ :func:`erfcinv(x) <erfinvc>`                        :func:`erfc`\ 의 역함수
-++ :func:`erfi(x) <erfi>`                              :const:`im`\ 가 허수 단위 (``√-1``)일 때, ``-im * erf(x * im)``\ 로 정의되어진 허수 오차함수
+++ :func:`erfi(x) <erfi>`                              :const:`im`\ 가 허수 단위 *i*\ 일 때, ``-im * erf(x * im)``\ 로 정의되어진 허수 오차함수
 ++ :func:`erfcx(x) <erfcx>`                            스케일링된 상보 오차함수, 즉 큰 ``x``\ 에서의 보다 정확한 ``exp(x^2) * erfc(x)``.
 ++ :func:`dawson(x) <dawson>`                          스케일링된 허수 오차함수, 다시 말해 Dawson 함수, 즉 큰 ``x``\ 에서의 보다 정확한 ``exp(-x^2) * erfi(x) * sqrt(pi) / 2``.
 
