@@ -94,23 +94,3 @@
 ==    devdocs/reflection
 ==    devdocs/julia
 ==    devdocs/C
-++ 
-++ .. _phdthesis:
-++ 
-++ ##################################
-++ Abstraction in Technical Computing
-++ ##################################
-++ 
-++ .. toctree::
-++    :maxdepth: 2
-++ 
-++    phdthesis/cover
-++    phdthesis/abstract
-++    phdthesis/contents
-++    phdthesis/chap1
-++    phdthesis/chap2
-++    phdthesis/chap3
-++    phdthesis/chap4
-++    phdthesis/chap5
-++    phdthesis/chap6
-++    phdthesis/proposal/proposal

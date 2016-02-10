@@ -3,18 +3,24 @@ push!(LOAD_PATH, "scripts")
 using Setting
 using DocUtil
 
-build_dir = is_scripts ? "../build" : "build"
+julia_doc = "julia/doc/"
 
 mkdir_if_not_exist(normpath(build_dir, "manual"))
+mkdir_if_not_exist(normpath(build_dir, "devdocs"))
 mkdir_if_not_exist(normpath(build_dir, "phdthesis"))
+mkdir_if_not_exist(normpath(build_dir, "_build/html/_static"))
 
-for file in juliadoc.files
-  src_path = get_src_path(juliadoc.name, file)
-  build_path = normpath(build_dir, file)
-  gen_rst(src_path, build_path)
+translated_files = AbstractString[]
+for item in file_items
+  path = startswith(item.path, julia_doc) ? item.path[length(julia_doc)+1:end] : item.path
+  if item.translated
+    src_path = normpath(src_dir, item.path)".txt"
+    gen_rst(src_path, normpath(build_dir, path), true)
+    push!(translated_files, path[1:end-length(".rst")])
+  else
+    codex_path = normpath(codex_dir, item.path)
+    gen_rst(codex_path, normpath(build_dir, path), false)
+  end
 end
-for file in phdthesis.files
-  src_path = get_src_path(phdthesis.name, file)
-  build_path = normpath(build_dir, phdthesis.name, file)
-  gen_rst(src_path, build_path)
-end
+
+gen_blame(translated_files, normpath(build_dir, "_build/html/_static/blame.js"))

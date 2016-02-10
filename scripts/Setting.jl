@@ -1,70 +1,43 @@
 module Setting
 
-export doc_items
-export juliadoc, phdthesis
-export get_src_path, get_codex_path, is_scripts
+export file_items
+export build_dir, src_dir, codex_dir
 
-type DocSet
-  name
-  files
+type FileItem
+  path::AbstractString
+  translated::Bool
 end
-
-type DocItem
-  codex_path
-  src_path
-end
-
-juliadoc = DocSet("julia/doc", """
-                    index.rst
-                    manual/introduction.rst
-                    manual/getting-started.rst
-                    manual/variables.rst
-                    manual/integers-and-floating-point-numbers.rst
-                    manual/mathematical-operations.rst
-                    manual/complex-and-rational-numbers.rst
-                  """ |> split)
-
-phdthesis = DocSet("phdthesis", """
-                     chap6.tex
-                   """ |> split)
 
 is_scripts = "scripts" == basename(pwd())
+build_dir = string(is_scripts ? "../" : "", "build")
+src_dir = string(is_scripts ? "../" : "", "src")
+codex_dir = string(is_scripts ? "../" : "", "codex")
 
-function get_src_path(name, file)
-  src_dir = is_scripts ? "../src" : "src"
-  extension = "txt"
-  normpath(src_dir, name, "$file.$extension")
+function walk_dir(func, root)
+  walk_dir(func, root, root)
 end
 
-
-function get_codex_path(work_path, sub, is_scripts)
-  codex_path = ""
-  if isdir(normpath(work_path, sub))
-    codex_path = work_path
-  else
-    codex_path = is_scripts ? "../codex" : "codex"
-  end
-  codex_path
-end
-
-
-function get_doc_items(sets)
-  work_path = is_scripts ? "../.." : ".."
-  codex_path = get_codex_path(work_path, juliadoc.name, is_scripts)
-
-  items = DocItem[]
-  for set in sets
-    for file in set.files
-      item = DocItem(
-        normpath(codex_path, set.name, file),
-        get_src_path(set.name, file)
-      )
-      push!(items, item)
+function walk_dir(func, root, path)
+  for name in readdir(path)
+    subpath = joinpath(path, name)
+    if isdir(subpath)
+      walk_dir(func, root, subpath)
+    else
+      func(name, subpath[length(root)+2:end])
     end
   end
-  items
 end
 
-doc_items = get_doc_items([juliadoc, phdthesis])
+function fileitems_from_codex()
+  items = FileItem[]
+  walk_dir(codex_dir) do name, path
+    src_path = joinpath(src_dir, path)".txt"
+    item = FileItem(path, isfile(src_path))
+    push!(items, item)
+  end
+  return items
+end
+
+file_items = fileitems_from_codex()
 
 end
