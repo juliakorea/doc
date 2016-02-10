@@ -1,6 +1,6 @@
+UnicodeData.txt
 _build/
+devdocs/
 index.rst
-manual/*
-stdlib/*
-phdthesis/*
-src/*
+manual/
+phdthesis/
