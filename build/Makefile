@@ -5,16 +5,15 @@ default: html
 # You can set these variables from the command line.
 SPHINXOPTS       :=
 PAPER            :=
-SRCDIR           := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-BUILDDIR         := $(abspath ../../julia/doc)
-OUT_BUILDDIR     := .
-JULIAHOME        := $(abspath $(SRCDIR)/..)
+JULIAHOME        := $(abspath ../../julia)
+BUILDDIR         := $(JULIAHOME)/doc
+SRCDIR           := .
 JULIA_EXECUTABLE := $(JULIAHOME)/usr/bin/julia
 
 # Internal variables.
 PAPEROPT_a4      := -D latex_paper_size=a4
 PAPEROPT_letter  := -D latex_paper_size=letter
-ALLSPHINXOPTS    := -d $(OUT_BUILDDIR)/_build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(SRCDIR)
+ALLSPHINXOPTS    := -d $(BUILDDIR)/_build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(SRCDIR)
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS   := $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
@@ -68,7 +67,7 @@ clean:
 cleanall: clean
 
 html: $(SPHINX_BUILD)
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(OUT_BUILDDIR)/_build/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/_build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 	cp -r _build/html/* ../../juliakorea.github.io/latest/
@@ -175,7 +174,7 @@ linkcheck: $(SPHINX_BUILD)
 	      "or in _build/linkcheck/output.txt."
 
 doctest: $(SPHINX_BUILD)
-	PATH="$(build_bindir):$(PATH)" $(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(OUT_BUILDDIR)/_build/doctest
+	PATH="$(build_bindir):$(PATH)" $(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/_build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 

@@ -616,8 +616,8 @@
 ++ :func:`mod2pi(x) <mod2pi>`   2pi에 대한 나머지;  ``0 <= mod2pi(x)  < 2pi``
 ++ :func:`divrem(x,y) <divrem>` ``(div(x,y),rem(x,y))``\ 를 반환 
 ++ :func:`fldmod(x,y) <fldmod>` ``(fld(x,y),mod(x,y))``\ 를 반환
-++ :func:`gcd(x,y...) <gcd>`    ``x``, ``y``,...\ 의 최대 공약수; ``x``\ 의 부호를 따른다.  
-++ :func:`lcm(x,y...) <lcm>`    ``x``, ``y``,...\ 의 최소 공배수; ``x``\ 의 부호를 따른다.
+++ :func:`gcd(x,y...) <gcd>`    ``x``, ``y``,...\ 의 최대 공약수
+++ :func:`lcm(x,y...) <lcm>`    ``x``, ``y``,...\ 의 최소 공배수
 -- :func:`div(x,y) <div>`       truncated division; quotient rounded towards zero
 -- :func:`fld(x,y) <fld>`       floored division; quotient rounded towards ``-Inf``
 -- :func:`cld(x,y) <cld>`       ceiling division; quotient rounded towards ``+Inf``
@@ -626,8 +626,8 @@
 -- :func:`mod2pi(x) <mod2pi>`   modulus with respect to 2pi;  ``0 <= mod2pi(x)  < 2pi``
 -- :func:`divrem(x,y) <divrem>` returns ``(div(x,y),rem(x,y))``
 -- :func:`fldmod(x,y) <fldmod>` returns ``(fld(x,y),mod(x,y))``
--- :func:`gcd(x,y...) <gcd>`    greatest common divisor of ``x``, ``y``,...; sign matches ``x``
--- :func:`lcm(x,y...) <lcm>`    least common multiple of ``x``, ``y``,...; sign matches ``x``
+-- :func:`gcd(x,y...) <gcd>`    greatest positive common divisor of ``x``, ``y``,...
+-- :func:`lcm(x,y...) <lcm>`    least positive common multiple of ``x``, ``y``,...
 == ============================ =======================================================================
 == 
 ++ 부호와 절대값 관련 함수

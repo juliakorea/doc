@@ -1029,14 +1029,18 @@ Some C libraries execute their callbacks from a different thread, and
 since Julia isn't thread-safe you'll need to take some extra
 precautions. In particular, you'll need to set up a two-layered
 system: the C callback should only *schedule* (via Julia's event loop)
-the execution of your "real" callback. To do this, you pass a function
-of one argument (the ``AsyncWork`` object for which the event was
-triggered, which you'll probably just ignore) to ``SingleAsyncWork``::
+the execution of your "real" callback.
+To do this, create a ``AsyncCondition`` object and wait on it::
 
-  cb = Base.SingleAsyncWork(data -> my_real_callback(args))
+  cond = Base.AsyncCondition()
+  wait(cond)
 
 The callback you pass to C should only execute a :func:`ccall` to
-``:uv_async_send``, passing ``cb.handle`` as the argument.
+``:uv_async_send``, passing ``cb.handle`` as the argument,
+taking care to avoid any allocations or other interactions with the Julia runtime.
+
+Note that events may be coalesced, so multiple calls to uv_async_send
+may result in a single wakeup notification to the condition.
 
 More About Callbacks
 --------------------
@@ -1049,33 +1053,3 @@ C++
 
 Limited support for C++ is provided by the `Cpp <https://github.com/timholy/Cpp.jl>`_,
 `Clang <https://github.com/ihnorton/Clang.jl>`_, and `Cxx <https://github.com/Keno/Cxx.jl>`_ packages.
-
-Handling Operating System Variation
------------------------------------
-
-When dealing with platform libraries, it is often necessary to provide special cases
-for various platforms. The variable ``OS_NAME`` can be used to write these special
-cases. Additionally, there are several macros intended to make this easier:
-``@windows``, ``@unix``, ``@linux``, and ``@osx``. Note that ``@linux`` and ``@osx`` are mutually
-exclusive subsets of ``@unix``. Their usage takes the form of a ternary conditional
-operator, as demonstrated in the following examples.
-
-Simple blocks::
-
-    ccall( (@windows? :_fopen : :fopen), ...)
-
-Complex blocks::
-
-    @linux? (
-             begin
-                 some_complicated_thing(a)
-             end
-           : begin
-                 some_different_thing(a)
-             end
-           )
-
-Chaining (parentheses optional, but recommended for readability)::
-
-    @windows? :a : (@osx? :b : :c)
-

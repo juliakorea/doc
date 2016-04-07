@@ -42,3 +42,4 @@ Sphinx extensions and theme
 The extensions to Sphinx and the theme are in the
 https://github.com/JuliaLang/JuliaDoc repository, and can also be used to style
 package documentation.
+

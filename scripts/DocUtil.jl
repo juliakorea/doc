@@ -41,6 +41,7 @@ end
 
 
 function gen_rst(src_path, build_path, translated)
+  #println("gen_rst: ", src_path, " ", build_path, " ", translated)
   out = open(build_path, "w")
   txt = open(readstring, src_path)
 
