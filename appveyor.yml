@@ -18,4 +18,4 @@ build_script:
   - C:\projects\julia\bin\julia -e "versioninfo()"
 
 test_script:
-  - C:\projects\julia\bin\julia --color=yes scripts/DiffHead.jl
+  - C:\projects\julia\bin\julia --color=yes test/runtests.jl
