@@ -3,8 +3,7 @@ using Base.Test
 push!(LOAD_PATH, "../scripts")
 push!(LOAD_PATH, "scripts")
 
-using Setting
-using DocUtil
+include("../scripts/translate.jl")
 
 codex_path = "codex/julia/doc/manual/getting-started.rst"
 src_path = "src/julia/doc/manual/getting-started.rst.txt"
