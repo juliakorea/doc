@@ -333,6 +333,8 @@ the zero or more values passed to ``bar`` after its first two arguments:
 In all these cases, ``x`` is bound to a tuple of the trailing values
 passed to ``bar``.
 
+It is possible to constrain the number of values passed as a variable argument; this will be discussed later in :ref:`man-vararg-fixedlen`.
+
 On the flip side, it is often handy to "splice" the values contained in
 an iterable collection into a function call as individual arguments. To
 do this, one also uses ``...`` but in the function call instead:
@@ -522,7 +524,7 @@ are evaluated. For example, given this definition::
 the ``b`` in ``a=b`` refers to a ``b`` in an outer scope, not the
 subsequent argument ``b``. However, if ``a`` and ``b`` were keyword
 arguments instead, then both would be created in the same scope and
-the ``b`` in ``a=b`` would refer the the subsequent argument ``b``
+the ``b`` in ``a=b`` would refer to the subsequent argument ``b``
 (shadowing any ``b`` in an outer scope), which would result in an
 undefined variable error (since the default expressions are evaluated
 left-to-right, and ``b`` has not been assigned yet).
@@ -591,16 +593,47 @@ This is accomplished by the following definition::
         end
     end
 
-In contrast to the :func:`map` example, here ``io`` is initialized by the
-*result* of ``open("outfile", "w")``.  The stream is then passed to
-your anonymous function, which performs the writing; finally, the
-:func:`open` function ensures that the stream is closed after your
-function exits.  The ``try/finally`` construct will be described in
-:ref:`man-control-flow`.
+Here, :func:`open` first opens the file for writing and then passes
+the resulting output stream to the anonymous function you defined
+in the ``do ... end`` block. After your function exits, :func:`open`
+will make sure that the stream is properly closed, regardless of
+whether your function exited normally or threw an exception.
+(The ``try/finally`` construct will be described in
+:ref:`man-control-flow`.)
 
 With the ``do`` block syntax, it helps to check the documentation or
 implementation to know how the arguments of the user function are
 initialized.
+
+.. _man-dot-vectorizing:
+
+Dot Syntax for Vectorizing Functions
+------------------------------------
+
+In technical-computing languages, it is common to have "vectorized" versions of
+functions, which simply apply a given function ``f(x)`` to each element of an
+array ``A`` to yield a new array via ``f(A)``.   This kind of syntax is
+convenient for data processing, but in other languages vectorization is also
+often required for performance: if loops are slow, the "vectorized" version of a
+function can call fast library code written in a low-level language.   In Julia,
+vectorized functions are *not* required for performance, and indeed it is often
+beneficial to write your own loops (:ref:`man-performance-tips`:), but they can
+still be convenient.  Therefore, *any* Julia function ``f`` can be applied
+elementwise to any array (or other collection) with the syntax ``f.(A)``.
+
+Of course, you can omit the dot if you write a specialized "vector" method
+of ``f``, e.g. via ``f(A::AbstractArray) = map(f, A)``, and this is just
+as efficient as ``f.(A)``.   But that approach requires you to decide in advance
+which functions you want to vectorize.
+
+More generally, ``f.(args...)`` is actually equivalent to
+``broadcast(f, args...)``, which allows you to operate on multiple
+arrays (even of different shapes), or a mix of arrays and scalars
+(:ref:`man-broadcasting`:).   For example, if you have ``f(x,y) = 3x + 4y``,
+then ``f.(pi,A)`` will return a new array consisting of ``f(pi,a)`` for each
+``a`` in ``A``, and ``f.(vector1,vector2)`` will return a new vector
+consisting of ``f(vector1[i],vector2[i])`` for each index ``i``
+(throwing an exception if the vectors have different length).
 
 Further Reading
 ---------------

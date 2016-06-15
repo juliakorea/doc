@@ -153,7 +153,7 @@ General Parallel Computing Support
 
    .. Docstring generated from Julia source
 
-   Equivalent to ``addprocs(CPU_CORES)``
+   Equivalent to ``addprocs(Sys.CPU_CORES)``
 
    Note that workers do not run a ``.juliarc.jl`` startup script, nor do they synchronize their global state (such as global variables, new method definitions, and loaded modules) with any of the other running processes.
 
@@ -235,6 +235,18 @@ General Parallel Computing Support
 
    Returns a list of all worker process identifiers.
 
+.. function:: default_worker_pool()
+
+   .. Docstring generated from Julia source
+
+   WorkerPool containing idle ``workers()`` (used by ``remote(f)``\ ).
+
+.. function:: WorkerPool(workers)
+
+   .. Docstring generated from Julia source
+
+   Create a WorkerPool from a vector of worker ids.
+
 .. function:: rmprocs(pids...)
 
    .. Docstring generated from Julia source
@@ -253,19 +265,45 @@ General Parallel Computing Support
 
    Get the id of the current process.
 
-.. function:: pmap(f, lsts...; err_retry=true, err_stop=false, pids=workers())
+.. function:: asyncmap(f, c...) -> collection
 
    .. Docstring generated from Julia source
 
-   Transform collections ``lsts`` by applying ``f`` to each element in parallel. (Note that ``f`` must be made available to all worker processes; see :ref:`Code Availability and Loading Packages <man-parallel-computing-code-availability>` for details.) If ``nprocs() > 1``\ , the calling process will be dedicated to assigning tasks. All other available processes will be used as parallel workers, or on the processes specified by ``pids``\ .
+   Transform collection ``c`` by applying ``@async f`` to each element.
 
-   If ``err_retry`` is ``true``\ , it retries a failed application of ``f`` on a different worker. If ``err_stop`` is ``true``\ , it takes precedence over the value of ``err_retry`` and ``pmap`` stops execution on the first error.
+   For multiple collection arguments, apply f elementwise.
 
-.. function:: remotecall(func, id, args...)
+.. function:: pmap([::WorkerPool], f, c...; distributed=true, batch_size=1, on_error=nothing, retry_n=0, retry_max_delay=DEFAULT_RETRY_MAX_DELAY, retry_on=DEFAULT_RETRY_ON) -> collection
 
    .. Docstring generated from Julia source
 
-   Call a function asynchronously on the given arguments on the specified process. Returns a ``Future``\ .
+   Transform collection ``c`` by applying ``f`` to each element using available workers and tasks.
+
+   For multiple collection arguments, apply f elementwise.
+
+   Note that ``f`` must be made available to all worker processes; see :ref:`Code Availability and Loading Packages <man-parallel-computing-code-availability>` for details.
+
+   If a worker pool is not specified, all available workers, i.e., the default worker pool is used.
+
+   By default, ``pmap`` distributes the computation over all specified workers. To use only the local process and distribute over tasks, specify ``distributed=false``\ . This is equivalent to ``asyncmap``\ .
+
+   ``pmap`` can also use a mix of processes and tasks via the ``batch_size`` argument. For batch sizes greater than 1, the collection is split into multiple batches, which are distributed across workers. Each such batch is processed in parallel via tasks in each worker. The specified ``batch_size`` is an upper limit, the actual size of batches may be smaller and is calculated depending on the number of workers available and length of the collection.
+
+   Any error stops pmap from processing the remainder of the collection. To override this behavior you can specify an error handling function via argument ``on_error`` which takes in a single argument, i.e., the exception. The function can stop the processing by rethrowing the error, or, to continue, return any value which is then returned inline with the results to the caller.
+
+   Failed computation can also be retried via ``retry_on``\ , ``retry_n``\ , ``retry_max_delay``\ , which are passed through to ``retry`` as arguments ``retry_on``\ , ``n`` and ``max_delay`` respectively. If batching is specified, and an entire batch fails, all items in the batch are retried.
+
+   The following are equivalent:
+
+   * ``pmap(f, c; distributed=false)`` and ``asyncmap(f,c)``
+   * ``pmap(f, c; retry_n=1)`` and ``asyncmap(retry(remote(f)),c)``
+   * ``pmap(f, c; retry_n=1, on_error=e->e)`` and ``asyncmap(x->try retry(remote(f))(x) catch e; e end, c)``
+
+.. function:: remotecall(func, id, args...; kwargs...)
+
+   .. Docstring generated from Julia source
+
+   Call a function asynchronously on the given arguments on the specified process. Returns a ``Future``\ . Keyword arguments, if any, are passed through to ``func``\ .
 
 .. function:: Future()
 
@@ -327,19 +365,25 @@ General Parallel Computing Support
    * ``RemoteChannel``\ : Wait for and get the value of a remote reference. Exceptions raised are   same as for a ``Future`` .
    * ``Channel`` : Wait for and get the first available item from the channel.
 
-.. function:: remotecall_wait(func, id, args...)
+.. function:: remotecall_wait(func, id, args...; kwargs...)
 
    .. Docstring generated from Julia source
 
-   Perform ``wait(remotecall(...))`` in one message.
+   Perform ``wait(remotecall(...))`` in one message. Keyword arguments, if any, are passed through to ``func``\ .
 
-.. function:: remotecall_fetch(func, id, args...)
+.. function:: remotecall_fetch(func, id, args...; kwargs...)
 
    .. Docstring generated from Julia source
 
-   Perform ``fetch(remotecall(...))`` in one message. Any remote exceptions are captured in a ``RemoteException`` and thrown.
+   Perform ``fetch(remotecall(...))`` in one message.  Keyword arguments, if any, are passed through to ``func``\ . Any remote exceptions are captured in a ``RemoteException`` and thrown.
 
-.. function:: remote(f)
+.. function:: remotecall_fetch(f, pool::WorkerPool, args...; kwargs...)
+
+   .. Docstring generated from Julia source
+
+   Call ``f(args...; kwargs...)`` on one of the workers in ``pool``\ . Waits for completion and returns the result.
+
+.. function:: remote([::WorkerPool], f) -> Function
 
    .. Docstring generated from Julia source
 
@@ -472,7 +516,20 @@ General Parallel Computing Support
 
    .. Docstring generated from Julia source
 
-   Execute an expression on all processes. Errors on any of the processes are collected into a ``CompositeException`` and thrown.
+   Execute an expression on all processes. Errors on any of the processes are collected into a ``CompositeException`` and thrown. For example :
+
+   .. code-block:: julia
+
+       @everywhere bar=1
+
+   will define ``bar`` under module ``Main`` on all processes.
+
+   Unlike ``@spawn`` and ``@spawnat``\ , ``@everywhere`` does not capture any local variables. Prefixing ``@everywhere`` with ``@eval`` allows us to broadcast local variables using interpolation :
+
+   .. code-block:: julia
+
+       foo = 1
+       @eval @everywhere bar=$foo
 
 .. function:: Base.remoteref_id(r::AbstractRemoteRef) -> (whence, id)
 
@@ -491,6 +548,12 @@ General Parallel Computing Support
    .. Docstring generated from Julia source
 
    A low-level API which given a ``IO`` connection, returns the pid of the worker it is connected to. This is useful when writing custom ``serialize`` methods for a type, which optimizes the data written out depending on the receiving process id.
+
+.. function:: Base.cluster_cookie([cookie]) -> cookie
+
+   .. Docstring generated from Julia source
+
+   Returns the cluster cookie. If a cookie is passed, also sets it as the cluster cookie.
 
 Shared Arrays
 -------------

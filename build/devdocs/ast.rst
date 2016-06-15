@@ -30,12 +30,20 @@ The following data types exist in lowered form:
 
 ``Slot``
     identifies arguments and local variables by consecutive numbering.
+    ``Slot`` is an abstract type with subtypes ``SlotNumber`` and ``TypedSlot``.
+    Both types have an integer-valued ``id`` field giving the slot index.
+    Most slots have the same type at all uses, and so are represented with
+    ``SlotNumber``. The types of these slots are found in the ``slottypes``
+    field of their ``LambdaInfo`` object.
+    Slots that require per-use type annotations are represented with
+    ``TypedSlot``, which has a ``typ`` field.
 
 ``LambdaInfo``
     wraps the IR of each method.
 
 ``LineNumberNode``
-    line number metadata
+    contains a single number, specifying the line number the next statement
+    came from.
 
 ``LabelNode``
     branch target, a consecutively-numbered integer starting at 0
@@ -51,11 +59,7 @@ The following data types exist in lowered form:
 ``GlobalRef``
     refers to global variable ``name`` in module ``mod``
 
-``TopNode``
-    forces a name to be resolved as a global in Base. This is now mostly
-    redundant with ``GlobalRef(Base, :x)``.
-
-``GenSym``
+``SSAValue``
     refers to a consecutively-numbered (starting at 0) static single assignment
     (SSA) variable inserted by the compiler.
 
@@ -171,9 +175,17 @@ These symbols appear in the ``head`` field of ``Expr``\s in lowered form.
     AST that is simply copied recursively and returned at run time.
 
 ``meta``
-    metadata. Currently used for inlining hints, represented by the symbols
-    ``:inline`` and ``:noinline``.
+    metadata. ``args[1]`` is typically a symbol specifying the kind of metadata,
+    and the rest of the arguments are free-form. The following kinds of metadata
+    are commonly used:
 
+    ``:inline`` and ``:noinline``: Inlining hints.
+
+    ``:push_loc``: enters a sequence of statements from a specified source location.
+      - ``args[2]`` specifies a filename, as a symbol.
+      - ``args[3]`` optionally specifies the name of an (inlined) function that originally contained the code.
+
+    ``:pop_loc``: returns to the source location before the matching ``:push_loc``.
 
 LambdaInfo
 ~~~~~~~~~~
@@ -196,7 +208,7 @@ LambdaInfo
     - 16 - statically assigned once
     - 32 - might be used before assigned. This flag is only valid after type inference.
 
-``gensymtypes`` - Either an array or an Int giving the number of compiler-inserted
+``ssavaluetypes`` - Either an array or an Int giving the number of compiler-inserted
     temporary locations in the function. If an array, specifies a type for each location.
 
 ``nargs`` - The number of argument slots. The first ``nargs`` entries of the slots
@@ -284,8 +296,6 @@ a{b;c}                   (curly a (parameters c) b)
 [x y; z t]               (vcat (row x y) (row z t))
 [x for y in z, a in b]   (comprehension x (= y z) (= a b))
 T[x for y in z]          (typed_comprehension T x (= y z))
-[a=>b for x in y]        (dict_comprehension (=> a b) (= x y))
-(k=>v)[a=>b for x in y]  (typed_dict_comprehension (=> k v) (=> a b) (= x y))
 (a, b, c)                (tuple a b c)
 (a; b; c)                (block a (block b c))
 =======================  ====================================

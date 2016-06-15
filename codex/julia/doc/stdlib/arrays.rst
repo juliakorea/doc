@@ -19,7 +19,7 @@ Basic functions
 
    .. Docstring generated from Julia source
 
-   Returns a tuple containing the dimensions of ``A``\ . Optionally you can specify the dimension(s) you want the length of, and get the length of that dimension, or a tuple of the lengths of dimensions you asked for.:
+   Returns a tuple containing the dimensions of ``A``\ . Optionally you can specify the dimension(s) you want the length of, and get the length of that dimension, or a tuple of the lengths of dimensions you asked for.
 
    .. code-block:: julia
 
@@ -31,11 +31,29 @@ Basic functions
        julia> size(A,3,2)
        (4,3)
 
-.. function:: iseltype(A,T)
+.. function:: indices(A)
 
    .. Docstring generated from Julia source
 
-   Tests whether ``A`` or its elements are of type ``T``\ .
+   Returns the tuple of valid indices for array ``A``\ .
+
+.. function:: indices(A, d)
+
+   .. Docstring generated from Julia source
+
+   Returns the valid range of indices for array ``A`` along dimension ``d``\ .
+
+.. function:: shape(A)
+
+   .. Docstring generated from Julia source
+
+   Returns a tuple specifying the "shape" of array ``A``\ . For arrays with conventional indexing (indices start at 1), this is equivalent to ``size(A)``\ ; otherwise it is equivalent to ``incides(A)``\ .
+
+.. function:: shape(A, d)
+
+   .. Docstring generated from Julia source
+
+   Specifies the "shape" of the array ``A`` along dimension ``d``\ . For arrays with conventional indexing (starting at 1), this is equivalent to ``size(A, d)``\ ; for arrays with unconventional indexing (indexing may start at something different from 1), it is equivalent to ``indices(A, d)``\ .
 
 .. function:: length(A) -> Integer
 
@@ -54,7 +72,7 @@ Basic functions
    .. doctest::
 
        julia> A = sparse([1, 1, 2], [1, 3, 1], [1, 2, -5])
-       2x3 sparse matrix with 3 Int64 entries:
+       2×3 sparse matrix with 3 Int64 nonzero entries:
                [1, 1]  =  1
                [2, 1]  =  -5
                [1, 3]  =  2
@@ -77,6 +95,14 @@ Basic functions
        A[iter] = 0
 
    If you supply more than one ``AbstractArray`` argument, ``eachindex`` will create an iterable object that is fast for all arguments (a ``UnitRange`` if all inputs have fast linear indexing, a CartesianRange otherwise).  If the arrays have different sizes and/or dimensionalities, ``eachindex`` returns an iterable that spans the largest range along each dimension.
+
+.. function:: linearindices(A)
+
+   .. Docstring generated from Julia source
+
+   Returns a ``UnitRange`` specifying the valid range of indices for ``A[i]`` where ``i`` is an ``Int``\ . For arrays with conventional indexing (indices start at 1), or any multidimensional array, this is ``1:length(A)``\ ; however, for one-dimensional arrays with unconventional indices, this is ``indices(A, 1)``\ .
+
+   Calling this function is the "safe" way to write algorithms that exploit linear indexing.
 
 .. function:: Base.linearindexing(A)
 
@@ -155,12 +181,6 @@ Constructors
 
    Construct a 1-d array of the specified type. This is usually called with the syntax ``Type[]``\ . Element values can be specified using ``Type[a,b,c,...]``\ .
 
-.. function:: cell(dims)
-
-   .. Docstring generated from Julia source
-
-   Construct an uninitialized cell array (heterogeneous array). ``dims`` can be either a tuple or a series of integer arguments.
-
 .. function:: zeros(type, dims)
 
    .. Docstring generated from Julia source
@@ -191,17 +211,29 @@ Constructors
 
    Create a ``BitArray`` with all values set to ``true``\ .
 
+.. function:: trues(A)
+
+   .. Docstring generated from Julia source
+
+   Create a ``BitArray`` with all values set to ``true`` of the same shape as ``A``\ .
+
 .. function:: falses(dims)
 
    .. Docstring generated from Julia source
 
    Create a ``BitArray`` with all values set to ``false``\ .
 
+.. function:: falses(A)
+
+   .. Docstring generated from Julia source
+
+   Create a ``BitArray`` with all values set to ``false`` of the same shape as ``A``\ .
+
 .. function:: fill(x, dims)
 
    .. Docstring generated from Julia source
 
-   Create an array filled with the value ``x``\ . For example, ``fill(1.0, (10,10))`` returns a 10x10 array of floats, with each element initialized to ``1.0``\ .
+   Create an array filled with the value ``x``\ . For example, ``fill(1.0, (10,10))`` returns a 10×10 array of floats, with each element initialized to ``1.0``\ .
 
    If ``x`` is an object reference, all elements will refer to the same object. ``fill(Foo(), dims)`` will return an array filled with the result of evaluating ``Foo()`` once.
 
@@ -215,7 +247,7 @@ Constructors
 
    .. Docstring generated from Julia source
 
-   Create an array with the same data as the given array, but with different dimensions. An implementation for a particular type of array may choose whether the data is copied or shared.
+   Create an array with the same data as the given array, but with different dimensions.
 
 .. function:: similar(array, [element_type=eltype(array)], [dims=size(array)])
 
@@ -223,14 +255,14 @@ Constructors
 
    Create an uninitialized mutable array with the given element type and size, based upon the given source array. The second and third arguments are both optional, defaulting to the given array's ``eltype`` and ``size``\ . The dimensions may be specified either as a single tuple argument or as a series of integer arguments.
 
-   Custom AbstractArray subtypes may choose which specific array type is best-suited to return for the given element type and dimensionality. If they do not specialize this method, the default is an ``Array(element_type, dims...)``\ .
+   Custom AbstractArray subtypes may choose which specific array type is best-suited to return for the given element type and dimensionality. If they do not specialize this method, the default is an ``Array{element_type}(dims...)``\ .
 
    For example, ``similar(1:10, 1, 4)`` returns an uninitialized ``Array{Int,2}`` since ranges are neither mutable nor support 2 dimensions:
 
    .. code-block:: julia
 
        julia> similar(1:10, 1, 4)
-       1x4 Array{Int64,2}:
+       1×4 Array{Int64,2}:
         4419743872  4374413872  4419743888  0
 
    Conversely, ``similar(trues(10,10), 2)`` returns an uninitialized ``BitVector`` with two elements since ``BitArray``\ s are both mutable and can support 1-dimensional arrays:
@@ -247,9 +279,35 @@ Constructors
    .. code-block:: julia
 
        julia> similar(falses(10), Float64, 2, 4)
-       2x4 Array{Float64,2}:
+       2×4 Array{Float64,2}:
         2.18425e-314  2.18425e-314  2.18425e-314  2.18425e-314
         2.18425e-314  2.18425e-314  2.18425e-314  2.18425e-314
+
+   See also ``allocate_for``\ .
+
+.. function:: allocate_for(storagetype, referencearray, [shape])
+
+   .. Docstring generated from Julia source
+
+   Create an uninitialized mutable array analogous to that specified by ``storagetype``\ , but with type and shape specified by the final two arguments. The main purpose of this function is to support allocation of arrays that may have unconventional indexing (starting at other than 1), as determined by ``referencearray`` and the optional ``shape`` information.
+
+   .. code-block:: julia
+
+       **Examples**:
+
+       allocate_for(Array{Int}, A)
+
+   creates an array that "acts like" an ``Array{Int}`` (and might indeed be backed by one), but which is indexed identically to ``A``\ . If ``A`` has conventional indexing, this will likely just call ``Array{Int}(size(A))``\ , but if ``A`` has unconventional indexing then the indices of the result will match ``A``\ .
+
+   .. code-block:: julia
+
+       allocate_for(BitArray, A, (shape(A, 2),))
+
+   would create a 1-dimensional logical array whose indices match those of the columns of ``A``\ .
+
+   The main purpose of the ``referencearray`` argument is to select a particular array type supporting unconventional indexing (as it is possible that several different ones will be simultaneously in use).
+
+   See also ``similar``\ .
 
 .. function:: reinterpret(type, A)
 
@@ -309,18 +367,6 @@ All mathematical operations and functions are supported for arrays
    .. Docstring generated from Julia source
 
    Like ``broadcast``\ , but allocates a ``BitArray`` to store the result, rather then an ``Array``\ .
-
-.. function:: broadcast_function(f)
-
-   .. Docstring generated from Julia source
-
-   Returns a function ``broadcast_f`` such that ``broadcast_function(f)(As...) === broadcast(f, As...)``\ . Most useful in the form ``const broadcast_f = broadcast_function(f)``\ .
-
-.. function:: broadcast!_function(f)
-
-   .. Docstring generated from Julia source
-
-   Like ``broadcast_function``\ , but for ``broadcast!``\ .
 
 Indexing, Assignment, and Concatenation
 ---------------------------------------
@@ -409,23 +455,23 @@ Indexing, Assignment, and Concatenation
        (1,2,3,4,5,6)
 
        julia> [a b c; d e f]
-       2x3 Array{Int64,2}:
+       2×3 Array{Int64,2}:
         1  2  3
         4  5  6
 
        julia> hvcat((3,3), a,b,c,d,e,f)
-       2x3 Array{Int64,2}:
+       2×3 Array{Int64,2}:
         1  2  3
         4  5  6
 
        julia> [a b;c d; e f]
-       3x2 Array{Int64,2}:
+       3×2 Array{Int64,2}:
         1  2
         3  4
         5  6
 
        julia> hvcat((2,2,2), a,b,c,d,e,f)
-       3x2 Array{Int64,2}:
+       3×2 Array{Int64,2}:
         1  2
         3  4
         5  6
@@ -580,13 +626,19 @@ Indexing, Assignment, and Concatenation
 
    .. Docstring generated from Julia source
 
-   Throw an error if the specified indexes are not in bounds for the given array. Subtypes of ``AbstractArray`` should specialize this method if they need to provide custom bounds checking behaviors.
+   Throw an error if the specified ``indexes`` are not in bounds for the given ``array``\ .
 
-.. function:: checkbounds(::Type{Bool}, dimlength::Integer, index)
+.. function:: checkbounds(Bool, array, indexes...)
 
    .. Docstring generated from Julia source
 
-   Return a ``Bool`` describing if the given index is within the bounds of the given dimension length. Custom types that would like to behave as indices for all arrays can extend this method in order to provide a specialized bounds checking implementation.
+   Return ``true`` if the specified ``indexes`` are in bounds for the given ``array``\ . Subtypes of ``AbstractArray`` should specialize this method if they need to provide custom bounds checking behaviors.
+
+.. function:: checkindex(Bool, inds::UnitRange, index)
+
+   .. Docstring generated from Julia source
+
+   Return ``true`` if the given ``index`` is within the bounds of ``inds``\ . Custom types that would like to behave as indices for all arrays can extend this method in order to provide a specialized bounds checking implementation.
 
 .. function:: randsubseq(A, p) -> Vector
 
@@ -726,7 +778,7 @@ Combinatorics
 
    .. Docstring generated from Julia source
 
-   Construct a random permutation of length ``n``\ . The optional ``rng`` argument specifies a random number generator, see :ref:`Random Numbers <random-numbers>`\ .
+   Construct a random permutation of length ``n``\ . The optional ``rng`` argument specifies a random number generator (see :ref:`Random Numbers <random-numbers>`\ ). To randomly permute a arbitrary vector, see :func:`shuffle` or :func:`shuffle!`\ .
 
 .. function:: invperm(v)
 
@@ -764,13 +816,13 @@ Combinatorics
 
    .. Docstring generated from Julia source
 
-   Return a randomly permuted copy of ``v``\ . The optional ``rng`` argument specifies a random number generator, see :ref:`Random Numbers <random-numbers>`\ .
+   Return a randomly permuted copy of ``v``\ . The optional ``rng`` argument specifies a random number generator (see :ref:`Random Numbers <random-numbers>`\ ). To permute ``v`` in-place, see :func:`shuffle!`\ .  To obtain randomly permuted indices, see :func:`randperm`\ .
 
 .. function:: shuffle!([rng,] v)
 
    .. Docstring generated from Julia source
 
-   In-place version of :func:`shuffle`\ .
+   In-place version of :func:`shuffle`\ : randomly permute the array ``v`` in-place, optionally supplying the random-number generator ``rng``\ .
 
 .. function:: reverse(v [, start=1 [, stop=length(v) ]] )
 
@@ -793,17 +845,10 @@ Combinatorics
 BitArrays
 ---------
 
-.. function:: bitpack(A::AbstractArray{T,N}) -> BitArray
-
-   .. Docstring generated from Julia source
-
-   Converts a numeric array to a packed boolean array.
-
-.. function:: bitunpack(B::BitArray{N}) -> Array{Bool,N}
-
-   .. Docstring generated from Julia source
-
-   Converts a packed boolean array to an array of booleans.
+BitArrays are space-efficient "packed" boolean arrays, which store
+one bit per boolean value.  They can be used similarly to ``Array{Bool}``
+arrays (which store one byte per boolean value), and can be converted
+to/from the latter via ``Array(bitarray)`` and ``BitArray(array)``, respectively.
 
 .. function:: flipbits!(B::BitArray{N}) -> BitArray{N}
 
@@ -935,23 +980,17 @@ dense counterparts. The following functions are specific to sparse arrays.
 
    Construct a sparse diagonal matrix. ``B`` is a tuple of vectors containing the diagonals and ``d`` is a tuple containing the positions of the diagonals. In the case the input contains only one diagonal, ``B`` can be a vector (instead of a tuple) and ``d`` can be the diagonal position (instead of a tuple), defaulting to 0 (diagonal). Optionally, ``m`` and ``n`` specify the size of the resulting sparse matrix.
 
-.. function:: sprand([rng],m,[n],p::AbstractFloat,[rfn])
+.. function:: sprand([rng],[type],m,[n],p::AbstractFloat,[rfn])
 
    .. Docstring generated from Julia source
 
-   Create a random length ``m`` sparse vector or ``m`` by ``n`` sparse matrix, in which the probability of any element being nonzero is independently given by ``p`` (and hence the mean density of nonzeros is also exactly ``p``\ ). Nonzero values are sampled from the distribution specified by ``rfn``\ . The uniform distribution is used in case ``rfn`` is not specified. The optional ``rng`` argument specifies a random number generator, see :ref:`Random Numbers <random-numbers>`\ .
+   Create a random length ``m`` sparse vector or ``m`` by ``n`` sparse matrix, in which the probability of any element being nonzero is independently given by ``p`` (and hence the mean density of nonzeros is also exactly ``p``\ ). Nonzero values are sampled from the distribution specified by ``rfn`` and have the type ``type``\ . The uniform distribution is used in case ``rfn`` is not specified. The optional ``rng`` argument specifies a random number generator, see :ref:`Random Numbers <random-numbers>`\ .
 
-.. function:: sprandn(m[,n],p::AbstractFloat)
-
-   .. Docstring generated from Julia source
-
-   Create a random sparse vector of length ``m`` or sparse matrix of size ``m`` by ``n`` with the specified (independent) probability ``p`` of any entry being nonzero, where nonzero values are sampled from the normal distribution.
-
-.. function:: sprandbool(m[,n],p)
+.. function:: sprandn([rng], m[,n],p::AbstractFloat)
 
    .. Docstring generated from Julia source
 
-   Create a random ``m`` by ``n`` sparse boolean matrix or length ``m`` sparse boolean vector with the specified (independent) probability ``p`` of any entry being ``true``\ .
+   Create a random sparse vector of length ``m`` or sparse matrix of size ``m`` by ``n`` with the specified (independent) probability ``p`` of any entry being nonzero, where nonzero values are sampled from the normal distribution. The optional ``rng`` argument specifies a random number generator, see :ref:`Random Numbers <random-numbers>`\ .
 
 .. function:: etree(A[, post])
 

@@ -21,7 +21,6 @@ taking the stream as their first argument, e.g.::
 
     julia> write(STDOUT,"Hello World");  # suppress return value 11 with ;
     Hello World
-
     julia> read(STDIN,Char)
 
     '\n'
@@ -105,7 +104,7 @@ the difference between the two)::
 IO Output Contextual Properties
 -------------------------------
 
-Sometimes IO output can benefit from the ability to pass contextual information into show methods. The ``IOContext`` object provides this framework for associating arbitrary metadata with an IO object. For example, ``showlimited`` adds a hinting parameter to the IO object that the invoked show method should print a shorter output (if applicable).
+Sometimes IO output can benefit from the ability to pass contextual information into show methods. The ``IOContext`` object provides this framework for associating arbitrary metadata with an IO object. For example, ``showcompact`` adds a hinting parameter to the IO object that the invoked show method should print a shorter output (if applicable).
 
 Working with Files
 ------------------
@@ -118,7 +117,7 @@ are ``Hello, World!``::
     IOStream(<file hello.txt>)
 
     julia> readlines(f)
-    1-element Array{Union{ASCIIString,UTF8String},1}:
+    1-element Array{String,1}:
      "Hello, World!\n"
 
 If you want to write to a file, you can open it with the write (``"w"``) flag::
@@ -173,7 +172,7 @@ Let's jump right in with a simple example involving TCP sockets. Let's first cre
                println("Hello World\n")
              end
            end
-    Task
+    Task (runnable) @0x00007fd31dc11ae0
 
     julia>
 
@@ -230,7 +229,7 @@ A great strength of Julia is that since the API is exposed synchronously even th
                end
              end
            end
-    Task
+    Task (runnable) @0x00007fd31dc12e60
 
     julia> clientside=connect(2001)
     TCPSocket(open, 0 bytes waiting)
@@ -238,10 +237,11 @@ A great strength of Julia is that since the API is exposed synchronously even th
     julia> @async while true
               write(STDOUT,readline(clientside))
            end
+    Task (runnable) @0x00007fd31dc11870
 
     julia> println(clientside,"Hello World from the Echo Server")
+    Hello World from the Echo Server
 
-    julia> Hello World from the Echo Server
 
 As with other streams, use :func:`close` to disconnect the socket::
 
@@ -250,7 +250,7 @@ As with other streams, use :func:`close` to disconnect the socket::
 Resolving IP Addresses
 ----------------------
 
-One of the :func:`connect` methods that does not follow the :func:`listen` methods is ``connect(host::ASCIIString,port)``, which will attempt to connect to the host
+One of the :func:`connect` methods that does not follow the :func:`listen` methods is ``connect(host::String,port)``, which will attempt to connect to the host
 given by the ``host`` parameter on the port given by the port parameter. It
 allows you to do things like::
 

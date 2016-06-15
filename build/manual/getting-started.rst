@@ -133,15 +133,10 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
      --compilecache={yes|no}   모듈의 사전 증분 컴파일을 활성화/비활성화
      -H, --home <dir>          Julia 실행파일의 위치를 지정한다
      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
-     -f, --no-startup          ~/.juliarc를 불러오지 않는다
-                               (조만간 폐기됨, --startup-file=no를 사용하는 것이 좋다)
-     -F                        ~/.juliarc를 불러온다.
-                               (조만간 폐기됨, --startup-file=yes를 사용하는 것이 좋다)
      --handle-signals={yes|no} Julia의 기본 시그널 핸들러의 작동을 켜거나 끈다
 
      -e, --eval <expr>         <expr>를 실행만 한다
      -E, --print <expr>        <expr>를 실행하고 표시한다
-     -P, --post-boot <expr>    <expr>를 실행하되, 대화형 실행환경을 유지한다 (조만간 폐기됨, 대신 -i -e를 사용)
      -L, --load <file>         <file>을 모든 프로세서에 로드한다
 
      -p, --procs {N|auto}      N개의 추가 worker 프로세스를 생성한다
@@ -152,12 +147,10 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
      -q, --quiet               시작할 때 배너를 재거한다
      --color={yes|no}          모든 텍스트에 색상을 표시하거나 표시하지 않는다
      --history-file={yes|no}   작업내역을 저장하거나 로드한다
-     --no-history-file         히스토리 파일을 로드하지 않는다
-                               (조만간 폐기됨, --history-file=no을 사용하는 것이 좋다)
 
-     --compile={yes|no|all}    컴파일러를 활성화거나 비활성화한다. 혹은 전체 컴파일을 요청한다
+     --compile={yes|no|all|min}컴파일러를 활성화거나 비활성화한다. 혹은 전체 컴파일을 요청한다
      -C, --cpu-target <target> <target>까지의 CPU기능만을 사용한다
-     -O, --optimize            코드 실행시간에 관련된 최적화를 실행한다
+     -O, --optimize={0,1,2,3}  코드 실행시간에 관련된 최적화를 실행한다 (지정되지 않을 경우 2단계 실행, -O라고 지정할 경우 3단계 실행)
      --inline={yes|no}         inlining을 허용할지 결정한다 (@inline로 선언된 함수를 덮어쓴다)
      --check-bounds={yes|no}   배열의 경계 체크를 항상 생략하거나 실행한다 (변수 선언을 무시)
      --math-mode={ieee|user}   IEEE 부동소수점 표준을 쓰거나 (변수 선언을 무시)
@@ -169,13 +162,13 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
      --output-o name           오브젝트 파일을 생성한다 (시스템 이미지 데이터를 포함)
      --output-ji name          시스템 이미지 데이터 파일을 생성한다 (.ji)
      --output-bc name          LLVM 비트코드를 생성한다 (.bc)
-
      --output-incremental=no   점진적으로 증가하는 출력 파일을 생성한다 (완결하기 보다는)
 
      --code-coverage={none|user|all}, --code-coverage
                                소스 코드 라인의 실행 횟수를 기록한다 (기본값 : "user")
      --track-allocation={none|user|all}, --track-allocation
                                각 소스 코드 라인에 의해 할당되는 바이트 수를 기록한다
+
 
 
 다른 읽을 거리
@@ -185,8 +178,12 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
 
 - `Julia and IJulia cheatsheet <http://math.mit.edu/~stevenj/Julia-cheatsheet.pdf>`_
 - `Learn Julia in a few minutes <http://learnxinyminutes.com/docs/julia/>`_
+- `Learn Julia the Hard Way <https://github.com/chrisvoncsefalvay/learn-julia-the-hard-way>`_
+- `Julia by Example <http://samuelcolvin.github.io/JuliaByExample/>`_
+- `Hands-on Julia <https://github.com/dpsanders/hands_on_julia>`_
 - `Tutorial for Homer Reid's numerical analysis class <http://homerreid.dyndns.org/teaching/18.330/JuliaProgramming.shtml>`_
 - `An introductory presentation <https://raw.githubusercontent.com/ViralBShah/julia-presentations/master/Fifth-Elephant-2013/Fifth-Elephant-2013.pdf>`_
-- `Videos from the Julia tutorial at MIT <http://julialang.org/blog/2013/03/julia-tutorial-MIT/>`_
+- `Videos from the Julia tutorial at MIT <http://julialang.org/blog/2013/03/julia-tutorial-MIT>`_
 - `Forio Julia Tutorials <http://forio.com/labs/julia-studio/tutorials/>`_
+- `YouTube videos from the JuliaCons <https://www.youtube.com/user/JuliaLanguage/playlists>`_
 

@@ -298,8 +298,8 @@ Julia는 정수들 간의 비를 정확히 표현하기 위해 유리수 타입�
 
     julia> 0//0
     ERROR: ArgumentError: invalid rational: zero(Int64)//zero(Int64)
-     in call at rational.jl:8
-     in // at rational.jl:22
+     in Rational{Int64}(::Int64, ::Int64) at ./rational.jl:8
+     in //(::Int64, ::Int64) at ./rational.jl:22
 
 다른 타입과 마찬가지로, 프로모션 시스템은 
 유리수와 다른 타입들 간의 상호작용을 어려움 없이 할 수 있도록 해준다:

@@ -230,12 +230,10 @@ a normal value:
 Using an index less than 1 or greater than ``end`` raises an error::
 
     julia> str[0]
-    ERROR: BoundsError()
-     in getindex at /Users/sabae/src/julia/usr/lib/julia/sys.dylib (repeats 2 times)
+    ERROR: BoundsError: attempt to access 14-element Array{UInt8,1} at index [0]
 
     julia> str[end+1]
-    ERROR: BoundsError()
-     in getindex at /Users/sabae/src/julia/usr/lib/julia/sys.dylib (repeats 2 times)
+    ERROR: BoundsError: attempt to access 14-element Array{UInt8,1} at index [15]
 
 You can also extract a substring using range indexing:
 
@@ -551,7 +549,7 @@ contained in a string:
     false
 
     julia> contains("Xylophon", 'o')
-    ERROR: MethodError: `contains` has no method matching contains(::ASCIIString, ::Char)
+    ERROR: MethodError: `contains` has no method matching contains(::String, ::Char)
     Closest candidates are:
       contains(!Matched::Function, ::Any, !Matched::Any)
       contains(::AbstractString, !Matched::AbstractString)
@@ -655,9 +653,9 @@ normal value and you can test for it programmatically::
 
     m = match(r"^\s*(?:#|$)", line)
     if m == nothing
-      println("not a comment")
+        println("not a comment")
     else
-      println("blank or comment")
+        println("blank or comment")
     end
 
 If a regular expression does match, the value returned by :func:`match` is a
@@ -677,14 +675,14 @@ which to start the search. For example:
 
 .. doctest::
 
-   julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",1)
-   RegexMatch("1")
+    julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",1)
+    RegexMatch("1")
 
-   julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",6)
-   RegexMatch("2")
+    julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",6)
+    RegexMatch("2")
 
-   julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",11)
-   RegexMatch("3")
+    julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",11)
+    RegexMatch("3")
 
 You can extract the following info from a :obj:`RegexMatch` object:
 
@@ -696,7 +694,9 @@ You can extract the following info from a :obj:`RegexMatch` object:
 For when a capture doesn't match, instead of a substring, ``m.captures``
 contains ``nothing`` in that position, and ``m.offsets`` has a zero
 offset (recall that indices in Julia are 1-based, so a zero offset into
-a string is invalid). Here is a pair of somewhat contrived examples::
+a string is invalid). Here is a pair of somewhat contrived examples:
+
+.. doctest::
 
     julia> m = match(r"(a|b)(c)?(d)", "acd")
     RegexMatch("acd", 1="a", 2="c", 3="d")
@@ -705,7 +705,7 @@ a string is invalid). Here is a pair of somewhat contrived examples::
     "acd"
 
     julia> m.captures
-    3-element Array{Union{SubString{UTF8String},Void},1}:
+    3-element Array{Union{SubString{String},Void},1}:
      "a"
      "c"
      "d"
@@ -726,7 +726,7 @@ a string is invalid). Here is a pair of somewhat contrived examples::
     "ad"
 
     julia> m.captures
-    3-element Array{Union{SubString{UTF8String},Void},1}:
+    3-element Array{Union{SubString{String},Void},1}:
      "a"
      nothing
      "d"
@@ -747,7 +747,9 @@ use destructuring syntax to bind them to local variables::
     "a"
 
 Captures can also be accessed by indexing the :obj:`RegexMatch` object
-with the number or name of the capture group::
+with the number or name of the capture group:
+
+.. doctest::
 
     julia> m=match(r"(?<hour>\d+):(?<minute>\d+)","12:45")
     RegexMatch("12:45", hour="12", minute="45")
@@ -760,16 +762,20 @@ Captures can be referenced in a substitution string when using :func:`replace`
 by using ``\n`` to refer to the nth capture group and prefixing the
 subsitution string with ``s``. Capture group 0 refers to the entire match object.
 Named capture groups can be referenced in the substitution with ``g<groupname>``.
-For example::
+For example:
+
+.. doctest::
 
     julia> replace("first second", r"(\w+) (?<agroup>\w+)", s"\g<agroup> \1")
-    julia> "second first"
+    "second first"
 
 Numbered capture groups can also be referenced as ``\g<n>`` for disambiguation,
-as in::
+as in:
 
-    julia> replace("a", r".", "\g<0>1")
-    julia> a1
+.. doctest::
+
+    julia> replace("a", r".", s"\g<0>1")
+    "a1"
 
 You can modify the behavior of regular expressions by some combination
 of the flags ``i``, ``m``, ``s``, and ``x`` after the closing double

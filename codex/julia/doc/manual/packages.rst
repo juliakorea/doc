@@ -42,7 +42,7 @@ Packages can be in more complicated states, indicated by annotations to the righ
 For programmatic usage, :func:`Pkg.installed` returns a dictionary, mapping installed package names to the version of that package which is installed::
 
     julia> Pkg.installed()
-    Dict{ASCIIString,VersionNumber} with 4 entries:
+    Dict{String,VersionNumber} with 4 entries:
     "Distributions"     => v"0.2.8"
     "Stats"             => v"0.2.6"
     "UTF16"             => v"0.2.0"
@@ -485,7 +485,8 @@ are several possible approaches, here is one that is widely used:
   error, :ref:`make sure you've set up your SSH keys <man-pkg-dev-setup>`.)
   Julia will then give you a hyperlink; open that link, edit the message, and
   then click "submit." At that point, the package owner will be notified of
-  your changes and may initiate discussion.
+  your changes and may initiate discussion. (If you are comfortable with git,
+  you can also do these steps manually from the shell.)
 
 - The package owner may suggest additional improvements. To respond to those
   suggestions, you can easily update the pull request (this only works for
@@ -989,14 +990,19 @@ For example::
     @osx Homebrew
 
 will require the ``Homebrew`` package only on systems where the operating system is OS X.
-The system conditions that are currently supported are::
+The system conditions that are currently supported are (hierarchically):
 
-    @windows
-    @unix
-    @osx
-    @linux
+* ``@unix``
 
-The ``@unix`` condition is satisfied on all UNIX systems, including OS X, Linux and FreeBSD.
+  * ``@linux``
+
+  * ``@bsd``
+
+    * ``@osx``
+
+* ``@windows``
+
+The ``@unix`` condition is satisfied on all UNIX systems, including Linux and BSD.
 Negated system conditionals are also supported by adding a ``!`` after the leading ``@``.
 Examples::
 

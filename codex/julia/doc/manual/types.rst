@@ -145,10 +145,20 @@ The "declaration" behavior only occurs in specific contexts::
 
 and applies to the whole current scope, even before the declaration.
 Currently, type declarations cannot be used in global scope, e.g. in
-the REPL, since Julia does not yet have constant-type globals.  Note
-that in a function return statement, the first two of the above
-expressions compute a value and then ``::`` is a type assertion and
-not a declaration.
+the REPL, since Julia does not yet have constant-type globals.
+
+Declarations can also be attached to function definitions::
+
+    function sinc(x)::Float64
+        if x == 0
+            return 1
+        end
+        return sin(pi*x)/(pi*x)
+    end
+
+Returning from this function behaves just like an assignment to
+a variable with a declared type: the value is always converted to
+``Float64``.
 
 
 .. _man-abstract-types:
@@ -752,14 +762,12 @@ each field:
 .. doctest::
 
     julia> Point{Float64}(1.0)
-    ERROR: MethodError: `convert` has no method matching convert(::Type{Point{Float64}}, ::Float64)
+    ERROR: MethodError: Cannot `convert` an object of type Float64 to an object of type Point{Float64}
     This may have arisen from a call to the constructor Point{Float64}(...),
     since type constructors fall back to convert methods.
 
     julia> Point{Float64}(1.0,2.0,3.0)
-    ERROR: MethodError: `convert` has no method matching convert(::Type{Point{Float64}}, ::Float64, ::Float64, ::Float64)
-    This may have arisen from a call to the constructor Point{Float64}(...),
-    since type constructors fall back to convert methods.
+    ERROR: MethodError: no method matching Point{Float64}(::Float64, ::Float64, ::Float64)
 
 Only one default constructor is generated for parametric types, since
 overriding it is not possible. This constructor accepts any arguments
@@ -792,9 +800,7 @@ isn't the case, the constructor will fail with a :exc:`MethodError`:
 .. doctest::
 
     julia> Point(1,2.5)
-    ERROR: MethodError: `convert` has no method matching convert(::Type{Point{T}}, ::Int64, ::Float64)
-    This may have arisen from a call to the constructor Point{T}(...),
-    since type constructors fall back to convert methods.
+    ERROR: MethodError: no method matching Point{T}(::Int64, ::Float64)
 
 Constructor methods to appropriately handle such mixed cases can be
 defined, but that will not be discussed until later on in
@@ -959,7 +965,7 @@ an appropriate tuple type is generated on demand:
 .. doctest::
 
     julia> typeof((1,"foo",2.5))
-    Tuple{Int64,ASCIIString,Float64}
+    Tuple{Int64,String,Float64}
 
 Note the implications of covariance:
 
@@ -997,9 +1003,14 @@ which denotes any number of trailing elements:
     julia> isa(("1",1,2,3.0), Tuple{AbstractString,Vararg{Int}})
     false
 
-Notice that ``Vararg{T}`` matches zero or more elements of type ``T``.
+Notice that ``Vararg{T}`` corresponds to zero or more elements of type ``T``.
 Vararg tuple types are used to represent the arguments accepted by varargs
 methods (see :ref:`man-varargs-functions`).
+
+The type ``Vararg{T,N}`` corresponds to exactly ``N`` elements of type ``T``.  ``NTuple{N,T}`` is
+a convenient alias for ``Tuple{Vararg{T,N}}``, i.e. a tuple type containing exactly
+``N`` elements of type ``T``.
+
 
 .. _man-singleton-types:
 
@@ -1196,7 +1207,7 @@ objects, they also have types, and we can ask what their types are:
     julia> typeof(Union{Real,Float64,Rational})
     DataType
 
-    julia> typeof(Union{Real,ASCIIString})
+    julia> typeof(Union{Real,String})
     Union
 
 What if we repeat the process? What is the type of a type of a type?
@@ -1208,7 +1219,7 @@ As it happens, types are all composite values and thus all have a type of
     julia> typeof(DataType)
     DataType
 
-    julia> typeof(UnionType)
+    julia> typeof(Union)
     DataType
 
 :obj:`DataType` is its own type.
@@ -1237,38 +1248,57 @@ If you apply :func:`supertype` to other type objects (or non-type objects), a
     julia> supertype(Union{Float64,Int64})
     ERROR: `supertype` has no method matching supertype(::Type{Union{Float64,Int64}})
 
+.. _man-val-trick:
+
 "Value types"
 -------------
 
-As one application of these ideas, Julia includes a parametric type,
-``Val{T}``, designated for dispatching on bits-type *values*.  For
-example, if you pass a boolean to a function, you have to test the
-value at run-time:
+In Julia, you can't dispatch on a *value* such as ``true`` or
+``false``. However, you can dispatch on parametric types, and Julia
+allows you to include "plain bits" values (Types, Symbols,
+Integers, floating-point numbers, tuples, etc.) as type parameters.  A
+common example is the dimensionality parameter in ``Array{T,N}``,
+where ``T`` is a type (e.g., ``Float64``) but ``N`` is just an
+``Int``.
 
-.. doctest::
+You can create your own custom types that take values as parameters,
+and use them to control dispatch of custom types. By way of
+illustration of this idea, let's introduce a parametric type,
+``Val{T}``, which serves as a customary way to exploit this technique
+for cases where you don't need a more elaborate hierarchy.
 
-    function firstlast(b::Bool)
-        return b ? "First" : "Last"
+``Val`` is defined as::
+
+    immutable Val{T}
     end
 
-    println(firstlast(true))
-
-You can instead cause the conditional to be evaluated during function
-compilation by using the ``Val`` trick:
+There is no more to the implementation of ``Val`` than this.  Some
+functions in Julia's standard library accept ``Val`` types as
+arguments, and you can also use it to write your own functions.  For
+example:
 
 .. doctest::
 
     firstlast(::Type{Val{true}}) = "First"
     firstlast(::Type{Val{false}}) = "Last"
 
-    println(firstlast(Val{true}))
+    julia> println(firstlast(Val{true}))
+    First
 
-Any legal type parameter (Types, Symbols, Integers, floating-point
-numbers, tuples, etc.) can be passed via ``Val``.
+    julia> println(firstlast(Val{false}))
+    Last
 
 For consistency across Julia, the call site should always pass a
-``Val`` type rather than creating an instance, i.e., use
+``Val`` *type* rather than creating an *instance*, i.e., use
 ``foo(Val{:bar})`` rather than ``foo(Val{:bar}())``.
+
+It's worth noting that it's extremely easy to mis-use parametric
+"value" types, including ``Val``; in unfavorable cases, you can easily
+end up making the performance of your code much *worse*.  In
+particular, you would never want to write actual code as illustrated
+above.  For more information about the proper (and improper) uses of
+``Val``, please read the more extensive discussion in :ref:`the
+performance tips <man-performance-val>`.
 
 .. _man-nullable-types:
 
@@ -1346,7 +1376,7 @@ You can safely access the value of a :obj:`Nullable` object using :func:`get`:
 
     julia> get(Nullable{Float64}())
     ERROR: NullException()
-     in get at nullable.jl:30
+     in get(::Nullable{Float64}) at ./nullable.jl:45
 
     julia> get(Nullable(1.0))
     1.0

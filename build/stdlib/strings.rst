@@ -50,53 +50,37 @@
 
    Create a string from any value using the ``showall`` function.
 
-.. function:: bytestring(::Ptr{UInt8}, [length])
+.. function:: String(s::AbstractString)
 
    .. Docstring generated from Julia source
 
-   Create a string from the address of a C (0-terminated) string encoded in ASCII or UTF-8. A copy is made; the ptr can be safely freed. If ``length`` is specified, the string does not have to be 0-terminated.
+   Convert a string to a contiguous byte array representation encoded as UTF-8 bytes. This representation is often appropriate for passing strings to C.
 
-.. function:: bytestring(s)
-
-   .. Docstring generated from Julia source
-
-   Convert a string to a contiguous byte array representation appropriate for passing it to C functions. The string will be encoded as either ASCII or UTF-8.
-
-.. function:: ascii(::Array{UInt8,1})
+.. function:: unsafe_string(p::Ptr{UInt8}, [length::Integer])
 
    .. Docstring generated from Julia source
 
-   Create an ASCII string from a byte array.
+   Copy a string from the address of a C-style (NUL-terminated) string encoded as UTF-8. (The pointer can be safely freed afterwards.) If ``length`` is specified (the length of the data in bytes), the string does not have to be NUL-terminated.
 
-.. function:: ascii(s)
+   This function is labelled "unsafe" because it will crash if ``p`` is not a valid memory address to data of the requested length.
 
-   .. Docstring generated from Julia source
+   See also :func:`unsafe_wrap`\ , which takes a pointer and wraps a string object around it without making a copy.
 
-   Convert a string to a contiguous ASCII string (all characters must be valid ASCII characters).
-
-.. function:: ascii(::Ptr{UInt8}, [length])
+.. function:: unsafe_wrap(String, p::Ptr{UInt8}, [length,] own=false)
 
    .. Docstring generated from Julia source
 
-   Create an ASCII string from the address of a C (0-terminated) string encoded in ASCII. A copy is made; the ptr can be safely freed. If ``length`` is specified, the string does not have to be 0-terminated.
+   Wrap a pointer ``p`` to an array of bytes in a ``String`` object, interpreting the bytes as UTF-8 encoded characters *without making a copy*. The optional ``length`` argument indicates the length in bytes of the pointer's data; if it is omitted, the data is assumed to be NUL-terminated.  The ``own`` argument optionally specifies whether Julia should take ownership of the memory, calling ``free`` on the pointer when the array is no longer referenced.
 
-.. function:: utf8(::Array{UInt8,1})
+   This function is labelled "unsafe" because it will crash if ``p`` is not a valid memory address to data of the requested length.
 
-   .. Docstring generated from Julia source
+   See also :func:`unsafe_string`\ , which takes a pointer and makes a copy of the data.
 
-   Create a UTF-8 string from a byte array.
-
-.. function:: utf8(::Ptr{UInt8}, [length])
+.. function:: ascii(s::AbstractString)
 
    .. Docstring generated from Julia source
 
-   Create a UTF-8 string from the address of a C (0-terminated) string encoded in UTF-8. A copy is made; the ptr can be safely freed. If ``length`` is specified, the string does not have to be 0-terminated.
-
-.. function:: utf8(s)
-
-   .. Docstring generated from Julia source
-
-   Convert a string to a contiguous UTF-8 string (all characters must be valid UTF-8 characters).
+   Convert a string to ``String`` type and check that it contains only ASCII data, otherwise throwing an ``ArugmentError`` indicating the position of the first non-ASCII byte.
 
 .. function:: @r_str -> Regex
 
@@ -159,13 +143,13 @@
 
    .. Docstring generated from Julia source
 
-   Returns ``true`` if the given value is valid for its type, which currently can be one of ``Char``\ , ``ASCIIString``\ , ``UTF8String``\ , ``UTF16String``\ , or ``UTF32String``\ .
+   Returns ``true`` if the given value is valid for its type, which currently can be one of ``Char``\ , ``String``\ , ``UTF16String``\ , or ``UTF32String``\ .
 
 .. function:: isvalid(T, value) -> Bool
 
    .. Docstring generated from Julia source
 
-   Returns ``true`` if the given value is valid for that type. Types currently can be ``Char``\ , ``ASCIIString``\ , ``UTF8String``\ , ``UTF16String``\ , or ``UTF32String`` Values for ``Char`` can be of type ``Char`` or ``UInt32`` Values for ``ASCIIString`` and ``UTF8String`` can be of that type, or ``Vector{UInt8}`` Values for ``UTF16String`` can be ``UTF16String`` or ``Vector{UInt16}`` Values for ``UTF32String`` can be ``UTF32String``\ , ``Vector{Char}`` or ``Vector{UInt32}``
+   Returns ``true`` if the given value is valid for that type. Types currently can be ``Char``\ , ``String``\ , ``UTF16String``\ , or ``UTF32String`` Values for ``Char`` can be of type ``Char`` or ``UInt32`` Values for ``String`` can be of that type, or ``Vector{UInt8}`` Values for ``UTF16String`` can be ``UTF16String`` or ``Vector{UInt16}`` Values for ``UTF32String`` can be ``UTF32String``\ , ``Vector{Char}`` or ``Vector{UInt32}``
 
 .. function:: isvalid(str, i)
 
@@ -349,7 +333,7 @@
 
    .. Docstring generated from Julia source
 
-   Remove a trailing newline from a string.
+   Remove a single trailing newline from a string.
 
 .. function:: ind2chr(string, i)
 
@@ -471,7 +455,7 @@
 
    Tests whether a character is a valid hexadecimal digit, or whether this is true for all elements of a string.
 
-.. function:: symbol(x...) -> Symbol
+.. function:: Symbol(x...) -> Symbol
 
    .. Docstring generated from Julia source
 
@@ -481,13 +465,13 @@
 
    .. Docstring generated from Julia source
 
-   General escaping of traditional C and Unicode escape sequences. See :func:`print_escaped` for more general escaping.
+   General escaping of traditional C and Unicode escape sequences.
 
 .. function:: unescape_string(s::AbstractString) -> AbstractString
 
    .. Docstring generated from Julia source
 
-   General unescaping of traditional C and Unicode escape sequences. Reverse of :func:`escape_string`\ . See also :func:`print_unescaped`\ .
+   General unescaping of traditional C and Unicode escape sequences. Reverse of :func:`escape_string`\ . See also :func:`unescape_string`\ .
 
 .. function:: utf16(s)
 

@@ -85,7 +85,7 @@ of an environment variable, one makes a call like this::
     julia> path = ccall((:getenv, "libc"), Cstring, (Cstring,), "SHELL")
     Cstring(@0x00007fff5fbffc45)
 
-    julia> bytestring(path)
+    julia> unsafe_string(path)
     "/bin/bash"
 
 Note that the argument type tuple must be written as ``(Cstring,)``,
@@ -117,7 +117,7 @@ which is a simplified version of the actual definition from
       if val == C_NULL
         error("getenv: undefined variable: ", var)
       end
-      bytestring(val)
+      unsafe_string(val)
     end
 
 The C ``getenv`` function indicates an error by returning ``NULL``, but
@@ -136,12 +136,12 @@ Here is a slightly more complex example that discovers the local
 machine's hostname::
 
     function gethostname()
-      hostname = Array(UInt8, 128)
+      hostname = Array{UInt8}(128)
       ccall((:gethostname, "libc"), Int32,
             (Ptr{UInt8}, Csize_t),
             hostname, sizeof(hostname))
       hostname[end] = 0; # ensure null-termination
-      return bytestring(pointer(hostname))
+      return unsafe_string(pointer(hostname))
     end
 
 This example first allocates an array of bytes, then calls the C library
@@ -266,7 +266,7 @@ First, a review of some relevant Julia type terminology:
 ==============================  ==============================  ======================================================
 Syntax / Keyword                Example                         Description
 ==============================  ==============================  ======================================================
-``type``                        ``ASCIIString``                 "Leaf Type" :: A group of related data that includes
+``type``                        ``String``                      "Leaf Type" :: A group of related data that includes
                                                                 a type-tag, is managed by the Julia GC, and
                                                                 is defined by object-identity.
                                                                 The type parameters of a leaf type must be fully defined
@@ -345,7 +345,7 @@ There are several special types to be aware of, as no other type can be defined 
     If an array of eltype ``Ptr{T}`` is passed as a ``Ptr{Ptr{T}}`` argument,
     :func:`Base.cconvert` will attempt to first make a null-terminated copy of the array with
     each element replaced by its :func:`cconvert` version. This allows, for example, passing an ``argv``
-    pointer array of type ``Vector{ByteString}`` to an argument of type ``Ptr{Ptr{Cchar}}``.
+    pointer array of type ``Vector{String}`` to an argument of type ``Ptr{Ptr{Cchar}}``.
 
 On all systems we currently support, basic C/C++ value types may be
 translated to Julia types as follows. Every C type also has a corresponding
@@ -399,6 +399,9 @@ Julia type with the same name, prefixed by C. This can help for writing portable
 | ``size_t``                        |                 | ``Csize_t``          | ``UInt``                          |
 +-----------------------------------+-----------------+----------------------+-----------------------------------+
 | ``void``                          |                 |                      | ``Void``                          |
++-----------------------------------+-----------------+----------------------+-----------------------------------+
+| ``void`` and                      |                 |                      | ``Union{}``                       |
+| ``[[noreturn]]`` or ``_Noreturn`` |                 |                      |                                   |
 +-----------------------------------+-----------------+----------------------+-----------------------------------+
 | ``void*``                         |                 |                      | ``Ptr{Void}``                     |
 +-----------------------------------+-----------------+----------------------+-----------------------------------+
@@ -465,13 +468,20 @@ C name                  Standard Julia Alias    Julia Base Type
     For string arguments (``char*``) the Julia type should be ``Cstring`` (if NUL-
     terminated data is expected) or either ``Ptr{Cchar}`` or ``Ptr{UInt8}``
     otherwise (these two pointer types have the same effect), as described above,
-    not ``ASCIIString``. Similarly, for array arguments (``T[]`` or ``T*``), the
+    not ``String``. Similarly, for array arguments (``T[]`` or ``T*``), the
     Julia type should again be ``Ptr{T}``, not ``Vector{T}``.
 
 .. warning::
 
     Julia's ``Char`` type is 32 bits, which is not the same as the wide character
     type (``wchar_t`` or ``wint_t``) on all platforms.
+
+.. warning::
+
+    A return type of ``Union{}`` means the function will not return
+    i.e. C++11 ``[[noreturn]]`` or C11 ``_Noreturn`` (e.g. ``jl_throw`` or
+    ``longjmp``). Do not use this for functions that return
+    no value (``void``) but do return.
 
 .. note::
 
@@ -550,6 +560,48 @@ Arrays of parameters must be expanded manually, currently
 Arrays of unknown size are not supported.
 
 In the future, some of these restrictions may be reduced or eliminated.
+
+SIMD Values
+~~~~~~~~~~~
+
+Note: This feature is currently implemented on 64-bit x86
+and AArch64 platforms only.
+
+If a C/C++ routine has an argument or return value that is a native
+SIMD type, the corresponding Julia type is a homogeneous tuple
+of ``VecElement`` that naturally maps to the SIMD type.  Specifically:
+
+    - The tuple must be the same size as the SIMD type.
+      For example, a tuple representing an ``__m128`` on x86
+      must have a size of 16 bytes.
+
+    - The element type of the tuple must be an instance of ``VecElement{T}``
+      where ``T`` is a bitstype that is 1, 2, 4 or 8 bytes.
+
+For instance, consider this C routine that uses AVX intrinsics::
+
+    #include <immintrin.h>
+
+    __m256 dist( __m256 a, __m256 b ) {
+        return _mm256_sqrt_ps(_mm256_add_ps(_mm256_mul_ps(a, a),
+                                            _mm256_mul_ps(b, b)));
+    }
+
+The following Julia code calls ``dist`` using ``ccall``::
+
+    typealias m256 NTuple{8,VecElement{Float32}}
+
+    a = m256(ntuple(i->VecElement(sin(Float32(i))),8))
+    b = m256(ntuple(i->VecElement(cos(Float32(i))),8))
+
+    function call_dist(a::m256, b::m256)
+        ccall((:dist, "libdist"), m256, (m256, m256), a, b)
+    end
+
+    println(call_dist(a,b))
+
+The host machine must have the requisite SIMD registers.  For example,
+the code above will not work on hosts without AVX support.
 
 Memory Ownership
 ~~~~~~~~~~~~~~~~
@@ -766,8 +818,8 @@ Here is a simple example of a C wrapper that returns a ``Ptr`` type::
             (Csize_t,),                        #tuple of input types
             n                                  #name of Julia variable to pass in
         )
-        if output_ptr==C_NULL #Could not allocate memory
-            throw(MemoryError())
+        if output_ptr==C_NULL # Could not allocate memory
+            throw(OutOfMemoryError())
         end
         return output_ptr
     end
@@ -828,7 +880,7 @@ Here is a third example passing Julia arrays::
     #                                double result_array[])
     function sf_bessel_Jn_array(nmin::Integer, nmax::Integer, x::Real)
         if nmax<nmin throw(DomainError()) end
-        result_array = Array(Cdouble, nmax-nmin+1)
+        result_array = Array{Cdouble}(nmax-nmin+1)
         errorcode = ccall(
             (:gsl_sf_bessel_Jn_array, :libgsl), #name of C function and library
             Cint,                               #output type
@@ -875,9 +927,9 @@ it is finished with them.
 
 Whenever you have created a pointer to Julia data, you must ensure the original data
 exists until you are done with using the pointer. Many methods in Julia such as
-:func:`unsafe_load` and :func:`bytestring` make copies of data instead of taking ownership
+:func:`unsafe_load` and :func:`String` make copies of data instead of taking ownership
 of the buffer, so that it is safe to free (or alter) the original data without
-affecting Julia. A notable exception is :func:`pointer_to_array` which, for performance
+affecting Julia. A notable exception is :func:`unsafe_wrap` which, for performance
 reasons, shares (or can be told to take ownership of) the underlying buffer.
 
 The garbage collector does not guarantee any order of finalization. That is, if ``a``
@@ -948,7 +1000,7 @@ conventions are: ``stdcall``, ``cdecl``, ``fastcall``, and ``thiscall``.
 For example (from ``base/libc.jl``) we see the same ``gethostname`` :func:`ccall` as above,
 but with the correct signature for Windows::
 
-    hn = Array(UInt8, 256)
+    hn = Array{UInt8}(256)
     err = ccall(:gethostname, stdcall, Int32, (Ptr{UInt8}, UInt32), hn, length(hn))
 
 For more information, please see the `LLVM Language Reference`_.
@@ -1008,7 +1060,7 @@ Any operation that throws an error is probably currently unimplemented
 and should be posted as a bug so that it can be resolved.
 
 If the pointer of interest is a plain-data array (bitstype or immutable), the
-function :func:`pointer_to_array(ptr,dims,[own]) <pointer_to_array>` may be
+function :func:`unsafe_wrap(Array, ptr,dims,[own]) <unsafe_wrap>` may be
 more useful. The final parameter should be true if Julia should "take
 ownership" of the underlying buffer and call ``free(ptr)`` when the returned
 ``Array`` object is finalized.  If the ``own`` parameter is omitted or false,
