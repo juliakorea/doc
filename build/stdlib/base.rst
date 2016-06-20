@@ -128,7 +128,7 @@ Getting Around
 
    When searching for files, ``require`` first looks for package code under ``Pkg.dir()``\ , then tries paths in the global array ``LOAD_PATH``\ .
 
-.. function:: Base.compilecache(module::ByteString)
+.. function:: Base.compilecache(module::String)
 
    .. Docstring generated from Julia source
 
@@ -514,13 +514,13 @@ Types
 
    .. Docstring generated from Julia source
 
-   Extract a named field from a ``value`` of composite type. The syntax ``a.b`` calls ``getfield(a, :b)``\ , and the syntax ``a.(b)`` calls ``getfield(a, b)``\ .
+   Extract a named field from a ``value`` of composite type. The syntax ``a.b`` calls ``getfield(a, :b)``\ .
 
 .. function:: setfield!(value, name::Symbol, x)
 
    .. Docstring generated from Julia source
 
-   Assign ``x`` to a named field in ``value`` of composite type. The syntax ``a.b = c`` calls ``setfield!(a, :b, c)``\ , and the syntax ``a.(b) = c`` calls ``setfield!(a, b, c)``\ .
+   Assign ``x`` to a named field in ``value`` of composite type. The syntax ``a.b = c`` calls ``setfield!(a, :b, c)``\ .
 
 .. function:: fieldoffset(type, i)
 
@@ -577,7 +577,7 @@ Types
 
    .. Docstring generated from Julia source
 
-   Determine whether ``T`` is a concrete type that can have instances, meaning its only subtypes are itself and ``None`` (but ``T`` itself is not ``None``\ ).
+   Determine whether ``T`` is a concrete type that can have instances, meaning its only subtypes are itself and ``Union{}`` (but ``T`` itself is not ``Union{}``\ ).
 
 .. function:: typejoin(T, S)
 
@@ -668,12 +668,6 @@ Generic Functions
        julia> [1:5;] |> x->x.^2 |> sum |> inv
        0.01818181818181818
 
-.. function:: call(x, args...)
-
-   .. Docstring generated from Julia source
-
-   If ``x`` is not a ``Function``\ , then ``x(args...)`` is equivalent to ``call(x, args...)``\ . This means that function-like behavior can be added to any type by defining new ``call`` methods.
-
 Syntax
 ------
 
@@ -734,17 +728,11 @@ Nullables
 
    Wrap value ``x`` in an object of type ``Nullable``\ , which indicates whether a value is present. ``Nullable(x)`` yields a non-empty wrapper, and ``Nullable{T}()`` yields an empty instance of a wrapper that might contain a value of type ``T``\ .
 
-.. function:: get(x)
+.. function:: get(x::Nullable[, y])
 
    .. Docstring generated from Julia source
 
-   Attempt to access the value of the ``Nullable`` object, ``x``\ . Returns the value if it is present; otherwise, throws a ``NullException``\ .
-
-.. function:: get(x, y)
-
-   .. Docstring generated from Julia source
-
-   Attempt to access the value of the ``Nullable{T}`` object, ``x``\ . Returns the value if it is present; otherwise, returns ``convert(T, y)``\ .
+   Attempt to access the value of ``x``\ . Returns the value if it is present; otherwise, returns ``y`` if provided, or throws a ``NullException`` if not.
 
 .. function:: isnull(x)
 
@@ -878,7 +866,7 @@ System
 
    .. Docstring generated from Julia source
 
-   Redirect I/O to or from the given ``command``\ . Keyword arguments specify which of the command's streams should be redirected. ``append`` controls whether file output appends to the file. This is a more general version of the 2-argument ``pipeline`` function. ``pipeline(from, to)`` is equivalent to ``pipeline(from, stdout=to)`` when ``from`` is a command, and to ``pipe(to, stdin=from)`` when ``from`` is another kind of data source.
+   Redirect I/O to or from the given ``command``\ . Keyword arguments specify which of the command's streams should be redirected. ``append`` controls whether file output appends to the file. This is a more general version of the 2-argument ``pipeline`` function. ``pipeline(from, to)`` is equivalent to ``pipeline(from, stdout=to)`` when ``from`` is a command, and to ``pipeline(to, stdin=from)`` when ``from`` is another kind of data source.
 
    **Examples**:
 
@@ -971,57 +959,55 @@ System
 
    A singleton of this type provides a hash table interface to environment variables.
 
-.. data:: ENV
-
-   Reference to the singleton ``EnvHash``, providing a dictionary interface to system environment variables.
-
-.. function:: @unix
+.. variable:: ENV
 
    .. Docstring generated from Julia source
 
-   Given ``@unix? a : b``\ , do ``a`` on Unix systems (including Linux and OS X) and ``b`` elsewhere. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+   Reference to the singleton ``EnvHash``\ , providing a dictionary interface to system environment variables.
 
-.. function:: @unix_only
-
-   .. Docstring generated from Julia source
-
-   A macro that evaluates the given expression only on Unix systems (including Linux and OS X). See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
-
-.. function:: @osx
+.. function:: is_unix([os])
 
    .. Docstring generated from Julia source
 
-   Given ``@osx? a : b``\ , do ``a`` on OS X and ``b`` elsewhere. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+   Predicate for testing if the OS provides a Unix-like interface. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
 
-.. function:: @osx_only
-
-   .. Docstring generated from Julia source
-
-   A macro that evaluates the given expression only on OS X systems. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
-
-.. function:: @linux
+.. function:: is_apple([os])
 
    .. Docstring generated from Julia source
 
-   Given ``@linux? a : b``\ , do ``a`` on Linux and ``b`` elsewhere. See documentation :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+   Predicate for testing if the OS is a derivative of Apple Macintosh OS X or Darwin. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
 
-.. function:: @linux_only
-
-   .. Docstring generated from Julia source
-
-   A macro that evaluates the given expression only on Linux systems. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
-
-.. function:: @windows
+.. function:: is_linux([os])
 
    .. Docstring generated from Julia source
 
-   Given ``@windows? a : b``\ , do ``a`` on Windows and ``b`` elsewhere. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+   Predicate for testing if the OS is a derivative of Linux. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
 
-.. function:: @windows_only
+.. function:: is_bsd([os])
 
    .. Docstring generated from Julia source
 
-   A macro that evaluates the given expression only on Windows systems. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+   Predicate for testing if the OS is a derivative of BSD. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+
+.. function:: is_windows([os])
+
+   .. Docstring generated from Julia source
+
+   Predicate for testing if the OS is a derivative of Microsoft Windows NT. See documentation in :ref:`Handling Operating System Variation <man-handling-operating-system-variation>`\ .
+
+.. function:: windows_version()
+
+   .. Docstring generated from Julia source
+
+   Returns the version number for the Windows NT Kernel as a (major, minor) pair, or ``(0, 0)`` if this is not running on Windows.
+
+.. function:: @static
+
+   .. Docstring generated from Julia source
+
+   Partially evaluates an expression at parse time.
+
+   For example, ``@static is_windows() ? foo : bar`` will evaluate ``is_windows()`` and insert either ``foo`` or ``bar`` into the expression. This is useful in cases where a construct would be invalid on other platforms, such as a ``ccall`` to a non-existent function.
 
 Errors
 ------
@@ -1144,7 +1130,7 @@ Errors
 
    .. Docstring generated from Julia source
 
-   A method with the required type signature does not exist in the given generic function.
+   A method with the required type signature does not exist in the given generic function. Alternatively, there is no unique most-specific method.
 
 .. function:: NullException()
 
@@ -1217,6 +1203,21 @@ Errors
    .. Docstring generated from Julia source
 
    An error occurred when running a module's ``__init__`` function. The actual error thrown is available in the ``.error`` field.
+
+.. function:: retry(f, [retry_on]; n=1, max_delay=10.0) -> Function
+
+   .. Docstring generated from Julia source
+
+   Returns a lambda that retries function ``f`` up to ``n`` times in the event of an exception. If ``retry_on`` is a ``Type`` then retry only for exceptions of that type. If ``retry_on`` is a function ``test_error(::Exception) -> Bool`` then retry only if it is true.
+
+   The first retry happens after a gap of 50 milliseconds or ``max_delay``\ , whichever is lower. Subsequently, the delays between retries are exponentially increased with a random factor upto ``max_delay``\ .
+
+   **Examples**
+
+   .. code-block:: julia
+
+       retry(http_get, e -> e.status == "503")(url)
+       retry(read, UVError)(io)
 
 Events
 ------

@@ -140,7 +140,7 @@ Data Formats
 
    Convert a hexadecimal string to the floating point number it represents.
 
-.. function:: hex2bytes(s::ASCIIString)
+.. function:: hex2bytes(s::AbstractString)
 
    .. Docstring generated from Julia source
 
@@ -150,7 +150,7 @@ Data Formats
 
    .. Docstring generated from Julia source
 
-   Convert an array of bytes to its hexadecimal representation. All characters are in lower-case. Returns an ``ASCIIString``\ .
+   Convert an array of bytes to its hexadecimal representation. All characters are in lower-case. Returns a ``String``\ .
 
 General Number Functions and Constants
 --------------------------------------
@@ -243,29 +243,23 @@ General Number Functions and Constants
 
    Test whether a floating point number is not a number (NaN).
 
-.. function:: inf(f)
+.. function:: nextfloat(x::AbstractFloat)
 
    .. Docstring generated from Julia source
 
-   Returns positive infinity of the floating point type ``f`` or of the same floating point type as ``f``\ .
+   Returns the smallest floating point number ``y`` of the same type as ``x`` such ``x < y``\ . If no such ``y`` exists (e.g. if ``x`` is ``Inf`` or ``NaN``\ ), then returns ``x``\ .
 
-.. function:: nan(f)
-
-   .. Docstring generated from Julia source
-
-   Returns NaN (not-a-number) of the floating point type ``f`` or of the same floating point type as ``f``
-
-.. function:: nextfloat(f)
+.. function:: prevfloat(x::AbstractFloat)
 
    .. Docstring generated from Julia source
 
-   Get the next floating point number in lexicographic order.
+   Returns the largest floating point number ``y`` of the same type as ``x`` such ``y < x``\ . If no such ``y`` exists (e.g. if ``x`` is ``-Inf`` or ``NaN``\ ), then returns ``x``\ .
 
-.. function:: prevfloat(f) -> AbstractFloat
+.. function:: nextfloat(x::AbstractFloat, n::Integer)
 
    .. Docstring generated from Julia source
 
-   Get the previous floating point number in lexicographic order.
+   The result of ``n`` iterative applications of ``nextfloat`` to ``x`` if ``n >= 0``\ , or ``-n`` applications of ``prevfloat`` if ``n < 0``\ .
 
 .. function:: isinteger(x) -> Bool
 
@@ -448,40 +442,6 @@ Integers
 
        julia> trailing_ones(3)
        2
-
-.. function:: isprime(x::Integer) -> Bool
-
-   .. Docstring generated from Julia source
-
-   Returns ``true`` if ``x`` is prime, and ``false`` otherwise.
-
-   .. doctest::
-
-       julia> isprime(3)
-       true
-
-.. function:: isprime(x::BigInt, [reps = 25]) -> Bool
-
-   .. Docstring generated from Julia source
-
-   Probabilistic primality test. Returns ``true`` if ``x`` is prime; and ``false`` if ``x`` is not prime with high probability. The false positive rate is about ``0.25^reps``\ . ``reps = 25`` is considered safe for cryptographic applications (Knuth, Seminumerical Algorithms).
-
-   .. doctest::
-
-       julia> isprime(big(3))
-       true
-
-.. function:: primes([lo,] hi)
-
-   .. Docstring generated from Julia source
-
-   Returns a collection of the prime numbers (from ``lo``\ , if specified) up to ``hi``\ .
-
-.. function:: primesmask([lo,] hi)
-
-   .. Docstring generated from Julia source
-
-   Returns a prime sieve, as a ``BitArray``\ , of the positive integers (from ``lo``\ , if specified) up to ``hi``\ . Useful when working with either primes or composite numbers.
 
 .. function:: isodd(x::Integer) -> Bool
 

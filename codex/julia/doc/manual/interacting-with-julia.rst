@@ -69,7 +69,7 @@ In addition to function names, complete function calls may be entered to see whi
     help> AbstractString
     DataType   : AbstractString
       supertype: Any
-      subtypes : Any[DirectIndexString,RepString,RevString{T<:AbstractString},RopeString,SubString{T<:AbstractString},UTF16String,UTF8String]
+      subtypes : Any[DirectIndexString,RepString,RevString{T<:AbstractString},SubString{T<:AbstractString},String]
 
 Help mode can be exited by pressing backspace at the beginning of the line.
 
@@ -213,7 +213,7 @@ and get a list of LaTeX matches as well::
 
     julia> e\^1[TAB] = [1 0]
     julia> e¹ = [1 0]
-    1x2 Array{Int64,2}:
+    1×2 Array{Int64,2}:
      1  0
 
     julia> \sqrt[TAB]2     # √ is equivalent to the sqrt() function

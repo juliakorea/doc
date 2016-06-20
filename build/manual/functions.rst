@@ -3,14 +3,13 @@
 .. currentmodule:: Base
 
 ***********
- Functions
+ 함수
 ***********
 
-In Julia, a function is an object that maps a tuple of argument values
-to a return value. Julia functions are not pure mathematical functions,
-in the sense that functions can alter and be affected by the global
-state of the program. The basic syntax for defining functions in Julia
-is:
+Julia에서는 함수라는 것은 매개변수 값 튜플(tuple)과 리턴값을 
+매핑하는 객체(object) 이다. Julia 함수들은 순수한 수학 함수들이 아니라, 
+프로그램의 전체적인 상태를 변경하거나 혹은 그 상태에 영향을 받기도 할 수 있다는 
+관점에서 보아야 한다. Julia에서의 함수를 정의하는 기본적인 문법은 다음과 같다:
 
 .. testcode::
 
@@ -23,28 +22,27 @@ is:
 
     f (generic function with 1 method)
 
-There is a second, more terse syntax for defining a function in Julia.
-The traditional function declaration syntax demonstrated above is
-equivalent to the following compact "assignment form"::
+Julia에는 이 뿐만 아니라 함수를 정의하는 더 간결한 문법도 존재한다.
+다음의 컴팩트한 "대입 형태"의 문법은 위에서 언급한 전통적인 함수 선언 문법과
+동일하다::
 
     f(x,y) = x + y
 
-In the assignment form, the body of the function must be a single
-expression, although it can be a compound expression (see
-:ref:`man-compound-expressions`). Short, simple
-function definitions are common in Julia. The short function syntax is
-accordingly quite idiomatic, considerably reducing both typing and
-visual noise.
+대입 형태에서는, 엮은 표현식 (:ref:`man-compound-expressions` 참고) 이어도
+함수 본체는 반드시 한 줄의 표현식이어야 한다.
+간단히 말해서, 간략한 함수 정의 방식은 Julia에서 흔한 방식이다.
+이 간략한 함수 문법은 키보드 타이핑과 시각적인 어지러움을 감소시켜주는 방법으로
+관용적으로 널리 쓰이고 있다.
 
-A function is called using the traditional parenthesis syntax:
+함수 호출은 전통적인 괄호 형식의 문법을 사용한다:
 
 .. doctest::
 
     julia> f(2,3)
     5
 
-Without parentheses, the expression ``f`` refers to the function object,
-and can be passed around like any value:
+괄호가 없으면, ``f``\ 라는 표현식은 함수 객체 자체를 가리키며, 
+이는 다른 값들처럼 전달될 수 있다:
 
 .. doctest::
 
@@ -53,44 +51,42 @@ and can be passed around like any value:
     julia> g(2,3)
     5
 
-As with variables, Unicode can also be used for function names:
+변수처럼, 함수 이름에 유니코드를 사용할 수 있다:
 
 .. doctest::
 
     julia> ∑(x,y) = x + y
     ∑ (generic function with 1 method)
 
-Argument Passing Behavior
+매개변수 전달 매커니즘
 -------------------------
 
-Julia function arguments follow a convention sometimes called "pass-by-sharing",
-which means that values are not copied when they are passed to functions.
-Function arguments themselves act as new variable *bindings* (new locations that
-can refer to values), but the values they refer to are identical to the passed
-values. Modifications to mutable values (such as Arrays) made within a function
-will be visible to the caller. This is the same behavior found in Scheme, most
-Lisps, Python, Ruby and Perl, among other dynamic languages.
+Julia의 함수 매개변수는 "공유에 의한 전달"\ 이라고 불리우는 방식을 따른다.
+"공유에 의한 전달" 방식은 매개변수가 함수에 전달될 때 복사되지 않는다.
+함수의 매개변수 그 자신들은 새로운 변수의 *바인딩*\ (값을 가리키는 새로운 주소)으로 
+작동하지만, 바인딩이 가리키는 값은 함수의 매개변수로 전달되는 값과 동일하다.
+하지만 함수 내부에서 수정되는 가변적인 값들은(배열과 같은) 다른 주소임에도 불구하고
+함수 외부에서도 그 결과가 반영된다. 이는 Scheme, 대부분의 Lisp, Python, Ruby
+그리고 Perl과 같은 다른 동적 언어에서와 같은 방식이다.
 
 .. _man-return-keyword:
 
-The ``return`` Keyword
+``return`` 키워드
 ----------------------
 
-The value returned by a function is the value of the last expression
-evaluated, which, by default, is the last expression in the body of the
-function definition. In the example function, ``f``, from the previous
-section this is the value of the expression ``x + y``. As in C and most
-other imperative or functional languages, the ``return`` keyword causes
-a function to return immediately, providing an expression whose value is
-returned::
+함수로 부터 반환되는 값은 기본적으로 함수 본문에 있는 가장 마지막 표현식의
+결과값이다. 앞에서 예로 든 ``f`` 라는 예제함수를 보면 ``x + y``\ 가 
+반환되는 표현식이라는 것을 알 수 있다. C와 같은 명령형 기반 혹은
+다른 함수형 언어에서와 같이, Julia에서 ``return``\ 이라는 키워드는 
+함수가 ``return`` 과 함께 병기된 표현식을 바로 리턴하도록 하고 있다::
 
     function g(x,y)
       return x * y
       x + y
     end
 
-Since function definitions can be entered into interactive sessions, it
-is easy to compare these definitions::
+대화형 실행환경에서도 함수 정의 문법을 사용할 수 있기 때문에, 
+위에서 언급한 다양한 정의들을 쉽게 비교해볼 수 있다::
 
     f(x,y) = x + y
 
@@ -105,13 +101,13 @@ is easy to compare these definitions::
     julia> g(2,3)
     6
 
-Of course, in a purely linear function body like ``g``, the usage of
-``return`` is pointless since the expression ``x + y`` is never
-evaluated and we could simply make ``x * y`` the last expression in the
-function and omit the ``return``. In conjunction with other control
-flow, however, ``return`` is of real use. Here, for example, is a
-function that computes the hypotenuse length of a right triangle with
-sides of length *x* and *y*, avoiding overflow::
+물론, ``g``\ 와 같이 순수하게 직관적인 함수 본문을 가지고 있을 때에는 
+``return``\ 은 무의미한 것이 ``x + y``\ 는 절대 계산될 일이 없고, 
+``x * y``\ 를 ``return``\ 을 뺀 상태로 맨 마지막 표현식으로 두어도 
+무방하기 때문이다. 그러나, 다른 제어 흐름 구문과 ``return``\ 의 혼용은 
+실제로 의미가 있는 조합이다. 예를 들어, *x*\ 와 *y*\ 를 밑변과 높이로 하는 
+직각 삼각형의 빗변의 길이를 구하는 함수에서는 오버플로우(overflow)를 
+피하기 위해 ``return``\ 이 유의미하게 쓰일 수 있다::
 
     function hypot(x,y)
       x = abs(x)
@@ -127,21 +123,21 @@ sides of length *x* and *y*, avoiding overflow::
       return y*sqrt(1+r*r)
     end
 
-There are three possible points of return from this function, returning
-the values of three different expressions, depending on the values of
-*x* and *y*. The ``return`` on the last line could be omitted since it
-is the last expression.
+이 함수에는 *x*\ 와 *y*\ 의 값에 따라 결정되는 세 종류의 다른 표현식 때문에 
+세 지점의 리턴 지점이 존재한다. 마지막 줄의 ``return``\ 은 이 함수 본문의 
+마지막 표현식이기 때문에 생략 가능하다.
 
-Operators Are Functions
+연산자 또한 함수
 -----------------------
 
-In Julia, most operators are just functions with support for special
-syntax. (The exceptions are operators with special evaluation semantics
-like ``&&`` and ``||``. These operators cannot be functions since
-:ref:`short-circuit evaluation <man-short-circuit-evaluation>` requires that
-their operands are not evaluated before evaluation of the operator.)
-Accordingly, you can also apply them using parenthesized argument lists,
-just as you would any other function:
+Julia에서는, 대부분의 연산자들은 일반적인 함수들과 다를 바 없다. 
+다만 특별한 문법이 연산자를 뒷받침하고 있다.
+(이것에 대한 예외는 ``&&``\ 나 ``||``\ 와 같이 특별한 계산 방식을 지니고 있는 
+연산자들이다. :ref:`short-circuit evaluation <man-short-circuit-evaluation>`\ 에서
+알 수 있듯이 ``&&``\ 나 ``||``\ 와 같은 연산자들은 연산자들의 계산 이전에 
+피연산자들이 먼저 계산될 수 없기 때문에 함수로 쓸 수 없다.)
+따라서, 대부분의 연산자들은 다른 함수들과 마찬가지로 
+괄호와 매개변수를 이용한 형식으로 쓸 수 있다:
 
 .. doctest::
 
@@ -151,10 +147,10 @@ just as you would any other function:
     julia> +(1,2,3)
     6
 
-The infix form is exactly equivalent to the function application form —
-in fact the former is parsed to produce the function call internally.
-This also means that you can assign and pass around operators such as
-:func:`+` and :func:`*` just like you would with other function values:
+중위 표현법(infix form)은 함수형 표기법과 동일하다. 
+— 실은 중위 표현법도 내부적으로는 함수를 불러오는 형태로 파싱된다. 
+이것은 :func:`+`\ 와 :func:`*`\ 와 같은 연산자들을 다른 함수값들과 같이 
+변수처럼 대입하고 전달할 수 있다는 이야기가 된다:
 
 .. doctest:: f-plus
 
@@ -163,17 +159,16 @@ This also means that you can assign and pass around operators such as
     julia> f(1,2,3)
     6
 
-Under the name ``f``, the function does not support infix notation,
-however.
+그러나 ``f``\ 라는 이름은 중위표현법을 지원하지 않는다.
 
-Operators With Special Names
-----------------------------
+특별한 이름을 지니고 있는 연산자
+---------------------------------
 
-A few special expressions correspond to calls to functions with non-obvious
-names. These are:
+다음은 몇 가지 표현식들이 Julia 내부에서 
+특정한 이름을 가지고 있는 함수로 매핑된다는 것을 나열한 것이다:
 
 =================== ==================
-Expression          Calls
+표현식              함수 이름
 =================== ==================
 ``[A B C ...]``     :func:`hcat`
 ``[A, B, C, ...]``  :func:`vcat`
@@ -186,20 +181,19 @@ Expression          Calls
 ``A(x)``            :func:`call`
 =================== ==================
 
-These functions are included in the ``Base.Operators`` module even
-though they do not have operator-like names.
+이 함수들은 연산자같지 않은 이름을 지니고 있지만, 
+``Base.Operators`` 모듈에 포함되어 있다.
 
 .. _man-anonymous-functions:
 
-Anonymous Functions
+익명 함수
 -------------------
 
-Functions in Julia are `first-class objects
-<https://en.wikipedia.org/wiki/First-class_citizen>`_: they can be assigned to
-variables, and called using the standard function call syntax from the
-variable they have been assigned to. They can be used as arguments, and
-they can be returned as values. They can also be created anonymously,
-without being given a name, using either of these syntaxes:
+Julia에서 함수는 일급 객체 혹은 일급 시민(`first-class objects
+<https://en.wikipedia.org/wiki/First-class_citizen>`_) 이다: 
+함수는 변수에 대입될 수도 있고, 대입된 변수도 일반적인 함수 호출을 사용해서 
+호출할 수도 있다. 또 매개변수로도 사용될수도 있으면서도 어떤 값의 형태로 리턴될 수 있다.
+함수는 정해진 이름이 없이 익명으로 생성될 수 있는데 이 때 다음과 같은 문법을 사용한다:
 
 .. doctest::
 
@@ -211,15 +205,14 @@ without being given a name, using either of these syntaxes:
            end
     #2 (generic function with 1 method)
 
-This creates a function taking one argument *x* and returning the
-value of the polynomial *x*\ ^2 + 2\ *x* - 1 at that value.
-Notice that the result is a generic function, but with a
-compiler-generated name based on consecutive numbering.
+이 구문은 *x*\ 이라는 매개변수 하나를 받고 ``*x*\ ^2 + 2\ *x* - 1``\ 의 
+계산값을 반환하는 함수이다. 이 구문의 결과는 
+제너릭 함수(generic function)지만, 
+컴파일러가 순차적인 순번을 매긴 제너릭 함수라는 것을 알아두더야 할 필요가 있다.
 
-The primary use for anonymous functions is passing them to functions which take
-other functions as arguments. A classic example is :func:`map`,
-which applies a function to each value of an array and returns a new
-array containing the resulting values:
+익명함수의 주요 사용용도는 다른 함수의 매개변수로 넘겨지는 것이다. 
+전통적인 예시는 :func:`map`\ 를 들 수 있는데, 
+:func:`map`\ 은 배열의 각각의 값에 함수를 적용하여 결과를 새로운 배열로 반환한다:
 
 .. doctest::
 
@@ -229,11 +222,10 @@ array containing the resulting values:
      4.0
      2.0
 
-This is fine if a named function effecting the transform one wants
-already exists to pass as the first argument to :func:`map`. Often, however,
-a ready-to-use, named function does not exist. In these situations, the
-anonymous function construct allows easy creation of a single-use
-function object without needing a name:
+이름이 있으면서 이미 존재하는 함수를 :func:`map`\ 의 매개변수로 넘기는 것도 상관없다. 
+그러나, 그렇게 준비된 이름이 있는 함수가 있는 일은 흔하지 않다. 
+이런 상황에서는 익명함수는 이름이 필요없으면서 단일 사용의 목적으로 
+함수를 쉽게 만들기 좋게 해준다:
 
 .. doctest::
 
@@ -243,21 +235,19 @@ function object without needing a name:
      14
      -2
 
-An anonymous function accepting multiple arguments can be written using
-the syntax ``(x,y,z)->2x+y-z``. A zero-argument anonymous function is
-written as ``()->3``. The idea of a function with no arguments may seem
-strange, but is useful for "delaying" a computation. In this usage, a
-block of code is wrapped in a zero-argument function, which is later
-invoked by calling it as ``f()``.
+여러 개의 매개변수를 받는 익명함수는 ``(x,y,z)->2x+y-z``\ 와 같은 문법을 사용한다. 
+매개변수가 하나도 존재 하지 않는 경우에는 ``()->3``\ 을 사용한다. 
+매개변수가 없는 함수라는 아이디어는 이상해보일 수도 있지만, 연산을 "늦출 때" 유용하다. 
+매개변수가 없는 익명 함수 안의 코드는 나중에 ``f()``\ 라고 호출될 때 
+그제서야 실행된다.
 
-Multiple Return Values
+다수의 리턴값
 ----------------------
 
-In Julia, one returns a tuple of values to simulate returning multiple
-values. However, tuples can be created and destructured without needing
-parentheses, thereby providing an illusion that multiple values are
-being returned, rather than a single tuple value. For example, the
-following function returns a pair of values:
+Julia에서는 다수의 리턴값을 흉내내기 위해 리턴할 때 값들의 튜플(tuple)로 반환한다. 
+그러나, 튜플은 괄호 없이도 생성될 수도 있고 파괴될수도 있기에, 
+하나의 튜플값이 아니라 여러 개의 값들이 반환된다는 환상을 심어줄 수 있다. 
+예를 들어 다음 함수는 한 쌍의 값을 반환한다:
 
 .. doctest::
 
@@ -265,17 +255,17 @@ following function returns a pair of values:
              a+b, a*b
            end;
 
-If you call it in an interactive session without assigning the return
-value anywhere, you will see the tuple returned:
+만약 대화형 실행환경에서 함수의 결과를 다른 곳에 대입하지 않고 함수를 호출한다면, 
+튜플이 리턴된다는 것을 알 수 있다:
 
 .. doctest::
 
     julia> foo(2,3)
     (5,6)
 
-A typical usage of such a pair of return values, however, extracts each
-value into a variable. Julia supports simple tuple "destructuring" that
-facilitates this:
+하지만 저런 쌍으로 이루어진 리턴값들은 
+각각의 값들을 변수에 대입하는 방법으로 주로 사용한다. 
+Julia는 이를 쉽게 하기 위해 간단한 방법의 튜플 "파괴" 방법을 제공한다:
 
 .. doctest::
 
@@ -287,34 +277,32 @@ facilitates this:
     julia> y
     6
 
-You can also return multiple values via an explicit usage of the
-``return`` keyword::
+명시적으로 ``return`` 키워드를 이용할 때에도 여러개의 값들을 반환할 수 있다::
 
     function foo(a,b)
       return a+b, a*b
     end
 
-This has the exact same effect as the previous definition of ``foo``.
+이는 앞서 정의한 ``foo``\ 와 같은 결과를 가져온다.
 
 .. _man-varargs-functions:
 
-Varargs Functions
+가변인자 함수
 -----------------
 
-It is often convenient to be able to write functions taking an arbitrary
-number of arguments. Such functions are traditionally known as "varargs"
-functions, which is short for "variable number of arguments". You can
-define a varargs function by following the last argument with an
-ellipsis:
+때떄로 임의의 개수의 매개변수를 받는 함수를 작성해야할 때가 있다. 
+이런 함수들은 전통적으로 "가변인자" 함수라고 한다.  
+Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변수를 
+생략부호(...)로 넣는다:
 
 .. doctest::
 
     julia> bar(a,b,x...) = (a,b,x)
     bar (generic function with 1 method)
 
-The variables ``a`` and ``b`` are bound to the first two argument values
-as usual, and the variable ``x`` is bound to an iterable collection of
-the zero or more values passed to ``bar`` after its first two arguments:
+변수 ``a``\ 와 ``b``\ 는 평소처럼 처음 두 매개변수와 매핑되지만, 
+변수 ``x``\ 는 ``bar``\ 의 처음 두 매개변수 이후에 전달되는 
+0개 혹은 그 이상의 반복 가능한 컬렉션에 포함되어 있는 값과 매핑된다:
 
 .. doctest::
 
@@ -330,12 +318,14 @@ the zero or more values passed to ``bar`` after its first two arguments:
     julia> bar(1,2,3,4,5,6)
     (1,2,(3,4,5,6))
 
-In all these cases, ``x`` is bound to a tuple of the trailing values
-passed to ``bar``.
+이 모든 경우에 대해, ``x``\ 는 ``bar``\ 에 전달되는 뒷부분의 튜플에 매핑된다.
 
-On the flip side, it is often handy to "splice" the values contained in
-an iterable collection into a function call as individual arguments. To
-do this, one also uses ``...`` but in the function call instead:
+가변인수의 갯수도 통제 가능하다.
+이는 :ref:`man-vararg-fixedlen`\ 에서 나중에 다룰 예정이다.
+
+위와 반대로, 어떤 때는 반복가능한 컬렉션 안에 있는 값들을 
+함수 호출 시 각각의 매개변수와 결합시켜서 대응하는 것(splice)이 유용할 때가 있다. 
+이를 위해서는 ``...``\ 을 함수 정의가 아닌 함수 호출 시에 사용하도록 한다:
 
 .. doctest::
 
@@ -345,9 +335,8 @@ do this, one also uses ``...`` but in the function call instead:
     julia> bar(1,2,x...)
     (1,2,(3,4))
 
-In this case a tuple of values is spliced into a varargs call precisely
-where the variable number of arguments go. This need not be the case,
-however:
+위 경우에는 튜플이 가변 인자의 위치와 정확하게 대응되어 결합한다. 
+하지만, 반드시 이런 경우만 있는 것은 아니다:
 
 .. doctest::
 
@@ -363,8 +352,7 @@ however:
     julia> bar(x...)
     (1,2,(3,4))
 
-Furthermore, the iterable object spliced into a function call need not
-be a tuple:
+게다가, 반복가능한 객체는 반드시 튜플일 필요는 없다:
 
 .. doctest::
 
@@ -386,8 +374,8 @@ be a tuple:
     julia> bar(x...)
     (1,2,(3,4))
 
-Also, the function that arguments are spliced into need not be a varargs
-function (although it often is)::
+또한, 이런 매개변수 결합대응(splice)은 
+꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다::
 
     baz(a,b) = a + b
 
@@ -408,26 +396,27 @@ function (although it often is)::
     julia> baz(args...)
     no method baz(Int64,Int64,Int64)
 
-As you can see, if the wrong number of elements are in the spliced
-container, then the function call will fail, just as it would if too
-many arguments were given explicitly.
+보다시피, 매개변수 결합대응 객체의 수가 실제 함수의 정의와 맞지 않으면, 
+함수 호출은 실패할 것이다. 이는 일반 함수 호출에서 
+명시적으로 매개변수를 너무 많이 넣어서 함수 호출이 실패하는 것과 
+같은 결과이다.
 
-Optional Arguments
+선택적 매개변수
 ------------------
 
-In many cases, function arguments have sensible default values and therefore
-might not need to be passed explicitly in every call. For example, the
-library function :func:`parse(type,num,base) <parse>` interprets a string as a number
-in some base. The ``base`` argument defaults to ``10``. This behavior can be
-expressed concisely as::
+많은 경우에 있어서, 함수의 매개변수는 기본적으로 주어질 값(디폴트 값)을 가정할 수 있고,  
+그에 따라 함수 호출에 있어서 매번 모든 매개변수를 넣는 것이 바람직하지 않을 수도 있다. 
+예를 들어, 라이브러리 함수 :func:`parse(type,num,base) <parse>`\ 는 문자열을 
+``base``\ 에 해당하는 숫자로 해석한다. 기본값으로 십진법을 가정하면, ``base``\ 는 
+``10``\ 을 기본값으로 한다. 이런 경우를 간략하게 표현하면 다음과 같다::
 
     function parse(type, num, base=10)
         ###
     end
 
-With this definition, the function can be called with either two or three
-arguments, and ``10`` is automatically passed when a third argument is not
-specified:
+이런 식의 정의를 이용하면, 함수는 2개 혹은 3개의 매개변수로 호출할 수 있다. 
+만약 세번째 매개변수가 지정되지 않다면 자동적으로 ``10``\ 이라는 매개변수가 
+``base``\ 로 가정한 함수가 호출된다:
 
 .. doctest::
 
@@ -440,101 +429,105 @@ specified:
     julia> parse(Int,"12")
     12
 
-Optional arguments are actually just a convenient syntax for writing
-multiple method definitions with different numbers of arguments
-(see :ref:`man-note-on-optional-and-keyword-arguments`).
+선택적 매개변수는 정확하게 말해서 다양한 수의 매개변수를 지니는 다수의 
+메소드(method)를 정의하는 간편한 방법일 뿐이다.
 
 
-Keyword Arguments
+키워드 매개변수
 -----------------
 
-Some functions need a large number of arguments, or have a large number of
-behaviors. Remembering how to call such functions can be difficult. Keyword
-arguments can make these complex interfaces easier to use and extend by
-allowing arguments to be identified by name instead of only by position.
+어떤 함수들은 매우 많은 수의 매개변수가 필요하거나 아니면 매우 다양한 
+호출이 있을 수도 있다. 이런 함수를 호출하는 것은 어렵다는 것을 기억해보자. 
+키워드 매개변수는 이런 복잡한 인터페이스를 쉽게 사용할 수 있게 하고, 
+위치에 따라 매개변수를 구분하는 것이 아니라 이름에 따라 구분할 수 있게 한다.
 
-For example, consider a function ``plot`` that
-plots a line. This function might have many options, for controlling line
-style, width, color, and so on. If it accepts keyword arguments, a possible
-call might look like ``plot(x, y, width=2)``, where we have chosen to
-specify only line width. Notice that this serves two purposes. The call is
-easier to read, since we can label an argument with its meaning. It also
-becomes possible to pass any subset of a large number of arguments, in
-any order.
+예를 들어 선형의 그래프를 그리는 ``plot``\ 이라는 함수를 가정해볼 수 있다. 
+이 함수는 선의 스타일, 굵기, 색 등등을 설정할 수 있는 매우 많은 옵션을 
+가질 수 있다. 만약에 이 함수가 키워드 매개변수를 받는다면, 
+함수 호출 시 ``plot(x, y, width=2)``\ 처럼 선의 굵기만을 옵션으로 
+지정할 수 있을 것이다. 이런 호출은 매개변수에 의미를 부여함으로써 코드를 
+읽기 쉽게 만든다. 또한, 이는 순서에 상관없이 다양한 경우의 매개변수를 지니는 
+함수를 호출할 수 있게 해준다.
 
-Functions with keyword arguments are defined using a semicolon in the
-signature::
+키워드 매개변수를 가지는 함수는 일반적인 매개변수와 키워드 매개변수를 
+구부하는 기호로 세미콜론을 사용한다::
 
     function plot(x, y; style="solid", width=1, color="black")
         ###
     end
 
-When the function is called, the semicolon is optional: one can
-either call ``plot(x, y, width=2)`` or ``plot(x, y; width=2)``, but
-the former style is more common.  An explicit semicolon is required only
-for passing varargs or computed keywords as described below.
+함수가 호출될 때, 세미콜론이 반드시 필요한 것은 아니다: 
+``plot(x, y, width=2)``\ 와 ``plot(x, y; width=2)`` 모두 호출 가능하다, 
+그러나 ``plot(x, y, width=2)``\ 이 좀 더 널리 쓰이는 표현이다. 
+그러나 앞에서 언급한 가변 인자 함수나 앞으로 설명할 계산된 키워드 매개변수의 
+경우에는 세미콜론이 반드시 필요하다.
 
-Keyword argument default values are evaluated only when necessary
-(when a corresponding keyword argument is not passed), and in
-left-to-right order. Therefore default expressions may refer to
-prior keyword arguments.
+키워드 매개변수의 디폴트값은 필요할 때만 계산된다. (해당 키워드 매개변수가 
+전달되지 않았을 때만 계산된다) 그리고 이는 
+왼쪽에서 오른쪽으로 계산되기 때문에 디폴트값을 표현하는 표현식들은 
+앞서 언급한 키워드 매개변수를 가리킬 것이다.
 
-The types of keyword arguments can be made explicit as follows::
+키워드 매개변수의 타입은 다음과 같이 명시적으로 지정할 수 있다::
 
     function f(;x::Int64=1)
         ###
     end
 
-Extra keyword arguments can be collected using ``...``, as in varargs
-functions::
+가변 인자 함수에서처럼 함수 정의에서 명시되지 않은 
+추가 키워드 매개변수는 ``...``\ 을 이용해서 
+전달할 수 있다::
 
     function f(x; y=0, kwargs...)
         ###
     end
 
-Inside ``f``, ``kwargs`` will be a collection of ``(key,value)`` tuples,
-where each ``key`` is a symbol. Such collections can be passed as keyword
-arguments using a semicolon in a call, e.g. ``f(x, z=1; kwargs...)``.
-Dictionaries can also be used for this purpose.
+``f``\ 안에서, ``kwargs``\ 는 ``key``\ 를 매개변수 이름으로 하는 
+``(key,value)`` 튜플의 집합체이다. 이런 컬렉션들은 함수 호출에서 
+세미콜론을 이용한 키워드 매개변수처럼 전달된다. 
+예를 들어 ``f(x, z=1; kwargs...)`` 같이 말이다. 
+딕셔너리 타입의 컬렉션들 또한 이런 목적으로 사용될 수 있다.
 
-One can also pass ``(key,value)`` tuples, or any iterable
-expression (such as a ``=>`` pair) that can be assigned to such a
-tuple, explicitly after a semicolon.  For example, ``plot(x, y;
-(:width,2))`` and ``plot(x, y; :width => 2)`` are equivalent to
-``plot(x, y, width=2)``.  This is useful in situations where the
-keyword name is computed at runtime.
+키워드 매개변수를 ``(key,value)`` 튜플 혹은 
+튜플에 대입될 수 있는 반복가능한 표현식
+(예를 들어 ``=>``\ 로 만들 수 있는 한 쌍의 값)
+을 통해서도 전달할 수 있다. 다만 이 경우에는 세미콜론 이후에 전달해야한다. 
+예를 들어, ``plot(x, y; (:width,2))``\ 와 ``plot(x, y; :width => 2)``\ 는 
+``plot(x, y, width=2)``\ 와 동등한 표현이다. 이것은 실해중에 키워드 이름이 
+결정되는 경우 유용하다. 
 
 .. _man-evaluation-scope-default-values:
 
-Evaluation Scope of Default Values
+디폴트 값의 계산 스코프(scope)
 ----------------------------------
 
-Optional and keyword arguments differ slightly in how their default
-values are evaluated. When optional argument default expressions are
-evaluated, only *previous* arguments are in scope. In contrast, *all*
-the arguments are in scope when keyword arguments default expressions
-are evaluated. For example, given this definition::
+선택적 매개변수와 키워드 매개변수는 기본값을 어떻게 계산하는 지에 따라 
+미세한 차이를 보인다. 선택적 매개변수의 기본값 표현식이 계산될 때는 
+선택적 매개변수가 명시되기 전의 *이전의* 매개변수만이 현재 스코프 안에 있을 수 있다. 
+반면에, 키워드 매개변수의 경우는 *모든* 매개변수가 현재 스코프안에 있다. 
+예를 들어, 다음과 같은 정의를 보면::
 
     function f(x, a=b, b=1)
         ###
     end
 
-the ``b`` in ``a=b`` refers to a ``b`` in an outer scope, not the
-subsequent argument ``b``. However, if ``a`` and ``b`` were keyword
-arguments instead, then both would be created in the same scope and
-the ``b`` in ``a=b`` would refer the the subsequent argument ``b``
-(shadowing any ``b`` in an outer scope), which would result in an
-undefined variable error (since the default expressions are evaluated
-left-to-right, and ``b`` has not been assigned yet).
+``a=b``\ 에서의 ``b``\ 는 함수 ``f``\ 의 매개변수 ``b``\ 가 아닌 
+함수 바깥의 ``b``\ 를 가리킨다. 그러나, ``a``\ 와 ``b``\ 가 
+키워드 매개변수였다면 ``a``\ 와 ``b`` 모두 같은 스코프에 있고 
+``a=b``\ 에서의 ``b``\ 는 매개변수 ``b``\ 를 가리켰을 것이다. 
+(이 경우 바깥쪽 스코프의 ``b``\ 와는 아무런 상관이 없다) 
+이 경우, 위 코드는 디폴트값 표현식은 왼쪽에서 오른쪽으로 
+계산되기 때문에 ``b``\ 에 어떠한 값도 지정되지 않아 
+undefined variable error를 일으킨다.
 
 
-Do-Block Syntax for Function Arguments
+함수 매개변수의 Do-Block 문법
 --------------------------------------
 
-Passing functions as arguments to other functions is a powerful technique,
-but the syntax for it is not always convenient. Such calls are especially
-awkward to write when the function argument requires multiple lines. As
-an example, consider calling :func:`map` on a function with several cases::
+함수를 다른 함수의 매개변수로 전달하는 것은 강력한 기술이지만, 
+이에 관련한 문법은 항상 편리한 것은 아니다. 
+이런 함수 호출은 특히 함수의 매개변수가 여러 줄에 걸쳐 있을 경우 
+혼돈을 안겨줄 수 있다. 예를 들어, :func:`map`\ 을 여러 경우에 따라 
+다르게 호출할 때를 생각해보자::
 
     map(x->begin
                if x < 0 && iseven(x)
@@ -547,7 +540,7 @@ an example, consider calling :func:`map` on a function with several cases::
            end,
         [A, B, C])
 
-Julia provides a reserved word ``do`` for rewriting this code more clearly::
+Julia는 예약어 ``do``\ 를 이용하여 위의 코드를 보다 간결할 수 있도록 한다::
 
     map([A, B, C]) do x
         if x < 0 && iseven(x)
@@ -559,28 +552,28 @@ Julia provides a reserved word ``do`` for rewriting this code more clearly::
         end
     end
 
-The ``do x`` syntax creates an anonymous function with argument ``x``
-and passes it as the first argument to :func:`map`. Similarly, ``do a,b``
-would create a two-argument anonymous function, and a plain ``do``
-would declare that what follows is an anonymous function of the form
-``() -> ...``.
+``do x`` 문법은 :func:`map`\ 의 첫 번째 매개변수로 전달하는 
+매개변수 ``x``\ 를 지니는 익명함수를 생성한다. 
+마찬가지로, ``do a,b``\ 는 두 개의 매개변수를 받는 익명함수를 생성하고, 
+``do`` 만 쓰면 ``() -> ...`` 형태를 지니는 익명함수를 선언하게 된다. 
 
-How these arguments are initialized depends on the "outer" function;
-here, :func:`map` will sequentially set ``x`` to ``A``, ``B``, ``C``,
-calling the anonymous function on each, just as would happen in the
-syntax ``map(func, [A, B, C])``.
+이 매개변수들은 "바깥쪽" 함수들에 의해서 초기화된다; 
+여기서 :func:`map`\ 는 순차적으로 ``x``\ 를 ``A``, ``B``, ``C``\ 로
+설정하고 각각의 익명함수를 호출한다. 
+이는 ``map(func, [A, B, C])``\ 라고 호출할 때 벌어지는 일들과 똑같다. 
 
-This syntax makes it easier to use functions to effectively extend the
-language, since calls look like normal code blocks. There are many
-possible uses quite different from :func:`map`, such as managing system
-state. For example, there is a version of :func:`open` that runs code
-ensuring that the opened file is eventually closed::
+이 문법은 함수 호출을 일반적인 코드 블럭처럼 보이게 함으로써 
+언어를 효과적으로 확장하여 함수를 쉽게 쓸 수 있게 해준다. 
+시스템의 상태를 관리할 때와 같이 
+:func:`map`\ 의 상당히 다양한 형태를 이용하는 경우가 있다. 
+예를 들어, 함수가 끝날 때 열었던 파일을 반드시 닫는 
+:func:`open`\ 의 또 다른 버전이 있다고 하자::
 
     open("outfile", "w") do io
         write(io, data)
     end
 
-This is accomplished by the following definition::
+:func:`open`\ 은 다음과 같이 정의되었다:: 
 
     function open(f::Function, args...)
         io = open(args...)
@@ -591,26 +584,57 @@ This is accomplished by the following definition::
         end
     end
 
-In contrast to the :func:`map` example, here ``io`` is initialized by the
-*result* of ``open("outfile", "w")``.  The stream is then passed to
-your anonymous function, which performs the writing; finally, the
-:func:`open` function ensures that the stream is closed after your
-function exits.  The ``try/finally`` construct will be described in
-:ref:`man-control-flow`.
+여기서 :func:`open`\ 는 쓰기용 파일을 먼저 열고, ``do ... end`` 블록에 
+정의한 익명함수(``f``, ``do`` 블록에서는 func:`write`\ )에 
+출력용 스트림을 전달한 것이다. 
+함수 ``f``\ 가 종료하면, :func:`open`\ 은 
+``f``\ 가 정상적으로 종료되었든 예외를 발생했든 간에 
+출력용 스트림이 항상 닫히도록 한다. 
+(``try/finally`` 구문은 :ref:`man-control-flow`\ 에서 설명할 예정이다.
 
-With the ``do`` block syntax, it helps to check the documentation or
-implementation to know how the arguments of the user function are
-initialized.
+``do`` 블록 문법은 문서나 구현이 사용자가 만든 함수의 매개변수가 
+어떻게 초기화되었는지 알 수 있도록 도와주는 역할을 한다.
 
-Further Reading
+.. _man-dot-vectorizing:
+
+함수의 벡터화를 위한 Dot 문법
+------------------------------------
+
+과학계산용 언어에서는 함수를 "벡터화"된 버전으로 쓰는 것이 흔한 일이다. 
+예를 들어 주어진 함수 ``f(x)``\ 를 배열 ``A`` 각각의 원소에 적용하고 싶으면 
+``f(A)``\ 라고 쓰듯이 말이다. 
+이런 형태의 문법은 데이터 처리할 때 편리하지만, 다른 언어들에서의 "벡터화"는 
+성능을 위해서 필요할 때도 있다: 만약 반복문이 느리다면, "벡터화"된 버전의 함수는 
+저수준의 언어로 쓰여진 빠른 라이브러리 코드를 불러온다. 
+Julia에서는 벡터화된 함수를 성능때문에 *반드시 써야할 필요는 없다.*  
+그리고 이는 벡터화된 형태에 구애받지 않고 사용자만의 반복문을 마음대로 쓸 수 있게 
+해 준다. (:ref:`man-performance-tips`:)  그러나, 여전히 벡터화는 편리한 존재이기에, 
+Julia로 쓰여진 아무 함수 ``f``\ 는 배열(혹은 다른 컬렉션)에 ``f.(A)``\ 라는 문법을 
+이용하면 배열(혹은 다른 컬렉션)의 각 원소에 적용할 수 있다.
+
+물론, ``f(A::AbstractArray) = map(f, A)``\ 와 같은 문법을 이용하면, 
+``f``\ 라고 하는 특별히 만든 "벡터화"된 메소드를 작성할 때 점을 생략할 수 있다.
+물론 이 경우는 ``f.(A)``\ 와 마찬가지로 효율적이다. 
+그러나 이런 접근법은 추후 어떤 함수를 벡터화할지 일일이 결정해야할 필요가 있다.
+
+더 일반적으로, ``f.(args...)``\ 는 여러 개의 배열(서로 다른 모양의 배열이라도), 
+혹은 배열과 스칼라의 혼합된 형태끼리에도 벡터화를 적용할 수 있는 
+``broadcast(f, args)``\ 와도 같다. 
+예를 들어, 만약 ``f(x,y) = 3x + 4y``\ 라고 하면, ``f.(pi.A)``\ 는 
+``A``\ 의 각각의 원소 ``a``\ 에 대해 ``f(pi,a)``\ 를 적용한 새 배열이 리턴될 것이고, 
+``f.(vector1,vector2)``\ 는 각각의 인덱스 ``i``\ 에 대해 
+``f(vector1[i],vector2[i])``\ 로 구성된 새 벡터를 리턴할 것이다. 
+(물론 두 벡터가 다른 길이면 예외를 발생시킬 것이다)
+
+더 읽을거리
 ---------------
 
-We should mention here that this is far from a complete picture of
-defining functions. Julia has a sophisticated type system and allows
-multiple dispatch on argument types. None of the examples given here
-provide any type annotations on their arguments, meaning that they are
-applicable to all types of arguments. The type system is described in
-:ref:`man-types` and defining a function in terms of methods chosen
-by multiple dispatch on run-time argument types is described in
-:ref:`man-methods`.
-
+함수 정의에 대해 여기서 언급한 것 뿐만 아니라 다른 이야깃거리들이 
+더 많다. Julia는 정교한 타입시스템을 가지고 있고 이는 
+매개변수에 따라 멀티플 디스패치를 가능하게 해준다. 
+여기에서 언급한 어떤 예제도 매개변수의 타입 어노테이션(어떠한 
+타입에도 적용가능하도록 하는 것)에 대한 
+예제를 언급하지 않았다. 타입 시스템은 :ref:`man-types`\ 에서 
+설명할 것이고, 프로그램 실행시 결정되는 매개변수 타입에 의한 
+멀티플 디스패치에 관련한 함수에 대한 설명은 :ref:`man-methods`\ 에서 
+논의할 예정이다.

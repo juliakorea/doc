@@ -55,8 +55,8 @@ Julia의 프로모션 문법은 다양한 타입간의 산술 연산을 자동�
     julia> 3*2/12
     0.5
 
-(전통적으로, 연산자들과 피연산자들 간의 간격을 넓게 유지하지만,
-이 사항에 문법적인 강제성은 없다.)
+(일반적으로, 다른 근처의 연산자들보다 먼저 적용되는 연산자들은 피연산자와의 간격을 좀 더 좁게 유지한다.
+예를 들어, 일반적으로 ``-x + 2``\ 와 같이 표현하는데,  ``x``\ 가 먼저 음수가 되고, 그 다음에 ``2``\ 가 더해지기 때문에 저런 식으로 표현될 수 있다.)
 
 비트 연산자
 -----------------
@@ -300,7 +300,10 @@ Julia는 :obj:`.<` 이외에도 :obj:`.*`, :obj:`.+` 등의 항목간 비교 연
 
 다음은 중첩된 비교 연산이 어떻게 평가되어지는지 나타낸다::
 
-    v(x) = (println(x); x)
+.. doctest::
+
+    julia> v(x) = (println(x); x)
+    v (generic function with 1 method)
 
     julia> v(1) < v(2) <= v(3)
     2
@@ -415,6 +418,12 @@ Julia는 부정확한 변환에 있어서 서로 차이가 발생하는 총 세 
 Julia는 수학 함수와 연산자의 종합 콜렉션을 제공하고 있다. 이런 수학적 연산은
 정수, 부동소수점 실수, 유리수, 복소수를 비롯한 어떠한 합당한 수학적 정의에 의한 수에 
 대해서도 정의할 수 있다.
+게다가, 이런 함수들은 (Julia의 다른 함수들과 같은) "벡터화"된 형태를 취하여 
+``f.(A)`` 와 같은 문법을 이용하여 
+배열이나 다른 컬렉션들과 함께 적용될 수 있다. 
+예를 들어, ``sin.(A)``\ 은 배열 ``A``\ 의 각각의 원소에 대해 
+사인값을 계산할 수 있게 한다. 
+자세한 내용은 :ref:`man-dot-vectorizing`\ 을 참고하면 알 수 있다:
 
 .. _man-rounding-functions:
 
@@ -445,6 +454,7 @@ Julia는 수학 함수와 연산자의 종합 콜렉션을 제공하고 있다. 
 :func:`cld(x,y) <cld>`       올림 나눗셈; 몫이 ``+Inf``\ 을 향해 근사
 :func:`rem(x,y) <rem>`       나머지; ``x == div(x,y)*y + rem(x,y)``\ 를 만족; ``x``\ 의 부호와 같다. 
 :func:`mod(x,y) <mod>`       나머지; ``x == fld(x,y)*y + mod(x,y)``\ 를 만족; ``y``\ 의 부호와 같다.
+:func:`mod1(x,y) <mod1>`     오프셋 1이 적용된 ``mod()`` 함수; ``mod(r, y) == mod(x, y)``\ 일 때,  ``y>0``\ 의 경우에는 ``r∈(0,y]``\ 을, ``y<0``\ 의 경우에는 ``r∈[y,0)``\ 을 반환한다.
 :func:`mod2pi(x) <mod2pi>`   2pi에 대한 나머지;  ``0 <= mod2pi(x)  < 2pi``
 :func:`divrem(x,y) <divrem>` ``(div(x,y),rem(x,y))``\ 를 반환 
 :func:`fldmod(x,y) <fldmod>` ``(fld(x,y),mod(x,y))``\ 를 반환
@@ -567,5 +577,3 @@ Julia에서는 모든 표준 삼각함수들과 포물선 함수들이 정의되
 
 .. |airylist| replace:: :func:`airy(z) <airy>`, :func:`airyai(z) <airyai>`, ``airy(0,z)``
 .. |airyprimelist| replace:: :func:`airyprime(z) <airyprime>`, :func:`airyaiprime(z) <airyaiprime>`, ``airy(1,z)``
-
-

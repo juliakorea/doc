@@ -134,7 +134,7 @@ Mathematical Operators
 
    .. Docstring generated from Julia source
 
-   Modulus after flooring division, returning in the range [0,``y``\ ), if ``y`` is positive, or (``y``\ ,0] if ``y`` is negative.
+   Modulus after flooring division, returning in the range :math:`[0,y)`\ , if ``y`` is positive, or :math:`(y,0]` if ``y`` is negative.
 
    .. code-block:: julia
 
@@ -144,9 +144,9 @@ Mathematical Operators
 
    .. Docstring generated from Julia source
 
-   Modulus after division by 2pi, returning in the range [0,2pi).
+   Modulus after division by ``2π``\ , returning in the range :math:`[0,2π)`\ .
 
-   This function computes a floating point representation of the modulus after division by numerically exact 2pi, and is therefore not exactly the same as mod(x,2pi), which would compute the modulus of ``x`` relative to division by the floating-point number 2pi.
+   This function computes a floating point representation of the modulus after division by numerically exact ``2π``\ , and is therefore not exactly the same as ``mod(x,2π)``\ , which would compute the modulus of ``x`` relative to division by the floating-point number ``2π``\ .
 
 .. function:: rem(x, y)
               %(x, y)
@@ -186,19 +186,13 @@ Mathematical Operators
 
    .. Docstring generated from Julia source
 
-   Modulus after flooring division, returning a value in the range ``(0, y]``\ .
+   Modulus after flooring division, returning a value ``r`` such that ``mod(r, y) == mod(x, y)``  in the range :math:`(0, y]` for positive ``y`` and in the range :math:`[y,0)` for negative ``y``\ .
 
 .. function:: fldmod1(x, y)
 
    .. Docstring generated from Julia source
 
    Return ``(fld1(x,y), mod1(x,y))``\ .
-
-.. function:: rem1(x, y)
-
-   .. Docstring generated from Julia source
-
-   (Deprecated.) Remainder after division, returning in the range ``(0, y]``\ .
 
 .. _//:
 .. function:: //(num, den)
@@ -507,7 +501,7 @@ Mathematical Operators
        julia> A=[1.0 2.0; 3.0 4.0]; B=[1.0 1.0; 1.0 1.0]; Y = similar(B); A_mul_B!(Y, A, B);
 
        julia> Y
-       2x2 Array{Float64,2}:
+       2×2 Array{Float64,2}:
         3.0  3.0
         7.0  7.0
 
@@ -890,7 +884,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Compute the hypotenuse :math:`\sqrt{\sum x_i}` avoiding overflow and underflow.
+   Compute the hypotenuse :math:`\sqrt{\sum x_i^2}` avoiding overflow and underflow.
 
 .. function:: log(x)
 
@@ -1359,19 +1353,6 @@ Mathematical Functions
 
    Compute ``factorial(n)/factorial(k)``\ .
 
-.. function:: factor(n) -> Dict
-
-   .. Docstring generated from Julia source
-
-   Compute the prime factorization of an integer ``n``\ . Returns a dictionary. The keys of the dictionary correspond to the factors, and hence are of the same type as ``n``\ . The value associated with each key indicates the number of times the factor appears in the factorization.
-
-   .. doctest::
-
-       julia> factor(100) # == 2*2*5*5
-       Dict{Int64,Int64} with 2 entries:
-         2 => 2
-         5 => 2
-
 .. function:: gcd(x,y)
 
    .. Docstring generated from Julia source
@@ -1439,14 +1420,6 @@ Mathematical Functions
    .. Docstring generated from Julia source
 
    Next integer not less than ``n`` that can be written as :math:`\prod k_i^{p_i}` for integers :math:`p_1`\ , :math:`p_2`\ , etc.
-
-   For a list of integers i1, i2, i3, find the smallest
-
-   .. code-block:: julia
-
-       i1^n1 * i2^n2 * i3^n3 >= x
-
-   for integer n1, n2, n3
 
 .. function:: invmod(x,m)
 
@@ -1662,7 +1635,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Dirichlet eta function :math:`\eta(s) = \sum^\infty_{n=1}(-)^{n-1}/n^{s}`\ .
+   Dirichlet eta function :math:`\eta(s) = \sum^\infty_{n=1}(-1)^{n-1}/n^{s}`\ .
 
 .. function:: zeta(s)
 
@@ -1674,9 +1647,9 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Hurwitz zeta function :math:`\zeta(s, z)`\ .  (This is equivalent to the Riemann zeta function :math:`\zeta(s)` for the case of ``z=1``\ .)
+   Generalized zeta function :math:`\zeta(s, z)`\ , defined by the sum :math:`\sum_{k=0}^\infty ((k+z)^2)^{-s/2}`\ , where any term with :math:`k+z=0` is excluded.  For :math:`\Re z > 0`\ , this definition is equivalent to the Hurwitz zeta function :math:`\sum_{k=0}^\infty (k+z)^{-s}`\ .   For :math:`z=1`\ , it yields the Riemann zeta function :math:`\zeta(s)`\ .
 
-.. function:: ndigits(n, b)
+.. function:: ndigits(n, b = 10)
 
    .. Docstring generated from Julia source
 
@@ -1702,6 +1675,12 @@ Statistics
    .. Docstring generated from Julia source
 
    Compute the mean of whole array ``v``\ , or optionally along the dimensions in ``region``\ . Note: Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArray`` package is recommended.
+
+.. function:: mean(f::Function, v)
+
+   .. Docstring generated from Julia source
+
+   Apply the function ``f`` to each element of ``v`` and take the mean.
 
 .. function:: mean!(r, v)
 
@@ -1768,42 +1747,6 @@ Statistics
    .. Docstring generated from Julia source
 
    Like ``median``\ , but may overwrite the input vector.
-
-.. function:: hist(v[, n]) -> e, counts
-
-   .. Docstring generated from Julia source
-
-   Compute the histogram of ``v``\ , optionally using approximately ``n`` bins. The return values are a range ``e``\ , which correspond to the edges of the bins, and ``counts`` containing the number of elements of ``v`` in each bin. Note: Julia does not ignore ``NaN`` values in the computation.
-
-.. function:: hist(v, e) -> e, counts
-
-   .. Docstring generated from Julia source
-
-   Compute the histogram of ``v`` using a vector/range ``e`` as the edges for the bins. The result will be a vector of length ``length(e) - 1``\ , such that the element at location ``i`` satisfies ``sum(e[i] .< v .<= e[i+1])``\ . Note: Julia does not ignore ``NaN`` values in the computation.
-
-.. function:: hist!(counts, v, e) -> e, counts
-
-   .. Docstring generated from Julia source
-
-   Compute the histogram of ``v``\ , using a vector/range ``e`` as the edges for the bins. This function writes the resultant counts to a pre-allocated array ``counts``\ .
-
-.. function:: hist2d(M, e1, e2) -> (edge1, edge2, counts)
-
-   .. Docstring generated from Julia source
-
-   Compute a "2d histogram" of a set of N points specified by N-by-2 matrix ``M``\ . Arguments ``e1`` and ``e2`` are bins for each dimension, specified either as integer bin counts or vectors of bin edges. The result is a tuple of ``edge1`` (the bin edges used in the first dimension), ``edge2`` (the bin edges used in the second dimension), and ``counts``\ , a histogram matrix of size ``(length(edge1)-1, length(edge2)-1)``\ . Note: Julia does not ignore ``NaN`` values in the computation.
-
-.. function:: hist2d!(counts, M, e1, e2) -> (e1, e2, counts)
-
-   .. Docstring generated from Julia source
-
-   Compute a "2d histogram" with respect to the bins delimited by the edges given in ``e1`` and ``e2``\ . This function writes the results to a pre-allocated array ``counts``\ .
-
-.. function:: histrange(v, n)
-
-   .. Docstring generated from Julia source
-
-   Compute *nice* bin ranges for the edges of a histogram of ``v``\ , using approximately ``n`` bins. The resulting step sizes will be 1, 2 or 5 multiplied by a power of 10. Note: Julia does not ignore ``NaN`` values in the computation.
 
 .. function:: midpoints(e)
 
@@ -1961,7 +1904,7 @@ multi-threading. Use ``FFTW.set_num_threads(np)`` to use ``np`` threads.
 
    Pre-plan an optimized FFT along given dimensions (``dims``\ ) of arrays matching the shape and type of ``A``\ .  (The first two arguments have the same meaning as for :func:`fft`\ .) Returns an object ``P`` which represents the linear operator computed by the FFT, and which contains all of the information needed to compute ``fft(A, dims)`` quickly.
 
-   To apply ``P`` to an array ``A``\ , use ``P * A``\ ; in general, the syntax for applying plans is much like that of matrices.  (A plan can only be applied to arrays of the same size as the ``A`` for which the plan was created.)  You can also apply a plan with a preallocated output array ``Â`` by calling ``A_mul_B!(Â, plan, A)``\ .  You can compute the inverse-transform plan by ``inv(P)`` and apply the inverse plan with ``P \ Â`` (the inverse plan is cached and reused for subsequent calls to ``inv`` or ``\``\ ), and apply the inverse plan to a pre-allocated output array ``A`` with ``A_ldiv_B!(A, P, Â)``\ .
+   To apply ``P`` to an array ``A``\ , use ``P * A``\ ; in general, the syntax for applying plans is much like that of matrices.  (A plan can only be applied to arrays of the same size as the ``A`` for which the plan was created.)  You can also apply a plan with a preallocated output array ``Â`` by calling ``A_mul_B!(Â, plan, A)``\ .  (For ``A_mul_B!``\ , however, the input array ``A`` must be a complex floating-point array like the output ``Â``\ .) You can compute the inverse-transform plan by ``inv(P)`` and apply the inverse plan with ``P \ Â`` (the inverse plan is cached and reused for subsequent calls to ``inv`` or ``\``\ ), and apply the inverse plan to a pre-allocated output array ``A`` with ``A_ldiv_B!(A, P, Â)``\ .
 
    The ``flags`` argument is a bitwise-or of FFTW planner flags, defaulting to ``FFTW.ESTIMATE``\ . e.g. passing ``FFTW.MEASURE`` or ``FFTW.PATIENT`` will instead spend several seconds (or more) benchmarking different possible FFT algorithms and picking the fastest one; see the FFTW manual for more information on planner flags.  The optional ``timelimit`` argument specifies a rough upper bound on the allowed planning time, in seconds. Passing ``FFTW.MEASURE`` or ``FFTW.PATIENT`` may cause the input array ``A`` to be overwritten with zeros during plan creation.
 

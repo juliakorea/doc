@@ -103,12 +103,12 @@ Applying it to any other types of arguments will result in a :exc:`MethodError`:
       f(!Matched::Float64, ::Float64)
 
     julia> f(2.0, "3.0")
-    ERROR: MethodError: `f` has no method matching f(::Float64, ::ASCIIString)
+    ERROR: MethodError: `f` has no method matching f(::Float64, ::String)
     Closest candidates are:
       f(::Float64, !Matched::Float64)
 
     julia> f("2.0", "3.0")
-    ERROR: MethodError: `f` has no method matching f(::ASCIIString, ::ASCIIString)
+    ERROR: MethodError: `f` has no method matching f(::String, ::String)
 
 As you can see, the arguments must be precisely of type :obj:`Float64`.
 Other numeric types, such as integers or 32-bit floating-point values,
@@ -173,7 +173,7 @@ function ``f`` remains undefined, and applying it will still result in a
 .. doctest::
 
     julia> f("foo", 3)
-    ERROR: MethodError: `f` has no method matching f(::ASCIIString, ::Int64)
+    ERROR: MethodError: `f` has no method matching f(::String, ::Int64)
     Closest candidates are:
       f(!Matched::Number, ::Number)
 
@@ -223,7 +223,9 @@ pairs of arguments to which no other method definition applies.
 
 Although it seems a simple concept, multiple dispatch on the types of
 values is perhaps the single most powerful and central feature of the
-Julia language. Core operations typically have dozens of methods::
+Julia language. Core operations typically have dozens of methods:
+
+.. doctest::
 
     julia> methods(+)
     # 139 methods for generic function "+":
@@ -320,9 +322,9 @@ Julia language. Core operations typically have dozens of methods::
     +(A::Base.LinAlg.SymTridiagonal{T},B::Base.LinAlg.Diagonal{T}) at linalg/special.jl:122
     +(A::Base.LinAlg.Bidiagonal{T},B::Base.LinAlg.SymTridiagonal{T}) at linalg/special.jl:121
     +(A::Base.LinAlg.SymTridiagonal{T},B::Base.LinAlg.Bidiagonal{T}) at linalg/special.jl:122
-    +{Tv1,Ti1,Tv2,Ti2}(A_1::Base.SparseMatrix.SparseMatrixCSC{Tv1,Ti1},A_2::Base.SparseMatrix.SparseMatrixCSC{Tv2,Ti2}) at sparse/sparsematrix.jl:873
-    +(A::Base.SparseMatrix.SparseMatrixCSC{Tv,Ti<:Integer},B::Array{T,N}) at sparse/sparsematrix.jl:885
-    +(A::Array{T,N},B::Base.SparseMatrix.SparseMatrixCSC{Tv,Ti<:Integer}) at sparse/sparsematrix.jl:887
+    +{Tv1,Ti1,Tv2,Ti2}(A_1::Base.SparseArrays.SparseMatrixCSC{Tv1,Ti1},A_2::Base.SparseMatrix.SparseMatrixCSC{Tv2,Ti2}) at sparse/sparsematrix.jl:873
+    +(A::Base.SparseArrays.SparseMatrixCSC{Tv,Ti<:Integer},B::Array{T,N}) at sparse/sparsematrix.jl:885
+    +(A::Array{T,N},B::Base.SparseArrays.SparseMatrixCSC{Tv,Ti<:Integer}) at sparse/sparsematrix.jl:887
     +{P<:Base.Dates.Period}(Y::Union{SubArray{P<:Base.Dates.Period,N,A<:DenseArray{T,N},I<:Tuple{Vararg{Union{Colon,Range{Int64},Int64}}},LD},DenseArray{P<:Base.Dates.Period,N}},x::P<:Base.Dates.Period) at dates/periods.jl:50
     +{T<:Base.Dates.TimeType}(r::Range{T<:Base.Dates.TimeType},x::Base.Dates.Period) at dates/ranges.jl:39
     +{T<:Number}(x::AbstractArray{T<:Number,N}) at abstractarray.jl:442
@@ -539,16 +541,42 @@ can also constrain type parameters of methods::
     true
 
     julia> same_type_numeric("foo", 2.0)
-    no method same_type_numeric(ASCIIString,Float64)
+    no method same_type_numeric(String,Float64)
 
     julia> same_type_numeric("foo", "bar")
-    no method same_type_numeric(ASCIIString,ASCIIString)
+    no method same_type_numeric(String,String)
 
     julia> same_type_numeric(Int32(1), Int64(2))
     false
 
 The ``same_type_numeric`` function behaves much like the ``same_type``
 function defined above, but is only defined for pairs of numbers.
+
+.. _man-vararg-fixedlen:
+
+Parametrically-constrained Varargs methods
+------------------------------------------
+
+Function parameters can also be used to constrain the number of arguments that may be supplied to a "varargs" function (:ref:`man-varargs-functions`).  The notation ``Vararg{T,N}`` is used to indicate such a constraint.  For example:
+
+.. doctest::
+
+    julia> bar(a,b,x::Vararg{Any,2}) = (a,b,x)
+
+    julia> bar(1,2,3)
+    ERROR: MethodError: `bar` has no matching method bar(::Int, ::Int, ::Int)
+
+    julia> bar(1,2,3,4)
+    (1,2,(3,4))
+
+    julia> bar(1,2,3,4,5)
+    ERROR: MethodError: `bar` has no method matching bar(::Int, ::Int, ::Int, ::Int, ::Int)
+
+More usefully, it is possible to constrain varargs methods by a parameter.  For example::
+
+    function getindex{T,N}(A::AbstractArray{T,N}, indexes::Vararg{Number,N})
+
+would be called only when the number of ``indexes`` matches the dimensionality of the array.
 
 .. _man-note-on-optional-and-keyword-arguments:
 

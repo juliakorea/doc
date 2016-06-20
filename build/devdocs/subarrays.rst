@@ -126,7 +126,7 @@ parent array, whereas for ``S2`` one needs to apply them to the
 second and third.  The simplest approach to indexing would be to do
 the type-analysis at runtime::
 
-    parentindexes = Array(Any, 0)
+    parentindexes = Array{Any}(0)
     for i = 1:ndims(S.parent)
         ...
         if isa(thisindex, Int)
@@ -168,7 +168,7 @@ the size of the array.  It therefore can miss some cases in which the
 stride happens to be uniform::
 
  julia> A = reshape(1:4*2, 4, 2)
- 4x2 Array{Int64,2}:
+ 4×2 Array{Int64,2}:
   1  5
   2  6
   3  7
@@ -186,7 +186,7 @@ efficiently.  However, success in this case depends on the size of the
 array: if the first dimension instead were odd, ::
 
  julia> A = reshape(1:5*2, 5, 2)
- 5x2 Array{Int64,2}:
+ 5×2 Array{Int64,2}:
   1   6
   2   7
   3   8

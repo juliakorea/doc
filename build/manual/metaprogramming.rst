@@ -102,7 +102,7 @@ objects:
     julia> dump(ex2)
     Expr
       head: Symbol call
-      args: Array(Any,(3,))
+      args: Array{Any}((3,))
         1: Symbol +
         2: Int64 1
         3: Int64 1
@@ -138,19 +138,18 @@ used as one building-block of expressions:
     julia> typeof(ans)
     Symbol
 
-:obj:`Symbol`\ s can also be created using :func:`symbol`, which takes any
-number of arguments and creates a new symbol by concatenating their string
-representations together:
+The :obj:`Symbol` constructor takes any number of arguments and creates a
+new symbol by concatenating their string representations together:
 
 .. doctest::
 
-    julia> :foo == symbol("foo")
+    julia> :foo == Symbol("foo")
     true
 
-    julia> symbol("func",10)
+    julia> Symbol("func",10)
     :func10
 
-    julia> symbol(:var,'_',"sym")
+    julia> Symbol(:var,'_',"sym")
     :var_sym
 
 In the context of an expression, symbols are used to indicate access to
@@ -612,7 +611,7 @@ Compare:
 .. doctest::
 
     julia> typeof(:("a should equal b"))
-    ASCIIString
+    String
 
     julia> typeof(:("a ($a) should equal b ($b)!"))
     Expr
@@ -620,12 +619,12 @@ Compare:
     julia> dump(:("a ($a) should equal b ($b)!"))
     Expr
       head: Symbol string
-      args: Array(Any,(5,))
-        1: ASCIIString "a ("
+      args: Array{Any}((5,))
+        1: String "a ("
         2: Symbol a
-        3: ASCIIString ") should equal b ("
+        3: String ") should equal b ("
         4: Symbol b
-        5: ASCIIString ")!"
+        5: String ")!"
       typ: Any
 
 So now instead of getting a plain string in ``msg_body``, the macro is
@@ -932,7 +931,7 @@ Let's see how ``foo`` behaves:
     4
 
     julia> y = foo("bar");
-    ASCIIString
+    String
 
     julia> y
     "barbar"

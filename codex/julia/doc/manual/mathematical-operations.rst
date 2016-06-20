@@ -57,8 +57,9 @@ Here are some simple examples using arithmetic operators:
     julia> 3*2/12
     0.5
 
-(By convention, we tend to space less tightly binding operators less
-tightly, but there are no syntactic constraints.)
+(By convention, we tend to space operators more tightly if they get applied before
+other nearby operators. For instance, we would generally write ``-x + 2`` to reflect
+that first ``x`` gets negated, and then ``2`` is added to that result.)
 
 Bitwise Operators
 -----------------
@@ -303,9 +304,12 @@ the preceding paragraph.
 This notation means that the scalar operand should be replicated for each entry of
 the array.
 
-Note the evaluation behavior of chained comparisons::
+Note the evaluation behavior of chained comparisons:
 
-    v(x) = (println(x); x)
+.. doctest::
+
+    julia> v(x) = (println(x); x)
+    v (generic function with 1 method)
 
     julia> v(1) < v(2) <= v(3)
     2
@@ -425,6 +429,11 @@ class of numerical values as permit sensible definitions, including
 integers, floating-point numbers, rationals, and complexes, wherever
 such definitions make sense.
 
+Moreover, these functions (like any Julia function) can be applied
+in "vectorized" fashion to arrays and other collections with the
+syntax ``f.(A)``, e.g. ``sin.(A)`` will compute the elementwise
+sine of each element of an array ``A``.  See :ref:`man-dot-vectorizing`:.
+
 .. _man-rounding-functions:
 
 Rounding functions
@@ -454,6 +463,7 @@ Function                     Description
 :func:`cld(x,y) <cld>`       ceiling division; quotient rounded towards ``+Inf``
 :func:`rem(x,y) <rem>`       remainder; satisfies ``x == div(x,y)*y + rem(x,y)``; sign matches ``x``
 :func:`mod(x,y) <mod>`       modulus; satisfies ``x == fld(x,y)*y + mod(x,y)``; sign matches ``y``
+:func:`mod1(x,y) <mod1>`     ``mod()`` with offset 1; returns ``r∈(0,y]`` for ``y>0`` or ``r∈[y,0)`` for ``y<0``, where ``mod(r, y) == mod(x, y)``
 :func:`mod2pi(x) <mod2pi>`   modulus with respect to 2pi;  ``0 <= mod2pi(x)  < 2pi``
 :func:`divrem(x,y) <divrem>` returns ``(div(x,y),rem(x,y))``
 :func:`fldmod(x,y) <fldmod>` returns ``(fld(x,y),mod(x,y))``
@@ -578,5 +588,3 @@ Function                                            Description
 
 .. |airylist| replace:: :func:`airy(z) <airy>`, :func:`airyai(z) <airyai>`, ``airy(0,z)``
 .. |airyprimelist| replace:: :func:`airyprime(z) <airyprime>`, :func:`airyaiprime(z) <airyaiprime>`, ``airy(1,z)``
-
-

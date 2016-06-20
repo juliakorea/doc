@@ -96,15 +96,15 @@ Julia로 하여금 연산 자원을 최대한 활용하도록 할 수 있도록 
     julia> typeof(1)
     Int64
 
-Julia의 내부 변수 :const:`WORD_SIZE`\ 는 해당 시스템이
+Julia의 내부 변수 :const:`Sys.WORD_SIZE`\ 는 해당 시스템이
 32비트인지 64비트인지 알려주는 역할을 한다.::
 
     # 32비트 시스템:
-    julia> WORD_SIZE
+    julia> Sys.WORD_SIZE
     32
 
     # 64비트 시스템:
-    julia> WORD_SIZE
+    julia> Sys.WORD_SIZE
     64
 
 Julia는 부호가 있는 정수형과 부호가 없는 정수형을 위해
@@ -726,10 +726,10 @@ Julia는 변수가 수치형 리터럴 바로 다음에 있으면,
 .. doctest::
 
     julia> (x-1)(x+1)
-    ERROR: MethodError: `Int64` has no method matching Int64(::Int64)
+    ERROR: MethodError: objects of type Int64 are not callable
 
     julia> x(x+1)
-    ERROR: MethodError: `Int64` has no method matching Int64(::Int64)
+    ERROR: MethodError: objects of type Int64 are not callable
 
 두 표현식은 함수로써 인식된다: 괄호앞에 붙는 수치형 리터럴이 아닌
 표현식들은 모두 함수와 함수의 매개변수로 인식된다.
