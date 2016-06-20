@@ -47,7 +47,7 @@ Basic functions
 
    .. Docstring generated from Julia source
 
-   Returns a tuple specifying the "shape" of array ``A``\ . For arrays with conventional indexing (indices start at 1), this is equivalent to ``size(A)``\ ; otherwise it is equivalent to ``incides(A)``\ .
+   Returns a tuple specifying the "shape" of array ``A``\ . For arrays with conventional indexing (indices start at 1), this is equivalent to ``size(A)``\ ; otherwise it is equivalent to ``indices(A)``\ .
 
 .. function:: shape(A, d)
 
@@ -377,7 +377,7 @@ Indexing, Assignment, and Concatenation
 
    Returns a subset of array ``A`` as specified by ``inds``\ , where each ``ind`` may be an ``Int``\ , a ``Range``\ , or a ``Vector``\ . See the manual section on :ref:`array indexing <man-array-indexing>` for details.
 
-.. function:: sub(A, inds...)
+.. function:: view(A, inds...)
 
    .. Docstring generated from Julia source
 
@@ -400,12 +400,6 @@ Indexing, Assignment, and Concatenation
    .. Docstring generated from Julia source
 
    Return all the data of ``A`` where the index for dimension ``d`` equals ``i``\ . Equivalent to ``A[:,:,...,i,:,:,...]`` where ``i`` is in position ``d``\ .
-
-.. function:: slice(A, inds...)
-
-   .. Docstring generated from Julia source
-
-   Returns a view of array ``A`` with the given indices like :func:`sub`\ , but drops all dimensions indexed with scalars.
 
 .. function:: setindex!(A, X, inds...)
 
@@ -1035,5 +1029,37 @@ dense counterparts. The following functions are specific to sparse arrays.
              # perform sparse wizardry...
           end
        end
+
+.. function:: dropzeros!(A::SparseMatrixCSC, trim::Bool = true)
+
+   .. Docstring generated from Julia source
+
+   Removes stored numerical zeros from ``A``\ , optionally trimming resulting excess space from ``A.rowval`` and ``A.nzval`` when ``trim`` is ``true``\ .
+
+   For an out-of-place version, see :func:`Base.SparseArrays.dropzeros`\ . For algorithmic information, see :func:`Base.SparseArrays.fkeep!`\ .
+
+.. function:: dropzeros(A::SparseMatrixCSC, trim::Bool = true)
+
+   .. Docstring generated from Julia source
+
+   Generates a copy of ``A`` and removes stored numerical zeros from that copy, optionally trimming excess space from the result's ``rowval`` and ``nzval`` arrays when ``trim`` is ``true``\ .
+
+   For an in-place version and algorithmic information, see :func:`Base.SparseArrays.dropzeros!`\ .
+
+.. function:: dropzeros!(x::SparseVector, trim::Bool = true)
+
+   .. Docstring generated from Julia source
+
+   Removes stored numerical zeros from ``x``\ , optionally trimming resulting excess space from ``x.nzind`` and ``x.nzval`` when ``trim`` is ``true``\ .
+
+   For an out-of-place version, see :func:`Base.SparseArrays.dropzeros`\ . For algorithmic information, see :func:`Base.SparseArrays.fkeep!`\ .
+
+.. function:: dropzeros(x::SparseVector, trim::Bool = true)
+
+   .. Docstring generated from Julia source
+
+   Generates a copy of ``x`` and removes numerical zeros from that copy, optionally trimming excess space from the result's ``nzind`` and ``nzval`` arrays when ``trim`` is ``true``\ .
+
+   For an in-place version and algorithmic information, see :func:`Base.SparseArrays.dropzeros!`\ .
 
 
