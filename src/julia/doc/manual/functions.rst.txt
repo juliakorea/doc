@@ -504,7 +504,7 @@
 ==     (1,2,(3,4))
 == 
 ++ 또한, 이런 매개변수 결합대응(splice)은 
-++ 꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다::
+++ 꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다:
 -- Also, the function that arguments are spliced into need not be a varargs
 -- function (although it often is):
 == 

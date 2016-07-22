@@ -190,7 +190,7 @@
 ++      --precompiled={yes|no}    가능하다면 시스템 이미지에 미리 컴파일해둔 코드를 사용한다
 
 ++      --compilecache={yes|no}   모듈의 사전 증분 컴파일을 활성화/비활성화
-++      -H, --home <dir>          ``julia`` 실행파일의 위치를 지정한다
+++      -H, --home <dir>          `julia` 실행파일의 위치를 지정한다
 ++      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
 ++      --handle-signals={yes|no} Julia의 기본 시그널 핸들러의 작동을 켜거나 끈다
 ++
