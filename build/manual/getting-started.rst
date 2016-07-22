@@ -51,13 +51,13 @@ Julia 코드 상에서는 나타나지 않는다.
 
 대화형 실행 환경을 이용하지 않고
 파일에 저장되어 있는 소스 코드를 실행하기 위해서는,
-소스 코드 파일 이름을 julia 명령어의 첫번째 매개 변수로 넣어서 실행한다.
+소스 코드 파일 이름을 ``julia`` 명령어의 첫번째 매개 변수로 넣어서 실행한다.
 
 .. code-block:: shell
 
     $ julia script.jl arg1 arg2...
 
-예제와 같이 julia 실행 명령 뒤에 오는 매개변수들은
+예제와 같이 ``julia`` 실행 명령 뒤에 오는 매개변수들은
 전역 상수 ``ARGS``\ 라고 불리우는
 ``script.ji``\ 라는 프로그램의 명령줄 인자로 작동한다.
 이 프로그램의 이름은 전역 상수 ``PROGRAM_FILE``\ 에도 설정된다.
@@ -107,7 +107,7 @@ Julia는 현재 호스트와 같은 경로에 설치가 되어 있어야 한다.
 특정 ip 주소와 포트를 지정한다.
 
 
-만약 julia가 실행할 때마다 실행되는 코드가 있다면,
+만약 Julia가 실행할 때마다 실행되는 코드가 있다면,
 그 코드를 ``~/.juliarc.ji`` 에 넣으면 된다.
 
 .. code-block:: shell
@@ -131,7 +131,7 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
      -J, --sysimage <file>     <file>이라는 시스템 이미지 파일을 로드한 뒤 실행한다
      --precompiled={yes|no}    가능하다면 시스템 이미지에 미리 컴파일해둔 코드를 사용한다
      --compilecache={yes|no}   모듈의 사전 증분 컴파일을 활성화/비활성화
-     -H, --home <dir>          Julia 실행파일의 위치를 지정한다
+     -H, --home <dir>          ``julia`` 실행파일의 위치를 지정한다
      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
      --handle-signals={yes|no} Julia의 기본 시그널 핸들러의 작동을 켜거나 끈다
 

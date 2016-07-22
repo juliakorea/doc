@@ -99,7 +99,18 @@ some noteworthy differences that may trip up Julia users accustomed to MATLAB:
 - Julia's ``type``\ s do not support dynamically adding fields at runtime,
   unlike MATLAB's ``class``\ es. Instead, use a :obj:`Dict`.
 - In Julia each module has its own global scope/namespace, whereas in
-  Matlab there is just one global scope.
+  MATLAB there is just one global scope.
+- In MATLAB, an idiomatic way to remove unwanted values is to use logical
+  indexing, like in the expression ``x(x>3)`` or in the statement
+  ``x(x>3) = []`` to modify ``x`` in-place. In contrast, Julia provides the
+  higher order functions :func:`filter` and :func:`filter!`, allowing users
+  to write ``filter(z->z>3, x)`` and ``filter!(z->z>3, x)`` as alternatives to
+  the corresponding transliterations ``x[x.>3]`` and ``x = x[x.>3]``. Using
+  :func:`filter!` reduces the use of temporary arrays.
+- The analogue of extracting (or "dereferencing") all elements of a cell array,
+  e.g. in ``vertcat(A{:})`` in MATLAB, is written using the splat operator in
+  Julia, e.g. as ``vcat(A...)``.
+
 
 Noteworthy differences from R
 -----------------------------
@@ -147,7 +158,7 @@ noteworthy differences:
   multiplication in Julia, equivalent to R's ``A %*% B``. In R, this same
   notation would perform an element-wise (Hadamard) product. To get the
   element-wise multiplication operation, you need to write ``A .* B`` in Julia.
-- Julia performs matrix transposition using the :obj:`.'` operator and conjugated
+- Julia performs matrix transposition using the :obj:`.' <Base..'>` operator and conjugated
   transposition using the :obj:`'` operator. Julia's ``A.'`` is therefore
   equivalent to R's ``t(A)``.
 - Julia does not require parentheses when writing ``if`` statements or
@@ -221,6 +232,13 @@ noteworthy differences:
 - Julia does not support the ``NULL`` type.
 - Julia lacks the equivalent of R's ``assign`` or ``get``.
 - In Julia, ``return`` does not require parentheses.
+- In R, an idiomatic way to remove unwanted values is to use logical indexing,
+  like in the expression ``x[x>3]`` or in the statement ``x = x[x>3]`` to
+  modify ``x`` in-place. In contrast, Julia provides the higher order functions
+  :func:`filter` and :func:`filter!`, allowing users to write
+  ``filter(z->z>3, x)`` and ``filter!(z->z>3, x)`` as alternatives to the
+  corresponding transliterations ``x[x.>3]`` and ``x = x[x.>3]``. Using
+  :func:`filter!` reduces the use of temporary arrays.
 
 
 Noteworthy differences from Python

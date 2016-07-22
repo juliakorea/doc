@@ -135,14 +135,6 @@ These symbols appear in the ``head`` field of ``Expr``\s in lowered form.
 ``null``
     has no arguments; simply yields the value ``nothing``
 
-``static_typeof``
-    a horrible misfeature used to determine the result type of array
-    comprehensions. Planned to be removed.
-
-``type_goto``
-    a virtual control flow edge used to convey type data to ``static_typeof``,
-    also to be removed.
-
 ``new``
     allocates a new struct-like object. First argument is the type. The ``new``
     pseudo-function is lowered to this, and the type is always inserted by the
@@ -229,7 +221,7 @@ There is generally a different expression head for each visually distinct
 syntactic form.
 Examples will be given in s-expression syntax. Each parenthesized list corresponds
 to an Expr, where the first element is the head.
-For example ``(call f x)`` corresponds to ``Expr(:call, :f, :x)`` in julia.
+For example ``(call f x)`` corresponds to ``Expr(:call, :f, :x)`` in Julia.
 
 Calls
 ~~~~~

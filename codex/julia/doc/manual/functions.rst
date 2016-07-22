@@ -204,12 +204,12 @@ without being given a name, using either of these syntaxes:
 .. doctest::
 
     julia> x -> x^2 + 2x - 1
-    #1 (generic function with 1 method)
+    (::#1) (generic function with 1 method)
 
     julia> function (x)
                x^2 + 2x - 1
            end
-    #2 (generic function with 1 method)
+    (::#3) (generic function with 1 method)
 
 This creates a function taking one argument *x* and returning the
 value of the polynomial *x*\ ^2 + 2\ *x* - 1 at that value.
@@ -389,9 +389,11 @@ be a tuple:
     (1,2,(3,4))
 
 Also, the function that arguments are spliced into need not be a varargs
-function (although it often is)::
+function (although it often is):
 
-    baz(a,b) = a + b
+.. doctest::
+
+    julia> baz(a,b) = a + b;
 
     julia> args = [1,2]
     2-element Array{Int64,1}:
@@ -408,7 +410,10 @@ function (although it often is)::
      3
 
     julia> baz(args...)
-    no method baz(Int64,Int64,Int64)
+    ERROR: MethodError: no method matching baz(::Int64, ::Int64, ::Int64)
+    Closest candidates are:
+      baz(::Any, ::Any)
+    ...
 
 As you can see, if the wrong number of elements are in the spliced
 container, then the function call will fail, just as it would if too
@@ -617,8 +622,8 @@ convenient for data processing, but in other languages vectorization is also
 often required for performance: if loops are slow, the "vectorized" version of a
 function can call fast library code written in a low-level language.   In Julia,
 vectorized functions are *not* required for performance, and indeed it is often
-beneficial to write your own loops (:ref:`man-performance-tips`:), but they can
-still be convenient.  Therefore, *any* Julia function ``f`` can be applied
+beneficial to write your own loops (see :ref:`man-performance-tips`), but they
+can still be convenient.  Therefore, *any* Julia function ``f`` can be applied
 elementwise to any array (or other collection) with the syntax ``f.(A)``.
 
 Of course, you can omit the dot if you write a specialized "vector" method
@@ -629,11 +634,38 @@ which functions you want to vectorize.
 More generally, ``f.(args...)`` is actually equivalent to
 ``broadcast(f, args...)``, which allows you to operate on multiple
 arrays (even of different shapes), or a mix of arrays and scalars
-(:ref:`man-broadcasting`:).   For example, if you have ``f(x,y) = 3x + 4y``,
+(see :ref:`man-broadcasting`).  For example, if you have ``f(x,y) = 3x + 4y``,
 then ``f.(pi,A)`` will return a new array consisting of ``f(pi,a)`` for each
 ``a`` in ``A``, and ``f.(vector1,vector2)`` will return a new vector
 consisting of ``f(vector1[i],vector2[i])`` for each index ``i``
 (throwing an exception if the vectors have different length).
+
+Moreover, *nested* ``f.(args...)`` calls are *fused* into a single ``broadcast``
+loop.  For example, ``sin.(cos.(X))`` is equivalent to ``broadcast(x -> sin(cos(x)), X)``,
+similar to ``[sin(cos(x)) for x in X]``: there is only a single loop over ``X``,
+and a single array is allocated for the result.   [In contrast, ``sin(cos(X))``
+in a typical "vectorized" language would first allocate one temporary array for ``tmp=cos(X)``,
+and then compute ``sin(tmp)`` in a separate loop, allocating a second array.]
+This loop fusion is not a compiler optimization that may or may not occur, it
+is a *syntactic guarantee* whenever nested ``f.(args...)`` calls are encountered.  Technically,
+the fusion stops as soon as a "non-dot" function is encountered; for example,
+in ``sin.(sort(cos.(X)))`` the ``sin`` and ``cos`` loops cannot be merged
+because of the intervening ``sort`` function.
+
+Finally, the maximum efficiency is typically achieved when the output
+array of a vectorized operation is *pre-allocated*, so that repeated
+calls do not allocate new arrays over and over again for the results
+(:ref:`man-preallocation`:).   A convenient syntax for this is
+``X .= ...``, which is equivalent to ``broadcast!(identity, X, ...)``
+except that, as above, the ``broadcast!`` loop is fused with any nested
+"dot" calls.  For example, ``X .= sin.(Y)`` is equivalent to
+``broadcast!(sin, X, Y)``, overwriting ``X`` with ``sin.(Y)`` in-place.
+
+(In future versions of Julia, operators like ``.*`` will also be handled with
+the same mechanism: they will be equivalent to ``broadcast`` calls and
+will be fused with other nested "dot" calls.  ``x .+= y`` is equivalent
+to ``x .= x .+ y`` and will eventually result in a fused in-place assignment.
+Similarly for ``.*=`` etcetera.)
 
 Further Reading
 ---------------

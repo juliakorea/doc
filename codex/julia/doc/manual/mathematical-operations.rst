@@ -294,11 +294,11 @@ work on arrays. For example, ``0 .< A .< 1`` gives a boolean array whose
 entries are true where the corresponding elements of ``A`` are between 0
 and 1.
 
-The operator :obj:`.<` is intended for array objects; the operation
+The operator :obj:`.\< <Base..\<>` is intended for array objects; the operation
 ``A .< B`` is valid only if ``A`` and ``B`` have the same dimensions.  The
 operator returns an array with boolean entries and with the same dimensions
 as ``A`` and ``B``.  Such operators are called *elementwise*; Julia offers a
-suite of elementwise operators: :obj:`.*`, :obj:`.+`, etc.  Some of the elementwise
+suite of elementwise operators: :obj:`.* <Base..*>`, :obj:`.+ <Base..+>`, etc.  Some of the elementwise
 operators can take a scalar operand such as the example ``0 .< A .< 1`` in
 the preceding paragraph.
 This notation means that the scalar operand should be replicated for each entry of
@@ -351,6 +351,22 @@ Control flow      ``&&`` followed by ``||`` followed by ``?``
 Assignments       ``= += -= *= /= //= \= ^= ÷= %= |= &= $= <<= >>= >>>=`` and ``.+= .-= .*= ./= .//= .\= .^= .÷= .%=``
 ================= =============================================================================================
 
+.. _man-elementary-functions:
+
+Elementary Functions
+~~~~~~~~~~~~~~~~~~~~
+
+Julia provides a comprehensive collection of mathematical functions and
+operators. These mathematical operations are defined over as broad a
+class of numerical values as permit sensible definitions, including
+integers, floating-point numbers, rationals, and complexes, wherever
+such definitions make sense.
+
+Moreover, these functions (like any Julia function) can be applied
+in "vectorized" fashion to arrays and other collections with the
+syntax ``f.(A)``, e.g. ``sin.(A)`` will compute the elementwise
+sine of each element of an array ``A``.  See :ref:`man-dot-vectorizing`:.
+
 .. _man-numerical-conversions:
 
 Numerical Conversions
@@ -384,21 +400,21 @@ The following examples show the different forms.
 
     julia> Int8(128)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Int64) at ./sysimg.jl:53
+     ...
 
     julia> Int8(127.0)
     127
 
     julia> Int8(3.14)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Float64) at ./sysimg.jl:53
+     ...
 
     julia> Int8(128.0)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Float64) at ./sysimg.jl:53
+     ...
 
     julia> 127 % Int8
     127
@@ -411,28 +427,12 @@ The following examples show the different forms.
 
     julia> round(Int8,127.6)
     ERROR: InexactError()
-     in trunc at ./float.jl:357
-     in round at ./float.jl:177
-     in eval at ./boot.jl:263
+     in trunc(::Type{Int8}, ::Float64) at ./float.jl:456
+     in round(::Type{Int8}, ::Float64) at ./float.jl:211
+     ...
 
 See :ref:`man-conversion-and-promotion` for how to define your own
 conversions and promotions.
-
-.. _man-elementary-functions:
-
-Elementary Functions
---------------------
-
-Julia provides a comprehensive collection of mathematical functions and
-operators. These mathematical operations are defined over as broad a
-class of numerical values as permit sensible definitions, including
-integers, floating-point numbers, rationals, and complexes, wherever
-such definitions make sense.
-
-Moreover, these functions (like any Julia function) can be applied
-in "vectorized" fashion to arrays and other collections with the
-syntax ``f.(A)``, e.g. ``sin.(A)`` will compute the elementwise
-sine of each element of an array ``A``.  See :ref:`man-dot-vectorizing`:.
 
 .. _man-rounding-functions:
 
