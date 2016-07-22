@@ -7,19 +7,19 @@
 General I/O
 -----------
 
-.. variable:: STDOUT
+.. data:: STDOUT
 
    .. Docstring generated from Julia source
 
    Global variable referring to the standard out stream.
 
-.. variable:: STDERR
+.. data:: STDERR
 
    .. Docstring generated from Julia source
 
    Global variable referring to the standard error stream.
 
-.. variable:: STDIN
+.. data:: STDIN
 
    .. Docstring generated from Julia source
 
@@ -342,7 +342,7 @@ General I/O
 
    .. Docstring generated from Julia source
 
-   Replace ``STDOUT`` by stream for all C and julia level output to ``STDOUT``\ . Note that ``stream`` must be a TTY, a ``Pipe`` or a ``TCPSocket``\ .
+   Replace ``STDOUT`` by stream for all C and Julia level output to ``STDOUT``\ . Note that ``stream`` must be a TTY, a ``Pipe`` or a ``TCPSocket``\ .
 
 .. function:: redirect_stderr([stream])
 
@@ -574,9 +574,7 @@ Text I/O
 
    If ``use_mmap`` is ``true``\ , the file specified by ``source`` is memory mapped for potential speedups. Default is ``true`` except on Windows. On Windows, you may want to specify ``true`` if the file is large, and is only read once and not written to.
 
-   If ``ignore_invalid_chars`` is ``true``\ , bytes in ``source`` with invalid character encoding will be ignored. Otherwise an error is thrown indicating the offending character position.
-
-   If ``quotes`` is ``true``\ , column enclosed within double-quote (") characters are allowed to contain new lines and column delimiters. Double-quote characters within a quoted field must be escaped with another double-quote.  Specifying ``dims`` as a tuple of the expected rows and columns (including header, if any) may speed up reading of large files.  If ``comments`` is ``true``\ , lines beginning with ``comment_char`` and text following ``comment_char`` in any line are ignored.
+   If ``quotes`` is ``true``\ , columns enclosed within double-quote (") characters are allowed to contain new lines and column delimiters. Double-quote characters within a quoted field must be escaped with another double-quote.  Specifying ``dims`` as a tuple of the expected rows and columns (including header, if any) may speed up reading of large files.  If ``comments`` is ``true``\ , lines beginning with ``comment_char`` and text following ``comment_char`` in any line are ignored.
 
 .. function:: readdlm(source, delim::Char, eol::Char; options...)
 
@@ -588,25 +586,25 @@ Text I/O
 
    .. Docstring generated from Julia source
 
-   The end of line delimiter is taken as ``n``\ .
+   The end of line delimiter is taken as ``\n``\ .
 
 .. function:: readdlm(source, delim::Char; options...)
 
    .. Docstring generated from Julia source
 
-   The end of line delimiter is taken as ``n``\ . If all data is numeric, the result will be a numeric array. If some elements cannot be parsed as numbers, a heterogeneous array of numbers and strings is returned.
+   The end of line delimiter is taken as ``\n``\ . If all data is numeric, the result will be a numeric array. If some elements cannot be parsed as numbers, a heterogeneous array of numbers and strings is returned.
 
 .. function:: readdlm(source, T::Type; options...)
 
    .. Docstring generated from Julia source
 
-   The columns are assumed to be separated by one or more whitespaces. The end of line delimiter is taken as ``n``\ .
+   The columns are assumed to be separated by one or more whitespaces. The end of line delimiter is taken as ``\n``\ .
 
 .. function:: readdlm(source; options...)
 
    .. Docstring generated from Julia source
 
-   The columns are assumed to be separated by one or more whitespaces. The end of line delimiter is taken as ``n``\ . If all data is numeric, the result will be a numeric array. If some elements cannot be parsed as numbers, a heterogeneous array of numbers and strings is returned.
+   The columns are assumed to be separated by one or more whitespaces. The end of line delimiter is taken as ``\n``\ . If all data is numeric, the result will be a numeric array. If some elements cannot be parsed as numbers, a heterogeneous array of numbers and strings is returned.
 
 .. function:: writedlm(f, A, delim='\\t')
 
@@ -1014,7 +1012,7 @@ Network I/O
 
    Converts the endianness of a value from that used by the Host to Little-endian.
 
-.. variable:: ENDIAN_BOM
+.. data:: ENDIAN_BOM
 
    .. Docstring generated from Julia source
 

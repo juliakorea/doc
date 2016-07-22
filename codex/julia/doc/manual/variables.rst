@@ -45,8 +45,8 @@ the language will not treat variables differently based on their names).
     julia> customary_phrase = "Hello world!"
     "Hello world!"
 
-    julia> UniversalDeclarationOfHumanRightsStart = "人人生而自由，在尊严和权力上一律平等。"
-    "人人生而自由，在尊严和权力上一律平等。"
+    julia> UniversalDeclarationOfHumanRightsStart = "人人生而自由，在尊严和权利上一律平等。"
+    "人人生而自由，在尊严和权利上一律平等。"
 
 .. raw:: latex
 
@@ -128,9 +128,11 @@ statements:
 
     julia> else = false
     ERROR: syntax: unexpected "else"
+     ...
 
     julia> try = "No"
     ERROR: syntax: unexpected "="
+     ...
 
 
 Stylistic Conventions

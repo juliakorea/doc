@@ -56,6 +56,16 @@
 
    Convert a string to a contiguous byte array representation encoded as UTF-8 bytes. This representation is often appropriate for passing strings to C.
 
+.. function:: transcode(T, src)
+
+   .. Docstring generated from Julia source
+
+   Convert string data between Unicode encodings. ``src`` is either a ``String`` or a ``Vector{UIntXX}`` of UTF-XX code units, where ``XX`` is 8, 16, or 32. ``T`` indicates the encoding of the return value: ``String`` to return a (UTF-8 encoded) ``String`` or ``UIntXX`` to return a ``Vector{UIntXX}`` of UTF-``XX`` data.   (The alias ``Cwchar_t`` can also be used as the integer type, for converting ``wchar_t*`` strings used by external C libraries.)
+
+   The ``transcode`` function succeeds as long as the input data can be reasonably represented in the target encoding; it always succeeds for conversions between UTF-XX encodings, even for invalid Unicode data.
+
+   Only conversion to/from UTF-8 is currently supported.
+
 .. function:: unsafe_string(p::Ptr{UInt8}, [length::Integer])
 
    .. Docstring generated from Julia source
@@ -80,7 +90,7 @@
 
    .. Docstring generated from Julia source
 
-   Convert a string to ``String`` type and check that it contains only ASCII data, otherwise throwing an ``ArugmentError`` indicating the position of the first non-ASCII byte.
+   Convert a string to ``String`` type and check that it contains only ASCII data, otherwise throwing an ``ArgumentError`` indicating the position of the first non-ASCII byte.
 
 .. function:: @r_str -> Regex
 
@@ -89,9 +99,9 @@
    Construct a regex, such as ``r"^[a-z]*$"``\ . The regex also accepts one or more flags, listed after the ending quote, to change its behaviour:
 
    * ``i`` enables case-insensitive matching
-   * ``m`` treats the ``^`` and ``$`` tokens as matching the start and end of individual lines, as   opposed to the whole string.
+   * ``m`` treats the ``^`` and ``$`` tokens as matching the start and end of individual lines, as opposed to the whole string.
    * ``s`` allows the ``.`` modifier to match newlines.
-   * ``x`` enables "comment mode": whitespace is enabled except when escaped with ``\``\ , and ``#``   is treated as starting a comment.
+   * ``x`` enables "comment mode": whitespace is enabled except when escaped with ``\``\ , and ``#`` is treated as starting a comment.
 
    For example, this regex has all three flags enabled:
 
@@ -121,13 +131,13 @@
    Alternatively, finer control and additional transformations may be be obtained by calling ``normalize_string(s; keywords...)``\ , where any number of the following boolean keywords options (which all default to ``false`` except for ``compose``\ ) are specified:
 
    * ``compose=false``\ : do not perform canonical composition
-   * ``decompose=true``\ : do canonical decomposition instead of canonical composition (``compose=true``   is ignored if present)
+   * ``decompose=true``\ : do canonical decomposition instead of canonical composition (``compose=true`` is ignored if present)
    * ``compat=true``\ : compatibility equivalents are canonicalized
    * ``casefold=true``\ : perform Unicode case folding, e.g. for case-insensitive string comparison
-   * ``newline2lf=true``\ , ``newline2ls=true``\ , or ``newline2ps=true``\ : convert various newline sequences   (LF, CRLF, CR, NEL) into a linefeed (LF), line-separation (LS), or paragraph-separation (PS)   character, respectively
+   * ``newline2lf=true``\ , ``newline2ls=true``\ , or ``newline2ps=true``\ : convert various newline sequences (LF, CRLF, CR, NEL) into a linefeed (LF), line-separation (LS), or paragraph-separation (PS) character, respectively
    * ``stripmark=true``\ : strip diacritical marks (e.g. accents)
-   * ``stripignore=true``\ : strip Unicode's "default ignorable" characters (e.g. the soft hyphen   or the left-to-right marker)
-   * ``stripcc=true``\ : strip control characters; horizontal tabs and form feeds are converted to   spaces; newlines are also converted to spaces unless a newline-conversion flag was specified
+   * ``stripignore=true``\ : strip Unicode's "default ignorable" characters (e.g. the soft hyphen or the left-to-right marker)
+   * ``stripcc=true``\ : strip control characters; horizontal tabs and form feeds are converted to spaces; newlines are also converted to spaces unless a newline-conversion flag was specified
    * ``rejectna=true``\ : throw an error if unassigned code points are found
    * ``stable=true``\ : enforce Unicode Versioning Stability
 
@@ -143,13 +153,13 @@
 
    .. Docstring generated from Julia source
 
-   Returns ``true`` if the given value is valid for its type, which currently can be one of ``Char``\ , ``String``\ , ``UTF16String``\ , or ``UTF32String``\ .
+   Returns ``true`` if the given value is valid for its type, which currently can be either ``Char`` or ``String``\ .
 
 .. function:: isvalid(T, value) -> Bool
 
    .. Docstring generated from Julia source
 
-   Returns ``true`` if the given value is valid for that type. Types currently can be ``Char``\ , ``String``\ , ``UTF16String``\ , or ``UTF32String`` Values for ``Char`` can be of type ``Char`` or ``UInt32`` Values for ``String`` can be of that type, or ``Vector{UInt8}`` Values for ``UTF16String`` can be ``UTF16String`` or ``Vector{UInt16}`` Values for ``UTF32String`` can be ``UTF32String``\ , ``Vector{Char}`` or ``Vector{UInt32}``
+   Returns ``true`` if the given value is valid for that type. Types currently can be either ``Char`` or ``String``\ . Values for ``Char`` can be of type ``Char`` or ``UInt32``\ . Values for ``String`` can be of that type, or ``Vector{UInt8}``\ .
 
 .. function:: isvalid(str, i)
 
@@ -473,30 +483,3 @@
 
    General unescaping of traditional C and Unicode escape sequences. Reverse of :func:`escape_string`\ . See also :func:`unescape_string`\ .
 
-.. function:: utf16(s)
-
-   .. Docstring generated from Julia source
-
-   Create a UTF-16 string from a byte array, array of ``UInt16``\ , or any other string type. (Data must be valid UTF-16. Conversions of byte arrays check for a byte-order marker in the first two bytes, and do not include it in the resulting string.)
-
-   Note that the resulting ``UTF16String`` data is terminated by the NUL codepoint (16-bit zero), which is not treated as a character in the string (so that it is mostly invisible in Julia); this allows the string to be passed directly to external functions requiring NUL-terminated data. This NUL is appended automatically by the ``utf16(s)`` conversion function. If you have a ``UInt16`` array ``A`` that is already NUL-terminated valid UTF-16 data, then you can instead use ``UTF16String(A)`` to construct the string without making a copy of the data and treating the NUL as a terminator rather than as part of the string.
-
-.. function:: utf16(::Union{Ptr{UInt16},Ptr{Int16}} [, length])
-
-   .. Docstring generated from Julia source
-
-   Create a string from the address of a NUL-terminated UTF-16 string. A copy is made; the pointer can be safely freed. If ``length`` is specified, the string does not have to be NUL-terminated.
-
-.. function:: utf32(s)
-
-   .. Docstring generated from Julia source
-
-   Create a UTF-32 string from a byte array, array of ``Char`` or ``UInt32``\ , or any other string type. (Conversions of byte arrays check for a byte-order marker in the first four bytes, and do not include it in the resulting string.)
-
-   Note that the resulting ``UTF32String`` data is terminated by the NUL codepoint (32-bit zero), which is not treated as a character in the string (so that it is mostly invisible in Julia); this allows the string to be passed directly to external functions requiring NUL-terminated data. This NUL is appended automatically by the ``utf32(s)`` conversion function. If you have a ``Char`` or ``UInt32`` array ``A`` that is already NUL-terminated UTF-32 data, then you can instead use ``UTF32String(A)`` to construct the string without making a copy of the data and treating the NUL as a terminator rather than as part of the string.
-
-.. function:: utf32(::Union{Ptr{Char},Ptr{UInt32},Ptr{Int32}} [, length])
-
-   .. Docstring generated from Julia source
-
-   Create a string from the address of a NUL-terminated UTF-32 string. A copy is made; the pointer can be safely freed. If ``length`` is specified, the string does not have to be NUL-terminated.

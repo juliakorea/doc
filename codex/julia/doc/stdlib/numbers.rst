@@ -40,7 +40,7 @@ Data Formats
 
    .. Docstring generated from Julia source
 
-   Convert an integer to a string in the given base, optionally specifying a number of digits to pad to. The base can be specified as either an integer, or as a ``UInt8`` array of character values to use as digit symbols.
+   Convert an integer to a string in the given base, optionally specifying a number of digits to pad to.
 
 .. function:: digits([T], n, [base], [pad])
 
@@ -100,7 +100,7 @@ Data Formats
 
    .. Docstring generated from Julia source
 
-   Extract the ``significand(s)`` (a.k.a. mantissa), in binary representation, of a floating-point number or array. If ``x`` is a non-zero finite number, than the result will be a number of the same type on the interval :math:`[1,2)`\ . Otherwise ``x`` is returned.
+   Extract the ``significand(s)`` (a.k.a. mantissa), in binary representation, of a floating-point number or array. If ``x`` is a non-zero finite number, then the result will be a number of the same type on the interval :math:`[1,2)`\ . Otherwise ``x`` is returned.
 
    .. doctest::
 
@@ -170,54 +170,78 @@ General Number Functions and Constants
 .. data:: pi
           π
 
-   The constant pi
+   .. Docstring generated from Julia source
+
+   The constant pi.
 
 .. data:: im
 
-   The imaginary unit
+   .. Docstring generated from Julia source
+
+   The imaginary unit.
 
 .. data:: e
           eu
 
-   The constant e
+   .. Docstring generated from Julia source
+
+   The constant e.
 
 .. data:: catalan
 
-   Catalan's constant
+   .. Docstring generated from Julia source
+
+   Catalan's constant.
 
 .. data:: γ
           eulergamma
 
-   Euler's constant
+   .. Docstring generated from Julia source
+
+   Euler's constant.
 
 .. data:: φ
           golden
 
-   The golden ratio
+   .. Docstring generated from Julia source
+
+   The golden ratio.
 
 .. data:: Inf
 
-   Positive infinity of type ``Float64``
+   .. Docstring generated from Julia source
+
+   Positive infinity of type ``Float64``\ .
 
 .. data:: Inf32
 
-   Positive infinity of type ``Float32``
+   .. Docstring generated from Julia source
+
+   Positive infinity of type ``Float32``\ .
 
 .. data:: Inf16
 
-   Positive infinity of type ``Float16``
+   .. Docstring generated from Julia source
+
+   Positive infinity of type ``Float16``\ .
 
 .. data:: NaN
 
-   A not-a-number value of type ``Float64``
+   .. Docstring generated from Julia source
+
+   A not-a-number value of type ``Float64``\ .
 
 .. data:: NaN32
 
-   A not-a-number value of type ``Float32``
+   .. Docstring generated from Julia source
+
+   A not-a-number value of type ``Float32``\ .
 
 .. data:: NaN16
 
-   A not-a-number value of type ``Float16``
+   .. Docstring generated from Julia source
+
+   A not-a-number value of type ``Float16``\ .
 
 .. function:: issubnormal(f) -> Bool
 
@@ -287,7 +311,7 @@ General Number Functions and Constants
        julia> Float32(1/3, RoundUp)
        0.33333334f0
 
-   See ``rounding`` for available rounding modes.
+   See :obj:`RoundingMode` for available rounding modes.
 
 .. function:: Float64(x [, mode::RoundingMode])
 
@@ -303,7 +327,7 @@ General Number Functions and Constants
        julia> Float64(pi, RoundUp)
        3.1415926535897936
 
-   See ``rounding`` for available rounding modes.
+   See :obj:`RoundingMode` for available rounding modes.
 
 .. function:: BigInt(x)
 
@@ -335,7 +359,7 @@ General Number Functions and Constants
 
    Get the current floating point rounding mode for type ``T``\ , controlling the rounding of basic arithmetic functions (:func:`+`\ , :func:`-`\ , :func:`*`\ , :func:`/` and :func:`sqrt`\ ) and type conversion.
 
-   Valid modes are ``RoundNearest``\ , ``RoundToZero``\ , ``RoundUp``\ , ``RoundDown``\ , and ``RoundFromZero`` (``BigFloat`` only).
+   See :obj:`RoundingMode` for available modes.
 
 .. function:: setrounding(T, mode)
 
@@ -343,7 +367,7 @@ General Number Functions and Constants
 
    Set the rounding mode of floating point type ``T``\ , controlling the rounding of basic arithmetic functions (:func:`+`\ , :func:`-`\ , :func:`*`\ , :func:`/` and :func:`sqrt`\ ) and type conversion.
 
-   Note that this may affect other types, for instance changing the rounding mode of ``Float64`` will change the rounding mode of ``Float32``\ . See ``rounding`` for available modes
+   Note that this may affect other types, for instance changing the rounding mode of ``Float64`` will change the rounding mode of ``Float32``\ . See :obj:`RoundingMode` for available modes.
 
 .. function:: setrounding(f::Function, T, mode)
 
@@ -358,7 +382,7 @@ General Number Functions and Constants
        f()
        setrounding(T, old)
 
-   See ``rounding`` for available rounding modes.
+   See :obj:`RoundingMode` for available rounding modes.
 
 .. function:: get_zero_subnormals() -> Bool
 
@@ -552,7 +576,7 @@ As ``BigInt`` represents unbounded integers, the interval must be specified (e.g
    Pick a random element or array of random elements from the set of values specified by ``S``\ ; ``S`` can be
 
    * an indexable collection (for example ``1:n`` or ``['x','y','z']``\ ), or
-   * a type: the set of values to pick from is then equivalent to ``typemin(S):typemax(S)`` for   integers (this is not applicable to ``BigInt``\ ), and to :math:`[0, 1)` for floating point numbers;
+   * a type: the set of values to pick from is then equivalent to ``typemin(S):typemax(S)`` for integers (this is not applicable to ``BigInt``\ ), and to :math:`[0, 1)` for floating point numbers;
 
    ``S`` defaults to ``Float64``\ .
 

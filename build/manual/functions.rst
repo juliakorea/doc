@@ -198,12 +198,12 @@ Julia에서 함수는 일급 객체 혹은 일급 시민(`first-class objects
 .. doctest::
 
     julia> x -> x^2 + 2x - 1
-    #1 (generic function with 1 method)
+    (::#1) (generic function with 1 method)
 
     julia> function (x)
                x^2 + 2x - 1
            end
-    #2 (generic function with 1 method)
+    (::#3) (generic function with 1 method)
 
 이 구문은 *x*\ 이라는 매개변수 하나를 받고 ``*x*\ ^2 + 2\ *x* - 1``\ 의 
 계산값을 반환하는 함수이다. 이 구문의 결과는 
@@ -377,7 +377,9 @@ Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변
 또한, 이런 매개변수 결합대응(splice)은 
 꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다::
 
-    baz(a,b) = a + b
+.. doctest::
+
+    julia> baz(a,b) = a + b;
 
     julia> args = [1,2]
     2-element Array{Int64,1}:
@@ -394,7 +396,10 @@ Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변
      3
 
     julia> baz(args...)
-    no method baz(Int64,Int64,Int64)
+    ERROR: MethodError: no method matching baz(::Int64, ::Int64, ::Int64)
+    Closest candidates are:
+      baz(::Any, ::Any)
+    ...
 
 보다시피, 매개변수 결합대응 객체의 수가 실제 함수의 정의와 맞지 않으면, 
 함수 호출은 실패할 것이다. 이는 일반 함수 호출에서 
@@ -608,7 +613,7 @@ Julia는 예약어 ``do``\ 를 이용하여 위의 코드를 보다 간결할 �
 저수준의 언어로 쓰여진 빠른 라이브러리 코드를 불러온다. 
 Julia에서는 벡터화된 함수를 성능때문에 *반드시 써야할 필요는 없다.*  
 그리고 이는 벡터화된 형태에 구애받지 않고 사용자만의 반복문을 마음대로 쓸 수 있게 
-해 준다. (:ref:`man-performance-tips`:)  그러나, 여전히 벡터화는 편리한 존재이기에, 
+해 준다. (:ref:`man-performance-tips` 참고)  그러나, 여전히 벡터화는 편리한 존재이기에,
 Julia로 쓰여진 아무 함수 ``f``\ 는 배열(혹은 다른 컬렉션)에 ``f.(A)``\ 라는 문법을 
 이용하면 배열(혹은 다른 컬렉션)의 각 원소에 적용할 수 있다.
 
@@ -619,12 +624,40 @@ Julia로 쓰여진 아무 함수 ``f``\ 는 배열(혹은 다른 컬렉션)에 `
 
 더 일반적으로, ``f.(args...)``\ 는 여러 개의 배열(서로 다른 모양의 배열이라도), 
 혹은 배열과 스칼라의 혼합된 형태끼리에도 벡터화를 적용할 수 있는 
-``broadcast(f, args)``\ 와도 같다. 
+``broadcast(f, args)``\ 와도 같다. (:ref:`man-broadcasting` 참고)
 예를 들어, 만약 ``f(x,y) = 3x + 4y``\ 라고 하면, ``f.(pi.A)``\ 는 
 ``A``\ 의 각각의 원소 ``a``\ 에 대해 ``f(pi,a)``\ 를 적용한 새 배열이 리턴될 것이고, 
 ``f.(vector1,vector2)``\ 는 각각의 인덱스 ``i``\ 에 대해 
 ``f(vector1[i],vector2[i])``\ 로 구성된 새 벡터를 리턴할 것이다. 
 (물론 두 벡터가 다른 길이면 예외를 발생시킬 것이다)
+
+(TODO: 아래 번역)
+Moreover, *nested* ``f.(args...)`` calls are *fused* into a single ``broadcast``
+loop.  For example, ``sin.(cos.(X))`` is equivalent to ``broadcast(x -> sin(cos(x)), X)``,
+similar to ``[sin(cos(x)) for x in X]``: there is only a single loop over ``X``,
+and a single array is allocated for the result.   [In contrast, ``sin(cos(X))``
+in a typical "vectorized" language would first allocate one temporary array for ``tmp=cos(X)``,
+and then compute ``sin(tmp)`` in a separate loop, allocating a second array.]
+This loop fusion is not a compiler optimization that may or may not occur, it
+is a *syntactic guarantee* whenever nested ``f.(args...)`` calls are encountered.  Technically,
+the fusion stops as soon as a "non-dot" function is encountered; for example,
+in ``sin.(sort(cos.(X)))`` the ``sin`` and ``cos`` loops cannot be merged
+because of the intervening ``sort`` function.
+
+Finally, the maximum efficiency is typically achieved when the output
+array of a vectorized operation is *pre-allocated*, so that repeated
+calls do not allocate new arrays over and over again for the results
+(:ref:`man-preallocation`:).   A convenient syntax for this is
+``X .= ...``, which is equivalent to ``broadcast!(identity, X, ...)``
+except that, as above, the ``broadcast!`` loop is fused with any nested
+"dot" calls.  For example, ``X .= sin.(Y)`` is equivalent to
+``broadcast!(sin, X, Y)``, overwriting ``X`` with ``sin.(Y)`` in-place.
+
+(In future versions of Julia, operators like ``.*`` will also be handled with
+the same mechanism: they will be equivalent to ``broadcast`` calls and
+will be fused with other nested "dot" calls.  ``x .+= y`` is equivalent
+to ``x .= x .+ y`` and will eventually result in a fused in-place assignment.
+Similarly for ``.*=`` etcetera.)
 
 더 읽을거리
 ---------------

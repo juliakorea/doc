@@ -87,7 +87,7 @@ do this:
 2. To provide extra type information to the compiler, which can then
    improve performance in some cases
 
-When appended to an expression computing a *value*, the ``::``
+When appended to an expression computing a value, the ``::``
 operator is read as "is an instance of". It can be used
 anywhere to assert that the value of the expression on the left is an
 instance of the type on the right. When the type on the right is
@@ -102,19 +102,17 @@ exception is thrown, otherwise, the left-hand value is returned:
 
     julia> (1+2)::AbstractFloat
     ERROR: TypeError: typeassert: expected AbstractFloat, got Int64
+     ...
 
     julia> (1+2)::Int
     3
 
 This allows a type assertion to be attached to any expression
-in-place. The most common usage of ``::`` as an assertion is in
-function/methods signatures, such as ``f(x::Int8) = ...`` (see
-:ref:`man-methods`).
+in-place.
 
-
-When appended to a *variable* in a statement context, the ``::``
-operator means something a bit
-different: it declares the variable to always have the specified type,
+When appended to a variable on the left-hand side of an assignment,
+or as part of a ``local`` declaration, the ``::`` operator means something
+a bit different: it declares the variable to always have the specified type,
 like a type declaration in a statically-typed language such as C. Every
 value assigned to the variable will be converted to the declared type
 using :func:`convert`:
@@ -137,9 +135,8 @@ This feature is useful for avoiding performance "gotchas" that could
 occur if one of the assignments to a variable changed its type
 unexpectedly.
 
-The "declaration" behavior only occurs in specific contexts::
+This "declaration" behavior only occurs in specific contexts::
 
-    x::Int8        # a variable by itself
     local x::Int8  # in a local declaration
     x::Int8 = 10   # as the left-hand side of an assignment
 
@@ -411,7 +408,8 @@ However, the value for ``baz`` must be convertible to :class:`Int`:
 
     julia> Foo((), 23.5, 1)
     ERROR: InexactError()
-     in call at none:2
+     in Foo(::Tuple{}, ::Float64, ::Int64) at ./none:2
+     ...
 
 You may find a list of field names using the ``fieldnames`` function.
 
@@ -442,7 +440,7 @@ You can also change the values as one would expect:
 .. doctest::
 
     julia> foo.qux = 2
-    2.0
+    2
 
     julia> foo.bar = 1//2
     1//2
@@ -765,9 +763,15 @@ each field:
     ERROR: MethodError: Cannot `convert` an object of type Float64 to an object of type Point{Float64}
     This may have arisen from a call to the constructor Point{Float64}(...),
     since type constructors fall back to convert methods.
+     in Point{Float64}(::Float64) at ./sysimg.jl:53
+     ...
 
     julia> Point{Float64}(1.0,2.0,3.0)
     ERROR: MethodError: no method matching Point{Float64}(::Float64, ::Float64, ::Float64)
+    Closest candidates are:
+      Point{Float64}{T}(::Any, ::Any)
+      Point{Float64}{T}(::Any)
+     ...
 
 Only one default constructor is generated for parametric types, since
 overriding it is not possible. This constructor accepts any arguments
@@ -801,6 +805,7 @@ isn't the case, the constructor will fail with a :exc:`MethodError`:
 
     julia> Point(1,2.5)
     ERROR: MethodError: no method matching Point{T}(::Int64, ::Float64)
+    ...
 
 Constructor methods to appropriately handle such mixed cases can be
 defined, but that will not be discussed until later on in
@@ -909,9 +914,11 @@ subtypes of :obj:`Real`:
 
     julia> Pointy{AbstractString}
     ERROR: TypeError: Pointy: in T, expected T<:Real, got Type{AbstractString}
+     ...
 
     julia> Pointy{1}
     ERROR: TypeError: Pointy: in T, expected T<:Real, got Int64
+     ...
 
 Type parameters for parametric composite types can be restricted in the
 same manner::
@@ -1277,16 +1284,21 @@ functions in Julia's standard library accept ``Val`` types as
 arguments, and you can also use it to write your own functions.  For
 example:
 
-.. doctest::
+.. testsetup:: value-types
+
+    firstlast(::Type{Val{true}}) = "First";
+    firstlast(::Type{Val{false}}) = "Last";
+
+.. doctest:: value-types
 
     firstlast(::Type{Val{true}}) = "First"
     firstlast(::Type{Val{false}}) = "Last"
 
-    julia> println(firstlast(Val{true}))
-    First
+    julia> firstlast(Val{true})
+    "First"
 
-    julia> println(firstlast(Val{false}))
-    Last
+    julia> firstlast(Val{false})
+    "Last"
 
 For consistency across Julia, the call site should always pass a
 ``Val`` *type* rather than creating an *instance*, i.e., use
@@ -1342,13 +1354,13 @@ To construct an object representing a non-missing value of type ``T``, use the
 .. doctest::
 
     julia> x1 = Nullable(1)
-    Nullable(1)
+    Nullable{Int64}(1)
 
     julia> x2 = Nullable(1.0)
-    Nullable(1.0)
+    Nullable{Float64}(1.0)
 
     julia> x3 = Nullable([1, 2, 3])
-    Nullable([1,2,3])
+    Nullable{Array{Int64,1}}([1,2,3])
 
 Note the core distinction between these two ways of constructing a :obj:`Nullable`
 object: in one style, you provide a type, ``T``, as a function parameter; in
@@ -1376,7 +1388,8 @@ You can safely access the value of a :obj:`Nullable` object using :func:`get`:
 
     julia> get(Nullable{Float64}())
     ERROR: NullException()
-     in get(::Nullable{Float64}) at ./nullable.jl:45
+     in get(::Nullable{Float64}) at ./nullable.jl:62
+     ...
 
     julia> get(Nullable(1.0))
     1.0
@@ -1392,10 +1405,10 @@ default value as a second argument to :func:`get`:
 
 .. doctest::
 
-    julia> get(Nullable{Float64}(), 0)
+    julia> get(Nullable{Float64}(), 0.0)
     0.0
 
-    julia> get(Nullable(1.0), 0)
+    julia> get(Nullable(1.0), 0.0)
     1.0
 
 Note that this default value will automatically be converted to the type of

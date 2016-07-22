@@ -438,7 +438,6 @@ Julia에서는 주어진 타입에서 표현할 수 있는 값을 넘어서게 �
     julia> (typemin(Float64),typemax(Float64))
     (-Inf,Inf)
 
-
 계산기 입실론(Machine epsilon)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -727,9 +726,11 @@ Julia는 변수가 수치형 리터럴 바로 다음에 있으면,
 
     julia> (x-1)(x+1)
     ERROR: MethodError: objects of type Int64 are not callable
+    ...
 
     julia> x(x+1)
     ERROR: MethodError: objects of type Int64 are not callable
+    ...
 
 두 표현식은 함수로써 인식된다: 괄호앞에 붙는 수치형 리터럴이 아닌
 표현식들은 모두 함수와 함수의 매개변수로 인식된다.

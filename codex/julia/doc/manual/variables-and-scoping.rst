@@ -31,7 +31,7 @@ introducing scope blocks are:
 +================================+==================================================================================+
 | :ref:`global <man-global>`     | module, baremodule, at interactive prompt (REPL)                                 |
 +--------------------------------+------------------------------+---------------------------------------------------+
-| :ref:`local <man-local-scope>` | :ref:`soft <man-soft-scope>` | for, while, list-comprehensions,                  |
+| :ref:`local <man-local-scope>` | :ref:`soft <man-soft-scope>` | for, while, comprehensions,                       |
 |                                |                              | try-catch-finally, let                            |
 |                                +------------------------------+---------------------------------------------------+
 |                                | :ref:`hard <man-hard-scope>` | functions (either syntax, anonymous & do-blocks), |
@@ -188,9 +188,9 @@ Soft Local Scope
   ``local``.
 
 Soft local scopes are introduced by for-loops, while-loops,
-list-comprehensions, try-catch-finally-blocks, and let-blocks.  There
+comprehensions, try-catch-finally-blocks, and let-blocks.  There
 are some extra rules for :ref:`let-blocks <man-let-blocks>` and for
-:ref:`for-loops and list-comprehensions <man-for-loops-scope>`.
+:ref:`for-loops and comprehensions <man-for-loops-scope>`.
 
 In the following example the ``x`` and ``y`` refer always to the same
 variables as the soft local scope inherits both read and write
@@ -306,11 +306,12 @@ macro definition need not come before its inner usage:
 .. doctest::
 
     julia> f = y -> x + y
-    (anonymous function)
+    (::#1) (generic function with 1 method)
 
     julia> f(3)
     ERROR: UndefVarError: x not defined
-     in anonymous at none:1
+     in (::##1#2)(::Int64) at ./none:1
+     ...
 
     julia> x = 1
     1
@@ -400,8 +401,8 @@ storage. Here is an example where the behavior of ``let`` is needed::
     Fs = Array{Any}(2)
     i = 1
     while i <= 2
-      Fs[i] = ()->i
-      i += 1
+        Fs[i] = ()->i
+        i += 1
     end
 
     julia> Fs[1]()
@@ -418,10 +419,10 @@ behave identically. We can use ``let`` to create a new binding for
     Fs = Array{Any}(2)
     i = 1
     while i <= 2
-      let i = i
-        Fs[i] = ()->i
-      end
-      i += 1
+        let i = i
+            Fs[i] = ()->i
+        end
+        i += 1
     end
 
     julia> Fs[1]()
@@ -437,11 +438,11 @@ block without creating any new bindings:
 .. doctest::
 
     julia> let
-             local x = 1
-             let
-               local x = 2
-             end
-             x
+               local x = 1
+               let
+                   local x = 2
+               end
+               x
            end
     1
 

@@ -155,7 +155,8 @@ Julia에서는 :ref:`상수를 변수와 병치
     julia> sqrt(-1)
     ERROR: DomainError:
     sqrt will only return a complex result if called with a complex argument. Try sqrt(complex(x)).
-     in sqrt at math.jl:146
+     in sqrt(::Int64) at ./math.jl:149
+     ...
 
     julia> sqrt(-1 + 0im)
     0.0 + 1.0im
@@ -300,6 +301,7 @@ Julia는 정수들 간의 비를 정확히 표현하기 위해 유리수 타입�
     ERROR: ArgumentError: invalid rational: zero(Int64)//zero(Int64)
      in Rational{Int64}(::Int64, ::Int64) at ./rational.jl:8
      in //(::Int64, ::Int64) at ./rational.jl:22
+     ...
 
 다른 타입과 마찬가지로, 프로모션 시스템은 
 유리수와 다른 타입들 간의 상호작용을 어려움 없이 할 수 있도록 해준다:

@@ -289,11 +289,11 @@ Python <https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Comparison_ope
 예를 들어, ``0 .< A .< 1``\ 는 ``A`` 배열에서 0과 1 사이의 값을 가졌을 때만 
 ``true`` 값을 가지는 boolean 배열을 리턴한다.
 
-:obj:`.<`\ 는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
+:obj:`.\< <Base..\<>`는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
 ``A``\ 와 ``B`` 가 같은 dimension일 때만 유효하다.
 이 연산자는 ``A``\ 나 ``B``\ 와 같은 dimension을 지닌 boolean 배열을 리턴한다. 
 이런 연산을 일컫어 *항목간 비교 연산자(elementwise)*\ 라고 한다; 
-Julia는 :obj:`.<` 이외에도 :obj:`.*`, :obj:`.+` 등의 항목간 비교 연산자를 제공한다.
+Julia는 :obj:`.<` 이외에도 :obj:`.* <Base..*>`, :obj:`.+ <Base..+>` 등의 항목간 비교 연산자를 제공한다.
 몇몇 항목간 비교 연산자는 바로 전 단락에서도 언급한 ``0 .< A .< 1``\ 와 같이
 스칼라 값을 피연산자로 받기도 한다. 스칼라 값이 피연산자로 될 경우에는 스칼라 값이
 배열의 각 항목으로 복제되어 들어간다는 의미이다.
@@ -344,6 +344,22 @@ Julia는 다음과 같은 순서로 연산을 수행한다. (높은 우선순위
 대입              ``= += -= *= /= //= \= ^= ÷= %= |= &= $= <<= >>= >>>=``, 그리고 ``.+= .-= .*= ./= .//= .\= .^= .÷= .%=``
 ================= =============================================================================================
 
+.. _man-elementary-functions:
+
+기초 함수
+~~~~~~~~~~~~~~~~~~~~
+
+Julia는 수학 함수와 연산자의 종합 콜렉션을 제공하고 있다. 이런 수학적 연산은
+정수, 부동소수점 실수, 유리수, 복소수를 비롯한 어떠한 합당한 수학적 정의에 의한 수에
+대해서도 정의할 수 있다.
+
+게다가, 이런 함수들은 (Julia의 다른 함수들과 같은) "벡터화"된 형태를 취하여
+``f.(A)`` 와 같은 문법을 이용하여
+배열이나 다른 컬렉션들과 함께 적용될 수 있다.
+예를 들어, ``sin.(A)``\ 은 배열 ``A``\ 의 각각의 원소에 대해
+사인값을 계산할 수 있게 한다.
+자세한 내용은 :ref:`man-dot-vectorizing`\ 을 참고하면 알 수 있다:
+
 .. _man-numerical-conversions:
 
 수치 변환
@@ -376,21 +392,21 @@ Julia는 부정확한 변환에 있어서 서로 차이가 발생하는 총 세 
 
     julia> Int8(128)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Int64) at ./sysimg.jl:53
+     ...
 
     julia> Int8(127.0)
     127
 
     julia> Int8(3.14)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Float64) at ./sysimg.jl:53
+     ...
 
     julia> Int8(128.0)
     ERROR: InexactError()
-     in call at ./essentials.jl:58
-     in eval at ./boot.jl:263
+     in Int8(::Float64) at ./sysimg.jl:53
+     ...
 
     julia> 127 % Int8
     127
@@ -403,27 +419,12 @@ Julia는 부정확한 변환에 있어서 서로 차이가 발생하는 총 세 
 
     julia> round(Int8,127.6)
     ERROR: InexactError()
-     in trunc at ./float.jl:357
-     in round at ./float.jl:177
-     in eval at ./boot.jl:263
+     in trunc(::Type{Int8}, ::Float64) at ./float.jl:456
+     in round(::Type{Int8}, ::Float64) at ./float.jl:211
+     ...
 
 :ref:`man-conversion-and-promotion`\ 을 참고하면 사용자 정의 변한과 프로모션을 
 어떻게 정의하는 지 알 수 있다.
-
-.. _man-elementary-functions:
-
-기초 함수
---------------------
-
-Julia는 수학 함수와 연산자의 종합 콜렉션을 제공하고 있다. 이런 수학적 연산은
-정수, 부동소수점 실수, 유리수, 복소수를 비롯한 어떠한 합당한 수학적 정의에 의한 수에 
-대해서도 정의할 수 있다.
-게다가, 이런 함수들은 (Julia의 다른 함수들과 같은) "벡터화"된 형태를 취하여 
-``f.(A)`` 와 같은 문법을 이용하여 
-배열이나 다른 컬렉션들과 함께 적용될 수 있다. 
-예를 들어, ``sin.(A)``\ 은 배열 ``A``\ 의 각각의 원소에 대해 
-사인값을 계산할 수 있게 한다. 
-자세한 내용은 :ref:`man-dot-vectorizing`\ 을 참고하면 알 수 있다:
 
 .. _man-rounding-functions:
 

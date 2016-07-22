@@ -478,129 +478,6 @@ Mathematical Operators
 
    Short-circuiting boolean OR.
 
-.. function:: A_ldiv_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A` \\ :math:`Bᴴ`\ .
-
-.. function:: A_ldiv_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A` \\ :math:`Bᵀ`\ .
-
-.. function:: A_mul_B!(Y, A, B) -> Y
-
-   .. Docstring generated from Julia source
-
-   Calculates the matrix-matrix or matrix-vector product :math:`A⋅B` and stores the result in ``Y``\ , overwriting the existing value of ``Y``\ . Note that ``Y`` must not be aliased with either ``A`` or ``B``\ .
-
-   .. doctest::
-
-       julia> A=[1.0 2.0; 3.0 4.0]; B=[1.0 1.0; 1.0 1.0]; Y = similar(B); A_mul_B!(Y, A, B);
-
-       julia> Y
-       2×2 Array{Float64,2}:
-        3.0  3.0
-        7.0  7.0
-
-.. function:: A_mul_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A⋅Bᴴ`\ .
-
-.. function:: A_mul_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A⋅Bᵀ`\ .
-
-.. function:: A_rdiv_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A / Bᴴ`\ .
-
-.. function:: A_rdiv_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`A / Bᵀ`\ .
-
-.. function:: Ac_ldiv_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ` \\ :math:`B`\ .
-
-.. function:: Ac_ldiv_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ` \\ :math:`Bᴴ`\ .
-
-.. function:: Ac_mul_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ⋅B`\ .
-
-.. function:: Ac_mul_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ Bᴴ`\ .
-
-.. function:: Ac_rdiv_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ / B`\ .
-
-.. function:: Ac_rdiv_Bc(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᴴ / Bᴴ`\ .
-
-.. function:: At_ldiv_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ` \\ :math:`B`\ .
-
-.. function:: At_ldiv_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ` \\ :math:`Bᵀ`\ .
-
-.. function:: At_mul_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ⋅B`\ .
-
-.. function:: At_mul_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ⋅Bᵀ`\ .
-
-.. function:: At_rdiv_B(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ / B`\ .
-
-.. function:: At_rdiv_Bt(A, B)
-
-   .. Docstring generated from Julia source
-
-   For matrices or vectors :math:`A` and :math:`B`\ , calculates :math:`Aᵀ / Bᵀ`\ .
-
 Mathematical Functions
 ----------------------
 
@@ -966,7 +843,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   ``round(x)`` rounds ``x`` to an integer value according to the default rounding mode (see :func:`rounding`\ ), returning a value of the same type as ``x``\ . By default (:obj:`RoundNearest`\ ), this will round to the nearest integer, with ties (fractional values of 0.5) being rounded to the even integer.
+   Rounds ``x`` to an integer value according to the provided :obj:`RoundingMode`\ , returning a value of the same type as ``x``\ . When not specifying a rounding mode the global mode will be used (see :func:`rounding`\ ), which by default is round to the nearest integer (:obj:`RoundNearest` mode), with ties (fractional values of 0.5) being rounded to the nearest even integer.
 
    .. doctest::
 
@@ -993,61 +870,75 @@ Mathematical Functions
        julia> round(pi, 3, 2)
        3.125
 
-   **note**
+   .. note::
+      Rounding to specified digits in bases other than 2 can be inexact when operating on binary floating point numbers. For example, the ``Float64`` value represented by ``1.15`` is actually *less* than 1.15, yet will be rounded to 1.2.
 
-   Rounding to specified digits in bases other than 2 can be inexact when operating on binary floating point numbers. For example, the ``Float64`` value represented by ``1.15`` is actually *less* than 1.15, yet will be rounded to 1.2.
+      .. doctest::
 
-   .. doctest::
+          julia> x = 1.15
+          1.15
 
-       julia> x = 1.15
-       1.15
+          julia> @sprintf "%.20f" x
+          "1.14999999999999991118"
 
-       julia> @sprintf "%.20f" x
-       "1.14999999999999991118"
+          julia> x < 115//100
+          true
 
-       julia> x < 115//100
-       true
+          julia> round(x, 1)
+          1.2
 
-       julia> round(x, 1)
-       1.2
 
-.. data:: RoundingMode
+.. type:: RoundingMode
 
-   A type which controls rounding behavior. Currently supported rounding modes are:
+   .. Docstring generated from Julia source
 
-   - :obj:`RoundNearest` (default)
-   - :obj:`RoundNearestTiesAway`
-   - :obj:`RoundNearestTiesUp`
-   - :obj:`RoundToZero`
-   - :obj:`RoundUp`
-   - :obj:`RoundDown`
+   A type used for controlling the rounding mode of floating point operations (via :func:`rounding`\ /:func:`setrounding` functions), or as optional arguments for rounding to the nearest integer (via the :func:`round` function).
+
+   Currently supported rounding modes are:
+
+   * :obj:`RoundNearest` (default)
+   * :obj:`RoundNearestTiesAway`
+   * :obj:`RoundNearestTiesUp`
+   * :obj:`RoundToZero`
+   * :obj:`RoundFromZero` (``BigFloat`` only)
+   * :obj:`RoundUp`
+   * :obj:`RoundDown`
 
 .. data:: RoundNearest
 
-   The default rounding mode. Rounds to the nearest integer, with ties
-   (fractional values of 0.5) being rounded to the nearest even integer.
+   .. Docstring generated from Julia source
+
+   The default rounding mode. Rounds to the nearest integer, with ties (fractional values of 0.5) being rounded to the nearest even integer.
 
 .. data:: RoundNearestTiesAway
 
-   Rounds to nearest integer, with ties rounded away from zero (C/C++
-   :func:`round` behaviour).
+   .. Docstring generated from Julia source
+
+   Rounds to nearest integer, with ties rounded away from zero (C/C++ :func:`round` behaviour).
 
 .. data:: RoundNearestTiesUp
 
-   Rounds to nearest integer, with ties rounded toward positive infinity
-   (Java/JavaScript :func:`round` behaviour).
+   .. Docstring generated from Julia source
+
+   Rounds to nearest integer, with ties rounded toward positive infinity (Java/JavaScript :func:`round` behaviour).
 
 .. data:: RoundToZero
 
-   :func:`round` using this rounding mode is an alias for :func:`trunc`.
+   .. Docstring generated from Julia source
+
+   :func:`round` using this rounding mode is an alias for :func:`trunc`\ .
 
 .. data:: RoundUp
 
-   :func:`round` using this rounding mode is an alias for :func:`ceil`.
+   .. Docstring generated from Julia source
+
+   :func:`round` using this rounding mode is an alias for :func:`ceil`\ .
 
 .. data:: RoundDown
 
-   :func:`round` using this rounding mode is an alias for :func:`floor`.
+   .. Docstring generated from Julia source
+
+   :func:`round` using this rounding mode is an alias for :func:`floor`\ .
 
 .. function:: round(z, RoundingModeReal, RoundingModeImaginary)
 
@@ -1347,12 +1238,6 @@ Mathematical Functions
 
    Factorial of ``n``\ .  If ``n`` is an :obj:`Integer`\ , the factorial is computed as an integer (promoted to at least 64 bits).  Note that this may overflow if ``n`` is not small, but you can use ``factorial(big(n))`` to compute the result exactly in arbitrary precision. If ``n`` is not an ``Integer``\ , ``factorial(n)`` is equivalent to :func:`gamma(n+1) <gamma>`\ .
 
-.. function:: factorial(n,k)
-
-   .. Docstring generated from Julia source
-
-   Compute ``factorial(n)/factorial(k)``\ .
-
 .. function:: gcd(x,y)
 
    .. Docstring generated from Julia source
@@ -1381,9 +1266,9 @@ Mathematical Functions
        julia> gcdx(240, 46)
        (2,-9,47)
 
-   **note**
+   .. note::
+      Bézout coefficients are *not* uniquely defined. ``gcdx`` returns the minimal Bézout coefficients that are computed by the extended Euclid algorithm. (Ref: D. Knuth, TAoCP, 2/e, p. 325, Algorithm X.) These coefficients ``u`` and ``v`` are minimal in the sense that :math:`|u| < |\frac y d|` and :math:`|v| < |\frac x d|`\ . Furthermore, the signs of ``u`` and ``v`` are chosen so that ``d`` is positive.
 
-   Bézout coefficients are *not* uniquely defined. ``gcdx`` returns the minimal Bézout coefficients that are computed by the extended Euclid algorithm. (Ref: D. Knuth, TAoCP, 2/e, p. 325, Algorithm X.) These coefficients ``u`` and ``v`` are minimal in the sense that :math:`|u| < |\frac y d` and :math:`|v| < |\frac x d`\ . Furthermore, the signs of ``u`` and ``v`` are chosen so that ``d`` is positive.
 
 .. function:: ispow2(n) -> Bool
 
@@ -1764,7 +1649,7 @@ Statistics
 
    Quantiles are computed via linear interpolation between the points ``((k-1)/(n-1), v[k])``\ , for ``k = 1:n`` where ``n = length(v)``\ . This corresponds to Definition 7 of Hyndman and Fan (1996), and is the same as the R default.
 
-   * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages",   *The American Statistician*, Vol. 50, No. 4, pp. 361-365
+   * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages", *The American Statistician*, Vol. 50, No. 4, pp. 361-365
 
 .. function:: quantile!([q, ] v, p; sorted=false)
 
@@ -1776,7 +1661,7 @@ Statistics
 
    Quantiles are computed via linear interpolation between the points ``((k-1)/(n-1), v[k])``\ , for ``k = 1:n`` where ``n = length(v)``\ . This corresponds to Definition 7 of Hyndman and Fan (1996), and is the same as the R default.
 
-   * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages",   *The American Statistician*, Vol. 50, No. 4, pp. 361-365
+   * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages", *The American Statistician*, Vol. 50, No. 4, pp. 361-365
 
 .. function:: cov(x[, corrected=true])
 

@@ -11,16 +11,35 @@ A lot of the power and extensibility in Julia comes from a collection of informa
 Iteration
 ---------
 
-================================= ======================== ===========================================
-Required methods                                           Brief description
-================================= ======================== ===========================================
-:func:`start(iter) <start>`                                Returns the initial iteration state
-:func:`next(iter, state) <next>`                           Returns the current item and the next state
-:func:`done(iter, state) <done>`                           Tests if there are any items remaining
-**Important optional methods**    **Default definition**   **Brief description**
-:func:`eltype(IterType) <eltype>` ``Any``                  The type the items returned by :func:`next`
-:func:`length(iter) <length>`     (*undefined*)            The number of items, if known
-================================= ======================== ===========================================
+================================================== ======================== =====================================================================================
+Required methods                                                            Brief description
+================================================== ======================== =====================================================================================
+:func:`start(iter) <start>`                                                 Returns the initial iteration state
+:func:`next(iter, state) <next>`                                            Returns the current item and the next state
+:func:`done(iter, state) <done>`                                            Tests if there are any items remaining
+**Important optional methods**                     **Default definition**   **Brief description**
+:func:`iteratorsize(IterType) <iteratorsize>`      ``HasLength()``          One of `HasLength()`, `HasShape()`, `IsInfinite()`, or `SizeUnknown()` as appropriate
+:func:`iteratoreltype(IterType) <iteratoreltype>`  ``HasEltype()``          Either `EltypeUnknown()` or `HasEltype()` as appropriate
+:func:`eltype(IterType) <eltype>`                  ``Any``                  The type the items returned by :func:`next`
+:func:`length(iter) <length>`                      (*undefined*)            The number of items, if known
+:func:`size(iter, [dim...]) <size>`                (*undefined*)            The number of items in each dimension, if known
+================================================== ======================== =====================================================================================
+
+================================================================ ======================================================================
+Value returned by :func:`iteratorsize(IterType) <iteratorsize>`  Required Methods
+================================================================ ======================================================================
+`HasLength()`                                                    :func:`length(iter) <length>`
+`HasShape()`                                                     :func:`length(iter) <length>`  and :func:`size(iter, [dim...]) <size>`
+`IsInfinite()`                                                   (*none*)
+`SizeUnknown()`                                                  (*none*)
+================================================================ ======================================================================
+
+==================================================================== ==================================
+Value returned by :func:`iteratoreltype(IterType) <iteratoreltype>`  Required Methods
+==================================================================== ==================================
+`HasEltype()`                                                        :func:`eltype(IterType) <eltype>`
+`EltypeUnknown()`                                                    (*none*)
+==================================================================== ==================================
 
 Sequential iteration is implemented by the methods :func:`start`, :func:`done`, and :func:`next`. Instead of mutating objects as they are iterated over, Julia provides these three methods to keep track of the iteration state externally from the object. The :func:`start(iter) <start>` method returns the initial state for the iterable object ``iter``. That state gets passed along to :func:`done(iter, state) <done>`, which tests if there are any elements remaining, and :func:`next(iter, state) <next>`, which returns a tuple containing the current element and an updated ``state``. The ``state`` object can be anything, and is generally considered to be an implementation detail private to the iterable object.
 
@@ -166,9 +185,9 @@ Methods to implement                                                            
 :func:`similar(A, dims::NTuple{Int}) <similar>`                       ``similar(A, eltype(A), dims)``              Return a mutable array with the same element type and size `dims`
 :func:`similar(A, ::Type{S}, dims::NTuple{Int}) <similar>`            ``Array{S}(dims)``                           Return a mutable array with the specified element type and size
 **Non-traditional indices**                                           **Default definition**                       **Brief description**
-:func:`Base.indicesbehavior(::Type) <indicesbehavior>`                ``Base.IndicesStartAt1()``                   Trait with values ``IndicesStartAt1()``, ``IndicesUnitRange()``, ``IndicesList()``
-:func:`indices(A, d) <indices>`                                       ``1:size(A, d)``                             Return the range of valid indices along dimension ``d``
-:func:`Base.similar(A, ::Type{S}, inds::NTuple{Ind}) <similar>`       ``similar(A, S, map(Base.dimlength, inds))`` Return a mutable array with the specified indices ``inds`` (see below for discussion of ``Ind``)
+:func:`indices(A) <indices>`                                          ``map(OneTo, size(A))``                      Return the ``AbstractUnitRange`` of valid indices
+:func:`Base.similar(A, ::Type{S}, inds::NTuple{Ind}) <similar>`       ``similar(A, S, Base.to_shape(inds))``       Return a mutable array with the specified indices ``inds`` (see below)
+:func:`Base.similar(T::Union{Type,Function}, inds) <similar>`         ``T(Base.to_shape(inds))``                   Return an array similar to ``T`` with the specified indices ``inds`` (see below)
 ===================================================================== ============================================ =======================================================================================
 
 If a type is defined as a subtype of ``AbstractArray``, it inherits a very large set of rich behaviors including iteration and multidimensional indexing built on top of single-element access.  See the :ref:`arrays manual page <man-arrays>` and :ref:`standard library section <stdlib-arrays>` for more supported methods.
@@ -290,10 +309,8 @@ In addition to all the iterable and indexable methods from above, these types ca
 
 If you are defining an array type that allows non-traditional indexing
 (indices that start at something other than 1), you should specialize
-``indices`` and ``indicesbehavior``.  You should also specialize
-``similar`` so that the ``dims`` argument (ordinarily a ``Dims``
-size-tuple) can be a mixture of ``Integer`` and ``UnitRange`` objects;
-the ``Integer`` entries imply that the indexing starts from 1, whereas
-the dimensions encoded with ``UnitRange`` may have arbitrary starting
-index.
+``indices``.  You should also specialize ``similar`` so that the
+``dims`` argument (ordinarily a ``Dims`` size-tuple) can accept
+``AbstractUnitRange`` objects, perhaps range-types ``Ind`` of your own
+design.  For more information, see :ref:`devdocs-offsetarrays`.
 
