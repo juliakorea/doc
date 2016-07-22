@@ -9,3 +9,7 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/m4pdut3nhv
 
 # 사용법
 * [git 도우미](https://github.com/juliakorea/doc/wiki/git)
+
+* 번역과 관련된 제안, 질문은 페이스북, 슬랙으로 알려주세요.
+ - https://www.facebook.com/groups/juliakorea/
+ - http://juliakorea.slack.com/

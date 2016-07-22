@@ -393,7 +393,7 @@
 -- entries are true where the corresponding elements of ``A`` are between 0
 -- and 1.
 == 
-++ :obj:`.\< <Base..\<>`는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
+++ :obj:`.\< <Base..\<>` 는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
 ++ ``A``\ 와 ``B`` 가 같은 dimension일 때만 유효하다.
 ++ 이 연산자는 ``A``\ 나 ``B``\ 와 같은 dimension을 지닌 boolean 배열을 리턴한다. 
 ++ 이런 연산을 일컫어 *항목간 비교 연산자(elementwise)*\ 라고 한다; 
@@ -411,7 +411,7 @@
 -- This notation means that the scalar operand should be replicated for each entry of
 -- the array.
 == 
-++ 다음은 중첩된 비교 연산이 어떻게 평가되어지는지 나타낸다::
+++ 다음은 중첩된 비교 연산이 어떻게 평가되어지는지 나타낸다:
 -- Note the evaluation behavior of chained comparisons:
 == 
 == .. doctest::
