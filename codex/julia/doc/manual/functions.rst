@@ -183,7 +183,6 @@ Expression          Calls
 ``1:n``             :func:`colon`
 ``A[i]``            :func:`getindex`
 ``A[i]=x``          :func:`setindex!`
-``A(x)``            :func:`call`
 =================== ==================
 
 These functions are included in the ``Base.Operators`` module even
@@ -412,7 +411,7 @@ function (although it often is):
     julia> baz(args...)
     ERROR: MethodError: no method matching baz(::Int64, ::Int64, ::Int64)
     Closest candidates are:
-      baz(::Any, ::Any)
+      baz(::Any, ::Any) at none:1
     ...
 
 As you can see, if the wrong number of elements are in the spliced
@@ -510,6 +509,13 @@ tuple, explicitly after a semicolon.  For example, ``plot(x, y;
 (:width,2))`` and ``plot(x, y; :width => 2)`` are equivalent to
 ``plot(x, y, width=2)``.  This is useful in situations where the
 keyword name is computed at runtime.
+
+The nature of keyword arguments makes it possible to specify the same
+argument more than once. For example, in the call
+``plot(x, y; options..., width=2)`` it is possible that the ``options``
+structure also contains a value for ``width``. In such a case the
+rightmost occurrence takes precedence; in this example, ``width``
+is certain to have the value ``2``.
 
 .. _man-evaluation-scope-default-values:
 
@@ -660,11 +666,15 @@ calls do not allocate new arrays over and over again for the results
 except that, as above, the ``broadcast!`` loop is fused with any nested
 "dot" calls.  For example, ``X .= sin.(Y)`` is equivalent to
 ``broadcast!(sin, X, Y)``, overwriting ``X`` with ``sin.(Y)`` in-place.
+If the left-hand side is an array-indexing expression, e.g.
+``X[2:end] .= sin.(Y)``, then it translates to ``broadcast!`` on a ``view``,
+e.g. ``broadcast!(sin, view(X, 2:endof(X)), Y)``, so that the left-hand
+side is updated in-place.
 
 (In future versions of Julia, operators like ``.*`` will also be handled with
 the same mechanism: they will be equivalent to ``broadcast`` calls and
-will be fused with other nested "dot" calls.  ``x .+= y`` is equivalent
-to ``x .= x .+ y`` and will eventually result in a fused in-place assignment.
+will be fused with other nested "dot" calls.  ``X .+= Y`` is equivalent
+to ``X .= X .+ Y`` and will eventually result in a fused in-place assignment.
 Similarly for ``.*=`` etcetera.)
 
 Further Reading

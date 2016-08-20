@@ -317,7 +317,7 @@ only as a storage format. In calculations they'll be converted to ``Float32``:
     2
 
     julia> 2*Float16(4.)
-    8.0f0
+    Float16(8.0)
 
 The underscore ``_`` can be used as digit separator:
 
@@ -505,14 +505,17 @@ Rounding modes
 If a number doesn't have an exact floating-point representation, it must be
 rounded to an appropriate representable value, however, if wanted, the manner
 in which this rounding is done can be changed according to the rounding modes
-presented in the `IEEE 754 standard <https://en.wikipedia.org/wiki/IEEE_754-2008>`_::
+presented in the `IEEE 754 standard <https://en.wikipedia.org/wiki/IEEE_754-2008>`_.
 
+.. doctest::
 
-    julia> 1.1 + 0.1
+    julia> x = 1.1; y = 0.1;
+
+    julia> x + y
     1.2000000000000002
 
     julia> setrounding(Float64,RoundDown) do
-           1.1 + 0.1
+               x + y
            end
     1.2
 
@@ -554,11 +557,11 @@ computation, and also in the following references:
 - For even more extensive documentation of the history of, rationale for,
   and issues with floating-point numbers, as well as discussion of many other
   topics in numerical computing, see the `collected writings
-  <http://www.cs.berkeley.edu/~wkahan/>`_ of `William Kahan
+  <https://people.eecs.berkeley.edu/~wkahan/>`_ of `William Kahan
   <https://en.wikipedia.org/wiki/William_Kahan>`_, commonly known as the "Father
   of Floating-Point". Of particular interest may be `An Interview with the Old
   Man of Floating-Point
-  <http://www.cs.berkeley.edu/~wkahan/ieee754status/754story.html>`_.
+  <https://people.eecs.berkeley.edu/~wkahan/ieee754status/754story.html>`_.
 
 .. _man-arbitrary-precision-arithmetic:
 
