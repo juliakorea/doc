@@ -770,7 +770,7 @@ code.
 
 Some run-time benchmarks comparing (1) type dispatch, (2) dictionary
 lookup, and (3) a "switch" statement can be found `on the mailing list
-<https://groups.google.com/d/msg/julia-users/jUMu9A3QKQQ/qjgVWr7vAwAJ>`_.
+<https://groups.google.com/forum/#!msg/julia-users/jUMu9A3QKQQ/qjgVWr7vAwAJ>`_.
 
 Perhaps even worse than the run-time impact is the compile-time
 impact: Julia will compile specialized functions for each different
@@ -947,7 +947,7 @@ Taken to its extreme, pre-allocation can make your code uglier, so
 performance measurements and some judgment may be required.   However,
 for "vectorized" (element-wise) functions, the convenient syntax
 ``x .= f.(y)`` can be used for in-place operations with fused loops
-and no temporary arrays (:ref:`dot-vectorizing`).
+and no temporary arrays (:ref:`man-dot-vectorizing`).
 
 
 Avoid string interpolation for I/O

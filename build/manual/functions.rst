@@ -178,7 +178,6 @@ Julia에서는, 대부분의 연산자들은 일반적인 함수들과 다를 �
 ``1:n``             :func:`colon`
 ``A[i]``            :func:`getindex`
 ``A[i]=x``          :func:`setindex!`
-``A(x)``            :func:`call`
 =================== ==================
 
 이 함수들은 연산자같지 않은 이름을 지니고 있지만, 
@@ -375,7 +374,7 @@ Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변
     (1,2,(3,4))
 
 또한, 이런 매개변수 결합대응(splice)은 
-꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다::
+꼭 가변 인자 함수에서만 적용할 수 있는 것은 아니다:
 
 .. doctest::
 
@@ -398,7 +397,7 @@ Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변
     julia> baz(args...)
     ERROR: MethodError: no method matching baz(::Int64, ::Int64, ::Int64)
     Closest candidates are:
-      baz(::Any, ::Any)
+      baz(::Any, ::Any) at none:1
     ...
 
 보다시피, 매개변수 결합대응 객체의 수가 실제 함수의 정의와 맞지 않으면, 
@@ -499,6 +498,12 @@ Julia에서 가변인자 함수를 정의하기 위해서는 마지막 매개변
 예를 들어, ``plot(x, y; (:width,2))``\ 와 ``plot(x, y; :width => 2)``\ 는 
 ``plot(x, y, width=2)``\ 와 동등한 표현이다. 이것은 실해중에 키워드 이름이 
 결정되는 경우 유용하다. 
+
+키워드 매개변수의 속성때분에 한 매개변수를 여러번 표시할 수 있다.
+예를 들어, ``plot(x, y; options..., width=2)``\ 와 같은 함수 호출에서 
+``options``\ 라는 구조체 내부에 ``width``\ 라는 값을 포함할 수 있다.
+이런 경우에는 오른쪽에 있는 매개변수가 우선순위를 가진다; 
+이번 예제에서는 ``width``\ 에는 ``2``\ 라는 정수가 들어간다.
 
 .. _man-evaluation-scope-default-values:
 
@@ -632,32 +637,35 @@ Julia로 쓰여진 아무 함수 ``f``\ 는 배열(혹은 다른 컬렉션)에 `
 (물론 두 벡터가 다른 길이면 예외를 발생시킬 것이다)
 
 (TODO: 아래 번역)
-Moreover, *nested* ``f.(args...)`` calls are *fused* into a single ``broadcast``
-loop.  For example, ``sin.(cos.(X))`` is equivalent to ``broadcast(x -> sin(cos(x)), X)``,
-similar to ``[sin(cos(x)) for x in X]``: there is only a single loop over ``X``,
-and a single array is allocated for the result.   [In contrast, ``sin(cos(X))``
-in a typical "vectorized" language would first allocate one temporary array for ``tmp=cos(X)``,
-and then compute ``sin(tmp)`` in a separate loop, allocating a second array.]
-This loop fusion is not a compiler optimization that may or may not occur, it
-is a *syntactic guarantee* whenever nested ``f.(args...)`` calls are encountered.  Technically,
-the fusion stops as soon as a "non-dot" function is encountered; for example,
-in ``sin.(sort(cos.(X)))`` the ``sin`` and ``cos`` loops cannot be merged
-because of the intervening ``sort`` function.
+게다가, *중첩된* ``f.(args...)`` 호출은 하나의 ``broadcast`` 반복문으으로 
+녹아들어갈 수 있다. 
+예를 들어, ``sin.(cos.(X))``\ 는 ``broadcast(x -> sin(cos(x)), X)``\ 와 같고, 
+이는 ``[sin(cos(x)) for x in X]``\ 와 같은 결과를 나타낸다. 
+[반대로, 벡터화를 지원하는 일반적인 언어에서는 ``sin(cos(X))``\ 를 호출할 때 
+``tmp=cos(X)``\ 를 위한 임시적인 배열을 할당하고, ``sin(tmp)``\ 를 또 다른 배열을 호출하면서 
+별도의 반복문에서 처리한다.]
+이런 반복문의 결합은 컴파일러의 최적화에 따라 일어날 가능성을 주는 것이 아니라, 
+``f.(args...)`` 호출이 일어날 때마다 *문법상으로 100% 발생*\ 한다고 보증한다.
+기술적으로 이런 결합은 "점이 아닌, 즉 벡터화가 적용되지 않는(non-dot)" 함수들이 나타나는 순간 
+멈추게 되어있다. 예를 들어, ``sin.(sort(cos.(X)))``\ 에서 ``sin``\ 과 ``cos`` 반복문은 
+결합될 수가 없는 것이, 중간에 ``sort`` 함수가 끼어들어갔기 때문이다.
 
-Finally, the maximum efficiency is typically achieved when the output
-array of a vectorized operation is *pre-allocated*, so that repeated
-calls do not allocate new arrays over and over again for the results
-(:ref:`man-preallocation`:).   A convenient syntax for this is
-``X .= ...``, which is equivalent to ``broadcast!(identity, X, ...)``
-except that, as above, the ``broadcast!`` loop is fused with any nested
-"dot" calls.  For example, ``X .= sin.(Y)`` is equivalent to
-``broadcast!(sin, X, Y)``, overwriting ``X`` with ``sin.(Y)`` in-place.
+결론적으로, 벡터화된 연산을 가장 효율적으로 활용하기 위해서
+출력용 배열이 *미리 할당*\ 되어 있어야한다. 왜냐하면, 그렇지 않다면  
+호출이 일어날 때마다 새 배열을 계속 할당할 것이기 때문이다. (:ref:`man-preallocation`:) 
+이를 위한 편리한 문법은  ``broadcast!(identity, X, ...)``\ 와 같은 의미의 
+``X .= ...``\ 가 있다. 이를 제외하고는 ``broadcast!`` 반복문은 어떠한 
+"점" 호출("dot" calls)과도 융합할 수 있다.
+예를 들어, ``X .= sin.(Y)``\ 는 ``broadcast!(sin, X, Y)``\ 와 같은 식인데, 이 경우 
+``X``\ 를 ``sin.(Y)``\ 로 덮어쓴다. 
+만약 좌변이 ``X[2:end] .= sin.(Y)``\ 와 같이 배열의 인덱스와 관련된 표현식인 경우,  
+좌변의 값을 변경하기 위해, ``broadcast!(sin, view(X, 2:endof(X)), Y)``\ 와 같이 
+``뷰(view)`` 관점에서 ``broadcast!``\ 로 본래의 식을  변환한다.
 
-(In future versions of Julia, operators like ``.*`` will also be handled with
-the same mechanism: they will be equivalent to ``broadcast`` calls and
-will be fused with other nested "dot" calls.  ``x .+= y`` is equivalent
-to ``x .= x .+ y`` and will eventually result in a fused in-place assignment.
-Similarly for ``.*=`` etcetera.)
+(미래의 Julia에서는, ``.*``\ 와 같은 연산자들은 같은 메커니즘으로 처리될 것이다: 
+이들은 ``broadcast`` 호출과 같아질 것이며, 다른 중첩된 "점" 호출처럼 융합할 수 있을 것이다. 
+``X .+= Y``\ 는 덮어씌워지며 융합된 결과로 ``X .= X .+ Y``\ 와 같은 값을 지니게 될 것이다. 
+`` .*= `` 등에서도 같은 일이 벌어질 것이다.)
 
 더 읽을거리
 ---------------

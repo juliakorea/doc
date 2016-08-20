@@ -155,7 +155,7 @@ Julia에서는 :ref:`상수를 변수와 병치
     julia> sqrt(-1)
     ERROR: DomainError:
     sqrt will only return a complex result if called with a complex argument. Try sqrt(complex(x)).
-     in sqrt(::Int64) at ./math.jl:149
+     in sqrt(::Int64) at ./math.jl:185
      ...
 
     julia> sqrt(-1 + 0im)

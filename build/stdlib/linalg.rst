@@ -23,7 +23,9 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Matrix division using a polyalgorithm. For input matrices ``A`` and ``B``\ , the result ``X`` is such that ``A*X == B`` when ``A`` is square.  The solver that is used depends upon the structure of ``A``\ .  A direct solver is used for upper or lower triangular ``A``\ .  For Hermitian ``A`` (equivalent to symmetric ``A`` for non-complex ``A``\ ) the ``BunchKaufman`` factorization is used. Otherwise an LU factorization is used. For rectangular ``A`` the result is the minimum-norm least squares solution computed by a pivoted QR factorization of ``A`` and a rank estimate of ``A`` based on the R factor.
+   Matrix division using a polyalgorithm. For input matrices ``A`` and ``B``\ , the result ``X`` is such that ``A*X == B`` when ``A`` is square. The solver that is used depends upon the structure of ``A``\ .  If ``A`` is upper or lower triangular (or diagonal), no factorization of ``A`` is required and the system is solved with either forward or backward substitution. For non-triangular square matrices, an LU factorization is used.
+
+   For rectangular ``A`` the result is the minimum-norm least squares solution computed by a pivoted QR factorization of ``A`` and a rank estimate of ``A`` based on the R factor.
 
    When ``A`` is sparse, a similar polyalgorithm is used. For indefinite matrices, the ``LDLt`` factorization does not use pivoting during the numerical factorization and therefore the procedure can fail even for invertible matrices.
 
@@ -110,7 +112,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Constructs an upper (``isupper=true``\ ) or lower (``isupper=false``\ ) bidiagonal matrix using the given diagonal (``dv``\ ) and off-diagonal (``ev``\ ) vectors.  The result is of type ``Bidiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`convert`\ . ``ev``\ 's length must be one less than the length of ``dv``\ .
+   Constructs an upper (``isupper=true``\ ) or lower (``isupper=false``\ ) bidiagonal matrix using the given diagonal (``dv``\ ) and off-diagonal (``ev``\ ) vectors.  The result is of type ``Bidiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`full`\ . ``ev``\ 's length must be one less than the length of ``dv``\ .
 
    **Example**
 
@@ -125,7 +127,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Constructs an upper (``uplo='U'``\ ) or lower (``uplo='L'``\ ) bidiagonal matrix using the given diagonal (``dv``\ ) and off-diagonal (``ev``\ ) vectors.  The result is of type ``Bidiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`convert`\ . ``ev``\ 's length must be one less than the length of ``dv``\ .
+   Constructs an upper (``uplo='U'``\ ) or lower (``uplo='L'``\ ) bidiagonal matrix using the given diagonal (``dv``\ ) and off-diagonal (``ev``\ ) vectors.  The result is of type ``Bidiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`full`\ . ``ev``\ 's length must be one less than the length of ``dv``\ .
 
    **Example**
 
@@ -154,13 +156,13 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Construct a symmetric tridiagonal matrix from the diagonal and first sub/super-diagonal, respectively. The result is of type ``SymTridiagonal`` and provides efficient specialized eigensolvers, but may be converted into a regular matrix with :func:`convert`\ .
+   Construct a symmetric tridiagonal matrix from the diagonal and first sub/super-diagonal, respectively. The result is of type ``SymTridiagonal`` and provides efficient specialized eigensolvers, but may be converted into a regular matrix with :func:`full`\ .
 
 .. function:: Tridiagonal(dl, d, du)
 
    .. Docstring generated from Julia source
 
-   Construct a tridiagonal matrix from the first subdiagonal, diagonal, and first superdiagonal, respectively.  The result is of type ``Tridiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`convert`\ . The lengths of ``dl`` and ``du`` must be one less than the length of ``d``\ .
+   Construct a tridiagonal matrix from the first subdiagonal, diagonal, and first superdiagonal, respectively.  The result is of type ``Tridiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`full`\ . The lengths of ``dl`` and ``du`` must be one less than the length of ``d``\ .
 
 .. function:: Symmetric(A, uplo=:U)
 
@@ -306,17 +308,17 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    Compute the square root of a non-negative number ``x``\ .
 
-.. function:: cholfact(A, uplo::Symbol, Val{false}) -> Cholesky
+.. function:: cholfact(A, [uplo::Symbol,] Val{false}) -> Cholesky
 
    .. Docstring generated from Julia source
 
-   Compute the Cholesky factorization of a dense symmetric positive definite matrix ``A`` and return a ``Cholesky`` factorization. The ``uplo`` argument may be ``:L`` for using the lower part or ``:U`` for the upper part of ``A``\ . The default is to use ``:U``\ . The triangular Cholesky factor can be obtained from the factorization ``F`` with: ``F[:L]`` and ``F[:U]``\ . The following functions are available for ``Cholesky`` objects: ``size``\ , ``\``\ , ``inv``\ , ``det``\ . A ``PosDefException`` exception is thrown in case the matrix is not positive definite.
+   Compute the Cholesky factorization of a dense symmetric positive definite matrix ``A`` and return a ``Cholesky`` factorization. The matrix ``A`` can either be a ``Symmetric`` or ``Hermitian`` ``StridedMatrix`` or a *perfectly* symmetric or Hermitian ``StridedMatrix``\ . In the latter case, the optional argument ``uplo`` may be ``:L`` for using the lower part or ``:U`` for the upper part of ``A``\ . The default is to use ``:U``\ . The triangular Cholesky factor can be obtained from the factorization ``F`` with: ``F[:L]`` and ``F[:U]``\ . The following functions are available for ``Cholesky`` objects: ``size``\ , ``\``\ , ``inv``\ , ``det``\ . A ``PosDefException`` exception is thrown in case the matrix is not positive definite.
 
-.. function:: cholfact(A, uplo::Symbol, Val{true}; tol = 0.0) -> CholeskyPivoted
+.. function:: cholfact(A, [uplo::Symbol,] Val{true}; tol = 0.0) -> CholeskyPivoted
 
    .. Docstring generated from Julia source
 
-   Compute the pivoted Cholesky factorization of a dense symmetric positive semi-definite matrix ``A`` and return a ``CholeskyPivoted`` factorization. The ``uplo`` argument may be ``:L`` for using the lower part or ``:U`` for the upper part of ``A``\ . The default is to use ``:U``\ . The triangular Cholesky factor can be obtained from the factorization ``F`` with: ``F[:L]`` and ``F[:U]``\ . The following functions are available for ``PivotedCholesky`` objects: ``size``\ , ``\``\ , ``inv``\ , ``det``\ , and ``rank``\ . The argument ``tol`` determines the tolerance for determining the rank. For negative values, the tolerance is the machine precision.
+   Compute the pivoted Cholesky factorization of a dense symmetric positive semi-definite matrix ``A`` and return a ``CholeskyPivoted`` factorization. The matrix ``A`` can either be a ``Symmetric`` or ``Hermitian`` ``StridedMatrix`` or a *perfectly* symmetric or Hermitian ``StridedMatrix``\ . In the latter case, the optional argument ``uplo`` may be ``:L`` for using the lower part or ``:U`` for the upper part of ``A``\ . The default is to use ``:U``\ . The triangular Cholesky factor can be obtained from the factorization ``F`` with: ``F[:L]`` and ``F[:U]``\ . The following functions are available for ``PivotedCholesky`` objects: ``size``\ , ``\``\ , ``inv``\ , ``det``\ , and ``rank``\ . The argument ``tol`` determines the tolerance for determining the rank. For negative values, the tolerance is the machine precision.
 
 .. function:: cholfact(A; shift = 0.0, perm = Int[]) -> CHOLMOD.Factor
 
@@ -342,13 +344,13 @@ Linear algebra functions in Julia are largely implemented by calling functions f
       This method uses the CHOLMOD library from SuiteSparse, which only supports doubles or complex doubles. Input matrices not of those element types will be converted to ``SparseMatrixCSC{Float64}`` or ``SparseMatrixCSC{Complex128}`` as appropriate.
 
 
-.. function:: cholfact!(A, uplo::Symbol, Val{false}) -> Cholesky
+.. function:: cholfact!(A, [uplo::Symbol,] Val{false}) -> Cholesky
 
    .. Docstring generated from Julia source
 
    The same as ``cholfact``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An ``InexactError`` exception is thrown if the factorisation produces a number not representable by the element type of ``A``\ , e.g. for integer types.
 
-.. function:: cholfact!(A, uplo::Symbol, Val{true}; tol = 0.0) -> CholeskyPivoted
+.. function:: cholfact!(A, [uplo::Symbol,] Val{true}; tol = 0.0) -> CholeskyPivoted
 
    .. Docstring generated from Julia source
 
@@ -578,7 +580,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Computes eigenvalues and eigenvectors of ``A``\ . See :func:`eigfact` for details on the ``permute`` and ``scale`` keyword arguments. The eigenvectors are returned columnwise.
+   Computes eigenvalues (``D``\ ) and eigenvectors (``V``\ ) of ``A``\ . See :func:`eigfact` for details on the ``irange``\ , ``vl``\ , and ``vu`` arguments and the ``permute`` and ``scale`` keyword arguments. The eigenvectors are returned columnwise.
 
    .. doctest::
 
@@ -592,9 +594,25 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Computes generalized eigenvalues and vectors of ``A`` with respect to ``B``\ .
+   Computes generalized eigenvalues (``D``\ ) and vectors (``V``\ ) of ``A`` with respect to ``B``\ .
 
    ``eig`` is a wrapper around :func:`eigfact`\ , extracting all parts of the factorization to a tuple; where possible, using :func:`eigfact` is recommended.
+
+   .. doctest::
+
+       julia> A = [1 0; 0 -1]
+       2×2 Array{Int64,2}:
+        1   0
+        0  -1
+
+       julia> B = [0 1; 1 0]
+       2×2 Array{Int64,2}:
+        0  1
+        1  0
+
+       julia> eig(A, B)
+       (Complex{Float64}[0.0+1.0im,0.0-1.0im],
+       Complex{Float64}[0.0-1.0im 0.0+1.0im; -1.0-0.0im -1.0+0.0im])
 
 .. function:: eigvals(A,[irange,][vl,][vu]) -> values
 
@@ -608,19 +626,61 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Same as ``eigvals``\ , but saves space by overwriting the input ``A`` (and ``B``\ ), instead of creating a copy.
+   Same as :func:`eigvals`\ , but saves space by overwriting the input ``A``\ , instead of creating a copy.
 
-.. function:: eigmax(A)
-
-   .. Docstring generated from Julia source
-
-   Returns the largest eigenvalue of ``A``\ .
-
-.. function:: eigmin(A)
+.. function:: eigmax(A; permute::Bool=true, scale::Bool=true)
 
    .. Docstring generated from Julia source
 
-   Returns the smallest eigenvalue of ``A``\ .
+   Returns the largest eigenvalue of ``A``\ . The option ``permute=true`` permutes the matrix to become closer to upper triangular, and ``scale=true`` scales the matrix by its diagonal elements to make rows and columns more equal in norm. Note that if the eigenvalues of ``A`` are complex, this method will fail, since complex numbers cannot be sorted.
+
+   .. doctest::
+
+       julia> A = [0 im; -im 0]
+       2×2 Array{Complex{Int64},2}:
+        0+0im  0+1im
+        0-1im  0+0im
+
+       julia> eigmax(A)
+       1.0
+
+       julia> A = [0 im; -1 0]
+       2×2 Array{Complex{Int64},2}:
+         0+0im  0+1im
+        -1+0im  0+0im
+
+       julia> eigmax(A)
+       ERROR: DomainError:
+        in #eigmax#30(::Bool, ::Bool, ::Function, ::Array{Complex{Int64},2}) at ./linalg/eigen.jl:186
+        in eigmax(::Array{Complex{Int64},2}) at ./linalg/eigen.jl:184
+        ...
+
+.. function:: eigmin(A; permute::Bool=true, scale::Bool=true)
+
+   .. Docstring generated from Julia source
+
+   Returns the smallest eigenvalue of ``A``\ . The option ``permute=true`` permutes the matrix to become closer to upper triangular, and ``scale=true`` scales the matrix by its diagonal elements to make rows and columns more equal in norm. Note that if the eigenvalues of ``A`` are complex, this method will fail, since complex numbers cannot be sorted.
+
+   .. doctest::
+
+       julia> A = [0 im; -im 0]
+       2×2 Array{Complex{Int64},2}:
+        0+0im  0+1im
+        0-1im  0+0im
+
+       julia> eigmin(A)
+       -1.0
+
+       julia> A = [0 im; -1 0]
+       2×2 Array{Complex{Int64},2}:
+         0+0im  0+1im
+        -1+0im  0+0im
+
+       julia> eigmin(A)
+       ERROR: DomainError:
+        in #eigmin#31(::Bool, ::Bool, ::Function, ::Array{Complex{Int64},2}) at ./linalg/eigen.jl:226
+        in eigmin(::Array{Complex{Int64},2}) at ./linalg/eigen.jl:224
+        ...
 
 .. function:: eigvecs(A, [eigvals,][permute=true,][scale=true]) -> Matrix
 
@@ -634,9 +694,9 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Computes the eigenvalue decomposition of ``A``\ , returning an ``Eigen`` factorization object ``F`` which contains the eigenvalues in ``F[:values]`` and the eigenvectors in the columns of the matrix ``F[:vectors]``\ . (The ``k``\ th eigenvector can be obtained from the slice ``F[:vectors][:, k]``\ .)
+   Computes the eigenvalue decomposition of ``A``\ , returning an :obj:`Eigen` factorization object ``F`` which contains the eigenvalues in ``F[:values]`` and the eigenvectors in the columns of the matrix ``F[:vectors]``\ . (The ``k``\ th eigenvector can be obtained from the slice ``F[:vectors][:, k]``\ .)
 
-   The following functions are available for ``Eigen`` objects: ``inv``\ , ``det``\ .
+   The following functions are available for ``Eigen`` objects: :func:`inv`\ , :func:`det`\ , and :func:`isposdef`\ .
 
    If ``A`` is :class:`Symmetric`\ , :class:`Hermitian` or :class:`SymTridiagonal`\ , it is possible to calculate only a subset of the eigenvalues by specifying either a :class:`UnitRange` ``irange`` covering indices of the sorted eigenvalues or a pair ``vl`` and ``vu`` for the lower and upper boundaries of the eigenvalues.
 
@@ -658,7 +718,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Compute the Hessenberg decomposition of ``A`` and return a ``Hessenberg`` object. If ``F`` is the factorization object, the unitary matrix can be accessed with ``F[:Q]`` and the Hessenberg matrix with ``F[:H]``\ . When ``Q`` is extracted, the resulting type is the ``HessenbergQ`` object, and may be converted to a regular matrix with :func:`convert`\ .
+   Compute the Hessenberg decomposition of ``A`` and return a ``Hessenberg`` object. If ``F`` is the factorization object, the unitary matrix can be accessed with ``F[:Q]`` and the Hessenberg matrix with ``F[:H]``\ . When ``Q`` is extracted, the resulting type is the ``HessenbergQ`` object, and may be converted to a regular matrix with :func:`full`\ .
 
 .. function:: hessfact!(A)
 
@@ -974,7 +1034,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   Construct a tridiagonal matrix from the first subdiagonal, diagonal, and first superdiagonal, respectively.  The result is of type ``Tridiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`convert`\ . The lengths of ``dl`` and ``du`` must be one less than the length of ``d``\ .
+   Construct a tridiagonal matrix from the first subdiagonal, diagonal, and first superdiagonal, respectively.  The result is of type ``Tridiagonal`` and provides efficient specialized linear solvers, but may be converted into a regular matrix with :func:`full`\ . The lengths of ``dl`` and ``du`` must be one less than the length of ``d``\ .
 
 .. function:: rank(M)
 

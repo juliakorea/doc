@@ -131,7 +131,7 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
      -J, --sysimage <file>     <file>이라는 시스템 이미지 파일을 로드한 뒤 실행한다
      --precompiled={yes|no}    가능하다면 시스템 이미지에 미리 컴파일해둔 코드를 사용한다
      --compilecache={yes|no}   모듈의 사전 증분 컴파일을 활성화/비활성화
-     -H, --home <dir>          ``julia`` 실행파일의 위치를 지정한다
+     -H, --home <dir>          `julia` 실행파일의 위치를 지정한다
      --startup-file={yes|no}   ~/.juliarc.jl를 불러온다
      --handle-signals={yes|no} Julia의 기본 시그널 핸들러의 작동을 켜거나 끈다
 
@@ -177,7 +177,7 @@ Julia 코드를 실행하고 옵션을 지정하는 방법은 다음과 같이 �
 이 매뉴얼 뿐만 아니라 Julia를 처음 접하는 사용자들에게 도움을 줄 수 있는 다른 문서를 소개한다.
 
 - `Julia and IJulia cheatsheet <http://math.mit.edu/~stevenj/Julia-cheatsheet.pdf>`_
-- `Learn Julia in a few minutes <http://learnxinyminutes.com/docs/julia/>`_
+- `Learn Julia in a few minutes <https://learnxinyminutes.com/docs/julia/>`_
 - `Learn Julia the Hard Way <https://github.com/chrisvoncsefalvay/learn-julia-the-hard-way>`_
 - `Julia by Example <http://samuelcolvin.github.io/JuliaByExample/>`_
 - `Hands-on Julia <https://github.com/dpsanders/hands_on_julia>`_

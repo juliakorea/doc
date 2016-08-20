@@ -7,13 +7,13 @@
 All package manager functions are defined in the ``Pkg`` module. None of the ``Pkg`` module's functions are exported;
 to use them, you'll need to prefix each function call with an explicit ``Pkg.``, e.g. ``Pkg.status()`` or ``Pkg.dir()``.
 
-Functions for package development (e.g. ``tag``, ``publish``, etc.) have been moved to the `PkgDev <https://github.com/JuliaLang/PkgDev.jl>`_ package. See `PkgDev README <https://github.com/JuliaLang/PkgDev.jl/blob/master/README.md#usage>`_ for the documentation of those functions.
+Functions for package development (e.g. ``tag``, ``publish``, etc.) have been moved to the `PkgDev <https://github.com/JuliaLang/PkgDev.jl>`_ package. See `PkgDev README <https://github.com/JuliaLang/PkgDev.jl/blob/master/README.md>`_ for the documentation of those functions.
 
 .. function:: dir() -> AbstractString
 
    .. Docstring generated from Julia source
 
-   Returns the absolute path of the package directory. This defaults to ``joinpath(homedir(),".julia","v$(VERSION.major).$(VERSION.minor)")`` on all platforms (i.e. ``~/.julia/v0.5`` in UNIX shell syntax). If the ``JULIA_PKGDIR`` environment variable is set, then that path is used in the returned value as ``joinpath(ENV["JULIA_PKGDIR"],"v$(VERSION.major).$(VERSION.minor)")``\ . If ``JULIA_PKGDIR`` is a relative path, it is interpreted relative to whatever the current working directory is.
+   Returns the absolute path of the package directory. This defaults to ``joinpath(homedir(),".julia","v$(VERSION.major).$(VERSION.minor)")`` on all platforms (i.e. ``~/.julia/v0.6`` in UNIX shell syntax). If the ``JULIA_PKGDIR`` environment variable is set, then that path is used in the returned value as ``joinpath(ENV["JULIA_PKGDIR"],"v$(VERSION.major).$(VERSION.minor)")``\ . If ``JULIA_PKGDIR`` is a relative path, it is interpreted relative to whatever the current working directory is.
 
 .. function:: dir(names...) -> AbstractString
 

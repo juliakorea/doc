@@ -333,7 +333,7 @@ Julia에서는 주어진 타입에서 표현할 수 있는 값을 넘어서게 �
     2
 
     julia> 2*Float16(4.)
-    8.0f0
+    Float16(8.0)
 
 밑줄 ``_``\ 는 수 구분자로 쓰일 수 있다.
 
@@ -526,14 +526,17 @@ Julia는 :func:`eps`\ 라는 것을 제공한다.
 그 수는 반드시 어떤 표현 가능한 값으로 반올림되어야 한다.
 그러나, 만약 사용자가 원한다면,
 `IEEE 754 standard <https://en.wikipedia.org/wiki/IEEE_754-2008>`_\ 에
-따라 반올림 방식에 대해서는 변경할 수 있다.::
+따라 반올림 방식에 대해서는 변경할 수 있다.
 
+.. doctest::
 
-    julia> 1.1 + 0.1
+    julia> x = 1.1; y = 0.1;
+
+    julia> x + y
     1.2000000000000002
 
     julia> setrounding(Float64,RoundDown) do
-           1.1 + 0.1
+               x + y
            end
     1.2
 
@@ -580,12 +583,12 @@ Julia는 :func:`eps`\ 라는 것을 제공한다.
   많은 다양한 이야기들에 대한 자세한 문서를 얻고 싶다면
   `William Kahan <https://en.wikipedia.org/wiki/William_Kahan>`_\ 가 작성한
   `collected writings
-  <http://www.cs.berkeley.edu/~wkahan/>`_\ 을 참고하는 것을 추천한다.
+  <https://people.eecs.berkeley.edu/~wkahan/>`_\ 을 참고하는 것을 추천한다.
   이 문서는 "부동소수점의 아버지(Father of Floating-Point)"라고도 알려져 있다.
 - 특별히 부동소수점의 역사에 관해서 관심이 더 생긴다면,
   `An Interview with the Old
   Man of Floating-Point
-  <http://www.cs.berkeley.edu/~wkahan/ieee754status/754story.html>`_\ 을
+  <https://people.eecs.berkeley.edu/~wkahan/ieee754status/754story.html>`_\ 을
   읽기를 바란다.
 
 .. _man-arbitrary-precision-arithmetic:
