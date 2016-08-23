@@ -134,7 +134,7 @@ General I/O
 
    Write the canonical binary representation of a value to the given I/O stream or file. Returns the number of bytes written into the stream.
 
-   You can write multiple values with the same :func:``write`` call. i.e. the following are equivalent:
+   You can write multiple values with the same ``write`` call. i.e. the following are equivalent:
 
    .. code-block:: julia
 
@@ -168,11 +168,17 @@ General I/O
 
    See ``read`` for a description of the ``all`` option.
 
-.. function:: read(stream::IO, nb=typemax(Int); all=true)
+.. function:: read(s::IO, nb=typemax(Int))
 
    .. Docstring generated from Julia source
 
-   Read at most ``nb`` bytes from ``stream``\ , returning a ``Vector{UInt8}`` of the bytes read.
+   Read at most ``nb`` bytes from ``s``\ , returning a ``Vector{UInt8}`` of the bytes read.
+
+.. function:: read(s::IOStream, nb::Integer; all=true)
+
+   .. Docstring generated from Julia source
+
+   Read at most ``nb`` bytes from ``s``\ , returning a ``Vector{UInt8}`` of the bytes read.
 
    If ``all`` is ``true`` (the default), this function will block repeatedly trying to read all requested bytes, until an error or end-of-file occurs. If ``all`` is ``false``\ , at most one ``read`` call is performed, and the amount of data returned is device-dependent. Note that not all stream types support the ``all`` option.
 
@@ -398,28 +404,40 @@ General I/O
 
    Read all available data on the stream, blocking the task only if no data is available. The result is a ``Vector{UInt8,1}``\ .
 
-.. function:: IOContext{<:IO} <: IO
+.. type:: IOContext
 
    .. Docstring generated from Julia source
 
-   IOContext provides a mechanism for passing output-configuration keyword arguments through arbitrary show methods.
+   IOContext provides a mechanism for passing output configuration settings among ``show`` methods.
 
-   In short, it is an immutable Dictionary that is a subclass of IO.
+   In short, it is an immutable dictionary that is a subclass of ``IO``\ . It supports standard dictionary operations such as ``getindex``\ , and can also be used as an I/O stream.
 
-   .. code-block:: julia
+.. function:: IOContext(io::IO, KV::Pair)
 
-       IOContext(io::IO, KV::Pair)
+   .. Docstring generated from Julia source
 
-   Create a new entry in the IO Dictionary for the key => value pair
+   Create an ``IOContext`` that wraps a given stream, adding the specified ``key=>value`` pair to the properties of that stream (note that ``io`` can itself be an ``IOContext``\ ).
 
    * use ``(key => value) in dict`` to see if this particular combination is in the properties set
    * use ``get(dict, key, default)`` to retrieve the most recent value for a particular key
 
-   .. code-block:: julia
+   The following properties are in common use:
 
-       IOContext(io::IO, context::IOContext)
+   * ``:compact``\ : Boolean specifying that small values should be printed more compactly, e.g. that numbers should be printed with fewer digits. This is set when printing array elements.
+   * ``:limit``\ : Boolean specifying that containers should be truncated, e.g. showing ``…`` in place of most elements.
+   * ``:displaysize``\ : A ``Tuple{Int,Int}`` giving the size in rows and columns to use for text output. This can be used to override the display size for called functions, but to get the size of the screen use the ``displaysize`` function.
 
-   Create a IOContext that wraps an alternate IO but inherits the keyword arguments from the context
+.. function:: IOContext(io::IO, context::IOContext)
+
+   .. Docstring generated from Julia source
+
+   Create an ``IOContext`` that wraps an alternate ``IO`` but inherits the properties of ``context``\ .
+
+.. function:: IOContext(io::IO; properties...)
+
+   .. Docstring generated from Julia source
+
+   The same as ``IOContext(io::IO, KV::Pair)``\ , but accepting properties as keyword arguments.
 
 Text I/O
 --------
@@ -606,11 +624,11 @@ Text I/O
 
    The columns are assumed to be separated by one or more whitespaces. The end of line delimiter is taken as ``\n``\ . If all data is numeric, the result will be a numeric array. If some elements cannot be parsed as numbers, a heterogeneous array of numbers and strings is returned.
 
-.. function:: writedlm(f, A, delim='\\t')
+.. function:: writedlm(f, A, delim='\\t'; opts)
 
    .. Docstring generated from Julia source
 
-   Write ``A`` (a vector, matrix or an iterable collection of iterable rows) as text to ``f`` (either a filename string or an ``IO`` stream) using the given delimiter ``delim`` (which defaults to tab, but can be any printable Julia object, typically a ``Char`` or ``AbstractString``\ ).
+   Write ``A`` (a vector, matrix, or an iterable collection of iterable rows) as text to ``f`` (either a filename string or an :class:`IO` stream) using the given delimiter ``delim`` (which defaults to tab, but can be any printable Julia object, typically a ``Char`` or ``AbstractString``\ ).
 
    For example, two vectors ``x`` and ``y`` of the same length can be written as two columns of tab-delimited text to ``f`` by either ``writedlm(f, [x y])`` or by ``writedlm(f, zip(x, y))``\ .
 
@@ -620,11 +638,11 @@ Text I/O
 
    Equivalent to ``readdlm`` with ``delim`` set to comma.
 
-.. function:: writecsv(filename, A)
+.. function:: writecsv(filename, A; opts)
 
    .. Docstring generated from Julia source
 
-   Equivalent to ``writedlm`` with ``delim`` set to comma.
+   Equivalent to :func:`writedlm` with ``delim`` set to comma.
 
 .. function:: Base64EncodePipe(ostream)
 
@@ -716,6 +734,8 @@ Julia environments (such as the IPython-based IJulia notebook).
    The default MIME type is ``MIME"text/plain"``\ . There is a fallback definition for ``text/plain`` output that calls ``show`` with 2 arguments. Therefore, this case should be handled by defining a 2-argument ``show(stream::IO, x::MyType)`` method.
 
    Technically, the ``MIME"mime"`` macro defines a singleton type for the given ``mime`` string, which allows us to exploit Julia's dispatch mechanisms in determining how to display objects of any given type.
+
+   The first argument to ``show`` can be an ``IOContext`` specifying output format properties. See ``IOContext`` for details.
 
 .. function:: mimewritable(mime, x)
 
@@ -872,7 +892,7 @@ Network I/O
 
    .. Docstring generated from Julia source
 
-   Connect to the Named Pipe / Domain Socket at ``path``\ .
+   Connect to the named pipe / UNIX domain socket at ``path``\ .
 
 .. function:: listen([addr,]port) -> TCPServer
 
@@ -884,7 +904,7 @@ Network I/O
 
    .. Docstring generated from Julia source
 
-   Create and listen on a Named Pipe / Domain Socket.
+   Create and listen on a named pipe / UNIX domain socket.
 
 .. function:: getaddrinfo(host)
 

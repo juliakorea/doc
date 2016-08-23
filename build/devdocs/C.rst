@@ -12,4 +12,5 @@
    backtraces
    debuggingtips
    valgrind
+   sanitizers
 

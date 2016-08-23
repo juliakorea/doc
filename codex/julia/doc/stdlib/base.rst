@@ -202,9 +202,11 @@ Getting Around
 
    .. Docstring generated from Julia source
 
-   Return an array of methods with an argument of type ``typ``\ . If optional ``showparents`` is ``true``\ , also return arguments with a parent type of ``typ``\ , excluding type ``Any``\ .
+   Return an array of methods with an argument of type ``typ``\ .
 
-   The optional second argument restricts the search to a particular module or function.
+   The optional second argument restricts the search to a particular module or function (the default is all modules, starting from Main).
+
+   If optional ``showparents`` is ``true``\ , also return arguments with a parent type of ``typ``\ , excluding type ``Any``\ .
 
 .. function:: @show
 
@@ -307,7 +309,7 @@ All Objects
 
    .. Docstring generated from Julia source
 
-   Get a unique integer id for ``x``\ . ``object_id(x)==object_id(y)`` if and only if ``is(x,y)``\ .
+   Get a hash value for ``x`` based on object identity. ``object_id(x)==object_id(y)`` if ``x === y``\ .
 
 .. function:: hash(x[, h::UInt])
 
@@ -386,6 +388,39 @@ All Objects
 
        julia> convert(Rational{Int64}, x)
        6004799503160661//18014398509481984
+
+   If ``T`` is a collection type and ``x`` a collection, the result of ``convert(T, x)`` may alias ``x``\ .
+
+   .. doctest::
+
+       julia> x = Int[1,2,3];
+
+       julia> y = convert(Vector{Int}, x);
+
+       julia> y === x
+       true
+
+   Similarly, if ``T`` is a composite type and ``x`` a related instance, the result of ``convert(T, x)`` may alias part or all of ``x``\ .
+
+   .. doctest::
+
+       julia> x = speye(5);
+
+       julia> typeof(x)
+       SparseMatrixCSC{Float64,Int64}
+
+       julia> y = convert(SparseMatrixCSC{Float64,Int64}, x);
+
+       julia> z = convert(SparseMatrixCSC{Float32,Int64}, y);
+
+       julia> y === x
+       true
+
+       julia> z === x
+       false
+
+       julia> z.colptr === x.colptr
+       true
 
 .. function:: promote(xs...)
 
@@ -922,13 +957,13 @@ System
 
    .. Docstring generated from Julia source
 
-   Print and return the time elapsed since the last :func:`tic`\ .
+   Print and return the time elapsed since the last :func:`tic`\ . The macro call ``@time expr`` can also be used to time evaluation.
 
 .. function:: toq()
 
    .. Docstring generated from Julia source
 
-   Return, but do not print, the time elapsed since the last :func:`tic`\ .
+   Return, but do not print, the time elapsed since the last :func:`tic`\ . The macro calls ``@timed expr`` and ``@elapsed expr`` also return evaluation time.
 
 .. function:: @time
 
@@ -936,11 +971,15 @@ System
 
    A macro to execute an expression, printing the time it took to execute, the number of allocations, and the total number of bytes its execution caused to be allocated, before returning the value of the expression.
 
+   See also :func:`@timev`\ , :func:`@timed`\ , :func:`@elapsed`\ , and :func:`@allocated`\ .
+
 .. function:: @timev
 
    .. Docstring generated from Julia source
 
    This is a verbose version of the ``@time`` macro. It first prints the same information as ``@time``\ , then any non-zero memory allocation counters, and then returns the value of the expression.
+
+   See also :func:`@time`\ , :func:`@timed`\ , :func:`@elapsed`\ , and :func:`@allocated`\ .
 
 .. function:: @timed
 
@@ -948,17 +987,23 @@ System
 
    A macro to execute an expression, and return the value of the expression, elapsed time, total bytes allocated, garbage collection time, and an object with various memory allocation counters.
 
+   See also :func:`@time`\ , :func:`@timev`\ , :func:`@elapsed`\ , and :func:`@allocated`\ .
+
 .. function:: @elapsed
 
    .. Docstring generated from Julia source
 
    A macro to evaluate an expression, discarding the resulting value, instead returning the number of seconds it took to execute as a floating-point number.
 
+   See also :func:`@time`\ , :func:`@timev`\ , :func:`@timed`\ , and :func:`@allocated`\ .
+
 .. function:: @allocated
 
    .. Docstring generated from Julia source
 
    A macro to evaluate an expression, discarding the resulting value, instead returning the total number of bytes allocated during evaluation of the expression. Note: the expression is evaluated inside a local function, instead of the current context, in order to eliminate the effects of compilation, however, there still may be some allocations due to JIT compilation. This also makes the results inconsistent with the ``@time`` macros, which do not try to adjust for the effects of compilation.
+
+   See also :func:`@time`\ , :func:`@timev`\ , :func:`@timed`\ , and :func:`@elapsed`\ .
 
 .. function:: EnvHash() -> EnvHash
 
@@ -1217,7 +1262,7 @@ Errors
 
    Returns a lambda that retries function ``f`` up to ``n`` times in the event of an exception. If ``retry_on`` is a ``Type`` then retry only for exceptions of that type. If ``retry_on`` is a function ``test_error(::Exception) -> Bool`` then retry only if it is true.
 
-   The first retry happens after a gap of 50 milliseconds or ``max_delay``\ , whichever is lower. Subsequently, the delays between retries are exponentially increased with a random factor upto ``max_delay``\ .
+   The first retry happens after a gap of 50 milliseconds or ``max_delay``\ , whichever is lower. Subsequently, the delays between retries are exponentially increased with a random factor up to ``max_delay``\ .
 
    **Examples**
 
@@ -1304,19 +1349,37 @@ Reflection
 
    Get the name of field ``i`` of a ``DataType``\ .
 
+.. function:: Base.datatype_module(t::DataType) -> Module
+
+   .. Docstring generated from Julia source
+
+   Determine the module containing the definition of a ``DataType``\ .
+
+.. function:: Base.datatype_name(t::DataType) -> Symbol
+
+   .. Docstring generated from Julia source
+
+   Get the name of a ``DataType`` (without its parent module) as a symbol.
+
 .. function:: isconst([m::Module], s::Symbol) -> Bool
 
    .. Docstring generated from Julia source
 
    Determine whether a global is declared ``const`` in a given ``Module``\ . The default ``Module`` argument is ``current_module()``\ .
 
-.. function:: function_name(f::Function) -> Symbol
+.. function:: Base.function_name(f::Function) -> Symbol
 
    .. Docstring generated from Julia source
 
    Get the name of a generic ``Function`` as a symbol, or ``:anonymous``\ .
 
-.. function:: function_module(f::Function, types) -> Module
+.. function:: Base.function_module(f::Function) -> Module
+
+   .. Docstring generated from Julia source
+
+   Determine the module containing the (first) definition of a generic function.
+
+.. function:: Base.function_module(f::Function, types) -> Module
 
    .. Docstring generated from Julia source
 
@@ -1391,11 +1454,11 @@ Internals
 
    Evaluates the arguments to the function or macro call, determines their types, and calls :func:`code_typed` on the resulting expression.
 
-.. function:: code_warntype(f, types)
+.. function:: code_warntype([io], f, types)
 
    .. Docstring generated from Julia source
 
-   Displays lowered and type-inferred ASTs for the methods matching the given generic function and type signature. The ASTs are annotated in such a way as to cause "non-leaf" types to be emphasized (if color is available, displayed in red). This serves as a warning of potential type instability. Not all non-leaf types are particularly problematic for performance, so the results need to be used judiciously. See :ref:`man-code-warntype` for more information.
+   Prints lowered and type-inferred ASTs for the methods matching the given generic function and type signature to ``io`` which defaults to ``STDOUT``\ . The ASTs are annotated in such a way as to cause "non-leaf" types to be emphasized (if color is available, displayed in red). This serves as a warning of potential type instability. Not all non-leaf types are particularly problematic for performance, so the results need to be used judiciously. See :ref:`man-code-warntype` for more information.
 
 .. function:: @code_warntype
 
@@ -1403,11 +1466,11 @@ Internals
 
    Evaluates the arguments to the function or macro call, determines their types, and calls :func:`code_warntype` on the resulting expression.
 
-.. function:: code_llvm(f, types)
+.. function:: code_llvm([io], f, types)
 
    .. Docstring generated from Julia source
 
-   Prints the LLVM bitcodes generated for running the method matching the given generic function and type signature to :const:`STDOUT`\ .
+   Prints the LLVM bitcodes generated for running the method matching the given generic function and type signature to ``io`` which defaults to ``STDOUT``\ .
 
    All metadata and dbg.* calls are removed from the printed bitcode. Use code_llvm_raw for the full IR.
 
@@ -1417,11 +1480,11 @@ Internals
 
    Evaluates the arguments to the function or macro call, determines their types, and calls :func:`code_llvm` on the resulting expression.
 
-.. function:: code_native(f, types)
+.. function:: code_native([io], f, types)
 
    .. Docstring generated from Julia source
 
-   Prints the native assembly instructions generated for running the method matching the given generic function and type signature to ``STDOUT``\ .
+   Prints the native assembly instructions generated for running the method matching the given generic function and type signature to ``io`` which defaults to ``STDOUT``\ .
 
 .. function:: @code_native
 

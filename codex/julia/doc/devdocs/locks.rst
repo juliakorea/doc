@@ -13,6 +13,10 @@ The following strategies are used to ensure that the code is dead-lock free
 
  3. avoid constructs that expect to need unrestricted recursion
 
+
+Locks
+-----
+
 Below are all of the locks that exist in the system and the mechanisms
 for using them that avoid the potential for deadlocks (no Ostrich algorithm allowed here):
 
@@ -38,10 +42,9 @@ The following are definitely leaf locks (level 1), and must not try to acquire a
 
 The following is a leaf lock (level 2), and only acquires level 1 locks (safepoint) internally:
 
-   * dump (this lock may be possible to eliminate by storing the state on the stack)
    * typecache
 
-The following are level 3 locks, which can only acquire level 1 or level 2 locks internally:
+The following is a level 3 lock, which can only acquire level 1 or level 2 locks internally:
 
    * Method->writelock
 
@@ -81,9 +84,10 @@ The following is the root lock, meaning no other lock shall be held when trying 
        additionally, it's unclear if *any* code can safely run in parallel with an arbitrary toplevel expression,
        so it may require all threads to get to a safepoint first
 
+Broken Locks
+------------
 
 The following locks are broken:
--------------------------------
 
 * toplevel
 
@@ -114,15 +118,26 @@ The following locks are broken:
 
     fix: create it
 
-* typecache
 
-    this only protects cache lookup and insertion but it doesn't make the lookup-and-construct atomic
+Shared Global Data Structures
+-----------------------------
 
-    fix: lock for ``apply_type`` / global (level 2?)
+These data structures each need locks due to being shared mutable global state.
+It is the inverse list for the above lock priority list.
+This list does not include level 1 leaf resources due to their simplicity.
 
+MethodTable modifications (def, cache, kwsorter type) : MethodTable->writelock
 
-* dump
+Type declarations : toplevel lock
 
-    may be able to eliminate this by making the state thread-local
+Type application : typecache lock
 
-    might also need to ensure that incremental deserialize has a toplevel expression lock
+Module serializer : toplevel lock
+
+JIT : codegen lock
+
+LLVMContext : codegen lock
+
+Method : Method->writelock
+    - roots array (serializer and codegen)
+    - invoke / specializations / tfunc modifications

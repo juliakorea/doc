@@ -90,6 +90,16 @@ action:
     julia> typeof(ans)
     Float64
 
+    julia> a = Any[1 2 3; 4 5 6]
+    2x3 Array{Any,2}:
+     1  2  3
+     4  5  6
+
+    julia> convert(Array{Float64}, a)
+    2x3 Array{Float64,2}:
+     1.0  2.0  3.0
+     4.0  5.0  6.0
+
 Conversion isn't always possible, in which case a no method error is
 thrown indicating that ``convert`` doesn't know how to perform the
 requested conversion:
@@ -274,8 +284,8 @@ the catch-all method definitions given in
     *(x::Number, y::Number) = *(promote(x,y)...)
     /(x::Number, y::Number) = /(promote(x,y)...)
 
-In certain cases, the result type also depends on the operator; how to
-handle such scenarios is described :ref:`elsewhere <devdocs-promote-op>`.
+In certain cases, the result type also depends on the operator;
+such scenarios are handled by the ``promote_op`` function.
 
 These method definitions say that in the absence of more specific rules
 for adding, subtracting, multiplying and dividing pairs of numeric

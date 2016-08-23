@@ -228,7 +228,7 @@ These therefore print identically, but they have very different behavior:
    julia> candid([1],3.2)
    ERROR: MethodError: no method matching candid(::Array{Int64,1}, ::Float64)
    Closest candidates are:
-     candid{T}(::Array{T,N}, !Matched::T)
+     candid{T}(::Array{T,N}, !Matched::T) at none:1
     ...
 
    julia> sneaky([1],3.2)
@@ -245,11 +245,11 @@ bound :obj:`TypeVar` objects with a hash (``#T`` instead of ``T``):
 
 .. doctest::
 
-   julia> jl_(first(methods(candid)))
-   Method(sig=Tuple{Main.#candid, Array{#T<:Any, N<:Any}, #T<:Any}, va=false, isstaged=false, tvars=#T<:Any, func=Main.candid(?), invokes=nothing, next=nothing)
+   julia> jl_(first(methods(candid)).sig)
+   Tuple{Main.#candid, Array{#T<:Any, N<:Any}, #T<:Any}
 
-   julia> jl_(first(methods(sneaky)))
-   Method(sig=Tuple{Main.#sneaky, Array{#T<:Any, N<:Any}, T<:Any}, va=false, isstaged=false, tvars=#T<:Any, func=Main.sneaky(?), invokes=nothing, next=nothing)
+   julia> jl_(first(methods(sneaky)).sig)
+   Tuple{Main.#sneaky, Array{#T<:Any, N<:Any}, T<:Any}
 
 Even though both print as ``T``, in ``sneaky`` the second ``T`` is
 not bound, and hence it isn't constrained to be the same type as the
@@ -319,9 +319,11 @@ the type, which is an object of type :obj:`TypeName`:
      primary: Array{T,N} <: DenseArray{T,N}
      cache: SimpleVector
        ...
+
      linearcache: SimpleVector
        ...
-     uid: Int64 47
+
+     uid: Int64 -7900426068641098781
      mt: MethodTable
        name: Symbol Array
        defs: Void nothing

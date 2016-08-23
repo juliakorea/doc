@@ -289,7 +289,7 @@ Python <https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Comparison_ope
 예를 들어, ``0 .< A .< 1``\ 는 ``A`` 배열에서 0과 1 사이의 값을 가졌을 때만 
 ``true`` 값을 가지는 boolean 배열을 리턴한다.
 
-:obj:`.\< <Base..\<>`는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
+:obj:`.\< <Base..\<>` 는 배열 간에 비교를 위해 작동하도록 만들어진 연산자이다; ``A .< B`` 연산은
 ``A``\ 와 ``B`` 가 같은 dimension일 때만 유효하다.
 이 연산자는 ``A``\ 나 ``B``\ 와 같은 dimension을 지닌 boolean 배열을 리턴한다. 
 이런 연산을 일컫어 *항목간 비교 연산자(elementwise)*\ 라고 한다; 
@@ -298,7 +298,7 @@ Julia는 :obj:`.<` 이외에도 :obj:`.* <Base..*>`, :obj:`.+ <Base..+>` 등의 
 스칼라 값을 피연산자로 받기도 한다. 스칼라 값이 피연산자로 될 경우에는 스칼라 값이
 배열의 각 항목으로 복제되어 들어간다는 의미이다.
 
-다음은 중첩된 비교 연산이 어떻게 평가되어지는지 나타낸다::
+다음은 중첩된 비교 연산이 어떻게 평가되어지는지 나타낸다:
 
 .. doctest::
 
@@ -419,7 +419,7 @@ Julia는 부정확한 변환에 있어서 서로 차이가 발생하는 총 세 
 
     julia> round(Int8,127.6)
     ERROR: InexactError()
-     in trunc(::Type{Int8}, ::Float64) at ./float.jl:456
+     in trunc(::Type{Int8}, ::Float64) at ./float.jl:458
      in round(::Type{Int8}, ::Float64) at ./float.jl:211
      ...
 

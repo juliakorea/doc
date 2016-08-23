@@ -201,11 +201,22 @@ Mathematical Operators
 
    Divide two integers or rational numbers, giving a ``Rational`` result.
 
-.. function:: rationalize([Type=Int,] x; tol=eps(x))
+.. function:: rationalize([T<:Integer=Int,] x; tol::Real=eps(x))
 
    .. Docstring generated from Julia source
 
-   Approximate floating point number ``x`` as a Rational number with components of the given integer type. The result will differ from ``x`` by no more than ``tol``\ .
+   Approximate floating point number ``x`` as a ``Rational`` number with components of the given integer type. The result will differ from ``x`` by no more than ``tol``\ . If ``T`` is not provided, it defaults to ``Int``\ .
+
+   .. doctest::
+
+       julia> rationalize(5.6)
+       28//5
+
+       julia> a = rationalize(BigInt, 10.3)
+       103//10
+
+       julia> typeof(num(a))
+       BigInt
 
 .. function:: num(x)
 
@@ -273,9 +284,9 @@ Mathematical Operators
 
    .. Docstring generated from Julia source
 
-   Unsigned right bit shift operator, ``x >>> n``\ . For ``n >= 0``\ , the result is ``x`` shifted right by ``n`` bits, where ``n >= 0``\ , filling with ``0``\ s. For ``n < 0``\ , this is equivalent to ``x [<<](:func:``\ <<``) -n``\ ].
+   Unsigned right bit shift operator, ``x >>> n``\ . For ``n >= 0``\ , the result is ``x`` shifted right by ``n`` bits, where ``n >= 0``\ , filling with ``0``\ s. For ``n < 0``\ , this is equivalent to ``x << -n``\ .
 
-   For ``Unsigned`` integer types, this is eqivalent to :func:`>>`\ . For ``Signed`` integer types, this is equivalent to ``signed(unsigned(x) >> n)``\ .
+   For ``Unsigned`` integer types, this is equivalent to :func:`>>`\ . For ``Signed`` integer types, this is equivalent to ``signed(unsigned(x) >> n)``\ .
 
    .. doctest::
 
@@ -310,6 +321,12 @@ Mathematical Operators
    .. Docstring generated from Julia source
 
    Construct a range by length, given a starting value and optional step (defaults to 1).
+
+.. function:: Base.OneTo(n)
+
+   .. Docstring generated from Julia source
+
+   Define an ``AbstractUnitRange`` that behaves like ``1:n``\ , with the added distinction that the lower limit is guaranteed (by the type system) to be 1.
 
 .. _==:
 .. function:: ==(x, y)
@@ -489,7 +506,7 @@ Mathematical Functions
 
    For real or complex floating-point values, ``rtol`` defaults to ``sqrt(eps(typeof(real(x-y))))``\ . This corresponds to requiring equality of about half of the significand digits. For other types, ``rtol`` defaults to zero.
 
-   ``x`` and ``y`` may also be arrays of numbers, in which case ``norm`` defaults to ``vecnorm`` but may be changed by passing a ``norm::Function`` keyword argument. (For numbers, ``norm`` is the same thing as ``abs``\ .)
+   ``x`` and ``y`` may also be arrays of numbers, in which case ``norm`` defaults to ``vecnorm`` but may be changed by passing a ``norm::Function`` keyword argument. (For numbers, ``norm`` is the same thing as ``abs``\ .) When ``x`` and ``y`` are arrays, if ``norm(x-y)`` is not finite (i.e. ``±Inf`` or ``NaN``\ ), the comparison falls back to checking whether all elements of ``x`` and ``y`` are approximately equal component-wise.
 
    The binary operator ``≈`` is equivalent to ``isapprox`` with the default arguments, and ``x ≉ y`` is equivalent to ``!isapprox(x,y)``\ .
 
@@ -647,7 +664,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Compute the inverse cosecant of ``x``\ , where the output is in radians
+   Compute the inverse cosecant of ``x``\ , where the output is in radians.
 
 .. function:: acot(x)
 
@@ -1006,11 +1023,30 @@ Mathematical Functions
 
    Return ``(min(x,y), max(x,y))``\ . See also: :func:`extrema` that returns ``(minimum(x), maximum(x))``\ .
 
+   .. doctest::
+
+       julia> minmax('c','b')
+       ('b','c')
+
 .. function:: clamp(x, lo, hi)
 
    .. Docstring generated from Julia source
 
-   Return ``x`` if ``lo <= x <= hi``\ . If ``x < lo``\ , return ``lo``\ . If ``x > hi``\ , return ``hi``\ . Arguments are promoted to a common type. Operates elementwise over ``x`` if it is an array.
+   Return ``x`` if ``lo <= x <= hi``\ . If ``x < lo``\ , return ``lo``\ . If ``x > hi``\ , return ``hi``\ . Arguments are promoted to a common type. Operates elementwise over ``x`` if ``x`` is an array.
+
+   .. doctest::
+
+       julia> clamp([pi, 1.0, big(10.)], 2., 9.)
+       3-element Array{BigFloat,1}:
+        3.141592653589793238462643383279502884197169399375105820974944592307816406286198
+        2.000000000000000000000000000000000000000000000000000000000000000000000000000000
+        9.000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+.. function:: clamp!(array::AbstractArray, lo, hi)
+
+   .. Docstring generated from Julia source
+
+   Restrict values in ``array`` to the specified range, in-place. See also :func:`clamp`\ .
 
 .. function:: abs(x)
 
@@ -1254,7 +1290,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Computes the greatest common (positive) divisor of ``x`` and ``y`` and their Bézout coefficients, i.e. the integer coefficients ``u`` and ``v`` that satisfy :math:`ux+vy = d = gcd(x,y)`\ .
+   Computes the greatest common (positive) divisor of ``x`` and ``y`` and their Bézout coefficients, i.e. the integer coefficients ``u`` and ``v`` that satisfy :math:`ux+vy = d = gcd(x,y)`\ . :math:`gcdx(x,y)` returns :math:`(d,u,v)`\ .
 
    .. doctest::
 
@@ -1267,7 +1303,7 @@ Mathematical Functions
        (2,-9,47)
 
    .. note::
-      Bézout coefficients are *not* uniquely defined. ``gcdx`` returns the minimal Bézout coefficients that are computed by the extended Euclid algorithm. (Ref: D. Knuth, TAoCP, 2/e, p. 325, Algorithm X.) These coefficients ``u`` and ``v`` are minimal in the sense that :math:`|u| < |\frac y d|` and :math:`|v| < |\frac x d|`\ . Furthermore, the signs of ``u`` and ``v`` are chosen so that ``d`` is positive.
+      Bézout coefficients are *not* uniquely defined. ``gcdx`` returns the minimal Bézout coefficients that are computed by the extended Euclidean algorithm. (Ref: D. Knuth, TAoCP, 2/e, p. 325, Algorithm X.) For signed integers, these coefficients ``u`` and ``v`` are minimal in the sense that :math:`|u| < |y/d|` and :math:`|v| < |x/d|`\ . Furthermore, the signs of ``u`` and ``v`` are chosen so that ``d`` is positive. For unsigned integers, the coefficients ``u`` and ``v`` might be near their ``typemax``\ , and the identity then holds only via the unsigned integers' modulo arithmetic.
 
 
 .. function:: ispow2(n) -> Bool
@@ -1310,7 +1346,7 @@ Mathematical Functions
 
    .. Docstring generated from Julia source
 
-   Take the inverse of ``x`` modulo ``m``\ : ``y`` such that :math:`xy = 1 \pmod m`\ .
+   Take the inverse of ``x`` modulo ``m``\ : ``y`` such that :math:`x y = 1 \pmod m`\ , with :math:`div(x,y) = 0`\ . This is undefined for :math:`m = 0`\ , or if :math:`gcd(x,m) \neq 1`\ .
 
 .. function:: powermod(x, p, m)
 
@@ -1474,11 +1510,19 @@ Mathematical Functions
 
    Scaled Bessel function of the third kind of order ``nu``\ , :math:`H^{(2)}_\nu(x) e^{x i}`\ .
 
-.. function:: besselh(nu, k, x)
+.. function:: besselh(nu, [k=1,] x)
 
    .. Docstring generated from Julia source
 
-   Bessel function of the third kind of order ``nu`` (Hankel function). ``k`` is either 1 or 2, selecting ``hankelh1`` or ``hankelh2``\ , respectively.
+   Bessel function of the third kind of order ``nu`` (the Hankel function). ``k`` is either 1 or 2, selecting :func:`hankelh1` or :func:`hankelh2`\ , respectively. ``k`` defaults to 1 if it is omitted. (See also :func:`besselhx` for an exponentially scaled variant.)
+
+.. function:: besselhx(nu, [k=1,] z)
+
+   .. Docstring generated from Julia source
+
+   Compute the scaled Hankel function :math:`\exp(∓iz) H_ν^{(k)}(z)`\ , where :math:`k` is 1 or 2, :math:`H_ν^{(k)}(z)` is ``besselh(nu, k, z)``\ , and :math:`∓` is :math:`-` for :math:`k=1` and :math:`+` for :math:`k=2`\ .  ``k`` defaults to 1 if it is omitted.
+
+   The reason for this function is that :math:`H_ν^{(k)}(z)` is asymptotically proportional to :math:`\exp(∓iz)/\sqrt{z}` for large :math:`|z|`\ , and so the :func:`besselh` function is susceptible to overflow or underflow when ``z`` has a large imaginary part.  The ``besselhx`` function cancels this exponential factor (analytically), so it avoids these problems.
 
 .. function:: besseli(nu, x)
 
@@ -1559,7 +1603,11 @@ Statistics
 
    .. Docstring generated from Julia source
 
-   Compute the mean of whole array ``v``\ , or optionally along the dimensions in ``region``\ . Note: Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArray`` package is recommended.
+   Compute the mean of whole array ``v``\ , or optionally along the dimensions in ``region``\ .
+
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended.
+
 
 .. function:: mean(f::Function, v)
 
@@ -1573,17 +1621,25 @@ Statistics
 
    Compute the mean of ``v`` over the singleton dimensions of ``r``\ , and write results to ``r``\ .
 
-.. function:: std(v[, region])
+.. function:: std(v[, region]; corrected::Bool=true, mean=nothing)
 
    .. Docstring generated from Julia source
 
-   Compute the sample standard deviation of a vector or array ``v``\ , optionally along dimensions in ``region``\ . The algorithm returns an estimator of the generative distribution's standard deviation under the assumption that each entry of ``v`` is an IID drawn from that generative distribution. This computation is equivalent to calculating ``sqrt(sum((v - mean(v)).^2) / (length(v) - 1))``\ . Note: Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArray`` package is recommended.
+   Compute the sample standard deviation of a vector or array ``v``\ , optionally along dimensions in ``region``\ . The algorithm returns an estimator of the generative distribution's standard deviation under the assumption that each entry of ``v`` is an IID drawn from that generative distribution. This computation is equivalent to calculating ``sqrt(sum((v - mean(v)).^2) / (length(v) - 1))``\ . A pre-computed ``mean`` may be provided. If ``corrected`` is ``true``\ , then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x)``\ .
 
-.. function:: stdm(v, m)
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended.
+
+
+.. function:: stdm(v, m::Number; corrected::Bool=true)
 
    .. Docstring generated from Julia source
 
-   Compute the sample standard deviation of a vector ``v`` with known mean ``m``\ . Note: Julia does not ignore ``NaN`` values in the computation.
+   Compute the sample standard deviation of a vector ``v`` with known mean ``m``\ . If ``corrected`` is ``true``\ , then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x)``\ .
+
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended.
+
 
 .. function:: var(v[, region])
 
@@ -1591,11 +1647,15 @@ Statistics
 
    Compute the sample variance of a vector or array ``v``\ , optionally along dimensions in ``region``\ . The algorithm will return an estimator of the generative distribution's variance under the assumption that each entry of ``v`` is an IID drawn from that generative distribution. This computation is equivalent to calculating ``sumabs2(v - mean(v)) / (length(v) - 1)``\ . Note: Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArray`` package is recommended.
 
-.. function:: varm(v, m)
+.. function:: varm(v, m[, region]; corrected::Bool=true)
 
    .. Docstring generated from Julia source
 
-   Compute the sample variance of a vector ``v`` with known mean ``m``\ . Note: Julia does not ignore ``NaN`` values in the computation.
+   Compute the sample variance of a collection ``v`` with known mean(s) ``m``\ , optionally over ``region``\ . ``m`` may contain means for each dimension of ``v``\ . If ``corrected`` is ``true``\ , then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x)``\ .
+
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended.
+
 
 .. function:: middle(x)
 
@@ -1613,19 +1673,40 @@ Statistics
 
    .. Docstring generated from Julia source
 
-   Compute the middle of a range, which consists in computing the mean of its extrema. Since a range is sorted, the mean is performed with the first and last element.
+   Compute the middle of a range, which consists of computing the mean of its extrema. Since a range is sorted, the mean is performed with the first and last element.
 
-.. function:: middle(array)
+   .. doctest::
+
+       julia> middle(1:10)
+       5.5
+
+.. function:: middle(a)
 
    .. Docstring generated from Julia source
 
-   Compute the middle of an array, which consists in finding its extrema and then computing their mean.
+   Compute the middle of an array ``a``\ , which consists of finding its extrema and then computing their mean.
+
+   .. doctest::
+
+       julia> a = [1,2,3.6,10.9]
+       4-element Array{Float64,1}:
+         1.0
+         2.0
+         3.6
+        10.9
+
+       julia> middle(a)
+       5.95
 
 .. function:: median(v[, region])
 
    .. Docstring generated from Julia source
 
-   Compute the median of whole array ``v``\ , or optionally along the dimensions in ``region``\ . For even number of elements no exact median element exists, so the result is equivalent to calculating mean of two median elements. ``NaN`` is returned if the data contains any ``NaN`` values. For applications requiring the handling of missing data, the ``DataArrays`` package is recommended.
+   Compute the median of an entire array ``v``\ , or, optionally, along the dimensions in ``region``\ . For an even number of elements no exact median element exists, so the result is equivalent to calculating mean of two median elements.
+
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended.
+
 
 .. function:: median!(v)
 
@@ -1649,6 +1730,10 @@ Statistics
 
    Quantiles are computed via linear interpolation between the points ``((k-1)/(n-1), v[k])``\ , for ``k = 1:n`` where ``n = length(v)``\ . This corresponds to Definition 7 of Hyndman and Fan (1996), and is the same as the R default.
 
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended. ``quantile`` will throw an ``ArgumentError`` in the presence of ``NaN`` values in the data array.
+
+
    * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages", *The American Statistician*, Vol. 50, No. 4, pp. 361-365
 
 .. function:: quantile!([q, ] v, p; sorted=false)
@@ -1661,31 +1746,35 @@ Statistics
 
    Quantiles are computed via linear interpolation between the points ``((k-1)/(n-1), v[k])``\ , for ``k = 1:n`` where ``n = length(v)``\ . This corresponds to Definition 7 of Hyndman and Fan (1996), and is the same as the R default.
 
+   .. note::
+      Julia does not ignore ``NaN`` values in the computation. For applications requiring the handling of missing data, the ``DataArrays.jl`` package is recommended. ``quantile!`` will throw an ``ArgumentError`` in the presence of ``NaN`` values in the data array.
+
+
    * Hyndman, R.J and Fan, Y. (1996) "Sample Quantiles in Statistical Packages", *The American Statistician*, Vol. 50, No. 4, pp. 361-365
 
 .. function:: cov(x[, corrected=true])
 
    .. Docstring generated from Julia source
 
-   Compute the variance of the vector ``x``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1`` wheares the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x)``\ .
+   Compute the variance of the vector ``x``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x)``\ .
 
 .. function:: cov(X[, vardim=1, corrected=true])
 
    .. Docstring generated from Julia source
 
-   Compute the covariance matrix of the matrix ``X`` along the dimension ``vardim``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1`` wheares the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = size(X, vardim)``\ .
+   Compute the covariance matrix of the matrix ``X`` along the dimension ``vardim``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = size(X, vardim)``\ .
 
 .. function:: cov(x, y[, corrected=true])
 
    .. Docstring generated from Julia source
 
-   Compute the covariance between the vectors ``x`` and ``y``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1`` wheares the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x) = length(y)``\ .
+   Compute the covariance between the vectors ``x`` and ``y``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = length(x) = length(y)``\ .
 
 .. function:: cov(X, Y[, vardim=1, corrected=true])
 
    .. Docstring generated from Julia source
 
-   Compute the covariance between the vectors or matrices ``X`` and ``Y`` along the dimension ``vardim``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1`` wheares the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = size(X, vardim) = size(Y, vardim)``\ .
+   Compute the covariance between the vectors or matrices ``X`` and ``Y`` along the dimension ``vardim``\ . If ``corrected`` is ``true`` (the default) then the sum is scaled with ``n-1``\ , whereas the sum is scaled with ``n`` if ``corrected`` is ``false`` where ``n = size(X, vardim) = size(Y, vardim)``\ .
 
 .. function:: cor(x)
 
@@ -1716,9 +1805,7 @@ Signal Processing
 
 Fast Fourier transform (FFT) functions in Julia are
 implemented by calling functions from `FFTW
-<http://www.fftw.org>`_. By default, Julia does not use multi-threaded
-FFTW. Higher performance may be obtained by experimenting with
-multi-threading. Use ``FFTW.set_num_threads(np)`` to use ``np`` threads.
+<http://www.fftw.org>`_.
 
 .. function:: fft(A [, dims])
 
@@ -1737,7 +1824,10 @@ multi-threading. Use ``FFTW.set_num_threads(np)`` to use ``np`` threads.
 
    A multidimensional FFT simply performs this operation along each transformed dimension of ``A``\ .
 
-   Higher performance is usually possible with multi-threading. Use ``FFTW.set_num_threads(np)`` to use ``np`` threads, if you have ``np`` processors.
+   .. note::
+      * Julia starts FFTW up with 1 thread by default. Higher performance is usually possible by increasing number of threads. Use ``FFTW.set_num_threads(Sys.CPU_CORES)`` to use as many threads as cores on your system.
+      * This performs a multidimensional FFT by default. FFT libraries in other languages such as Python and Octave perform a one-dimensional FFT along the first non-singleton dimension of the array. This is worth noting while performing comparisons. For more details, refer to the :ref:`man-noteworthy-differences` section of the manual.
+
 
 .. function:: fft!(A [, dims])
 
@@ -2022,11 +2112,19 @@ some built-in integration support in Julia.
 
    Returns a pair ``(I,E)`` of the estimated integral ``I`` and an estimated upper bound on the absolute error ``E``\ . If ``maxevals`` is not exceeded then ``E <= max(abstol, reltol*norm(I))`` will hold. (Note that it is useful to specify a positive ``abstol`` in cases where ``norm(I)`` may be zero.)
 
-   The endpoints ``a`` etcetera can also be complex (in which case the integral is performed over straight-line segments in the complex plane). If the endpoints are ``BigFloat``\ , then the integration will be performed in ``BigFloat`` precision as well (note: it is advisable to increase the integration ``order`` in rough proportion to the precision, for smooth integrands). More generally, the precision is set by the precision of the integration endpoints (promoted to floating-point types).
+   The endpoints ``a`` et cetera can also be complex (in which case the integral is performed over straight-line segments in the complex plane). If the endpoints are ``BigFloat``\ , then the integration will be performed in ``BigFloat`` precision as well.
+
+   .. note::
+      It is advisable to increase the integration ``order`` in rough proportion to the precision, for smooth integrands.
+
+
+   More generally, the precision is set by the precision of the integration endpoints (promoted to floating-point types).
 
    The integrand ``f(x)`` can return any numeric scalar, vector, or matrix type, or in fact any type supporting ``+``\ , ``-``\ , multiplication by real values, and a ``norm`` (i.e., any normed vector space). Alternatively, a different norm can be specified by passing a ``norm``\ -like function as the ``norm`` keyword argument (which defaults to ``vecnorm``\ ).
 
-   [Only one-dimensional integrals are provided by this function. For multi-dimensional integration (cubature), there are many different algorithms (often much better than simple nested 1d integrals) and the optimal choice tends to be very problem-dependent. See the Julia external-package listing for available algorithms for multidimensional integration or other specialized tasks (such as integrals of highly oscillatory or singular functions).]
+   .. note::
+      Only one-dimensional integrals are provided by this function. For multi-dimensional integration (cubature), there are many different algorithms (often much better than simple nested 1d integrals) and the optimal choice tends to be very problem-dependent. See the Julia external-package listing for available algorithms for multidimensional integration or other specialized tasks (such as integrals of highly oscillatory or singular functions).
+
 
    The algorithm is an adaptive Gauss-Kronrod integration technique: the integral in each interval is estimated using a Kronrod rule (``2*order+1`` points) and the error is estimated using an embedded Gauss rule (``order`` points). The interval with the largest error is then subdivided into two intervals and the process is repeated until the desired error tolerance is achieved.
 

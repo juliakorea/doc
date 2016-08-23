@@ -297,6 +297,12 @@ General Number Functions and Constants
 
    Test whether ``x`` or all its elements are numerically equal to some real number.
 
+.. function:: isimag(z) -> Bool
+
+   .. Docstring generated from Julia source
+
+   Test whether ``z`` is purely imaginary, i.e. has a real part equal to 0.
+
 .. function:: Float32(x [, mode::RoundingMode])
 
    .. Docstring generated from Julia source
@@ -365,9 +371,13 @@ General Number Functions and Constants
 
    .. Docstring generated from Julia source
 
-   Set the rounding mode of floating point type ``T``\ , controlling the rounding of basic arithmetic functions (:func:`+`\ , :func:`-`\ , :func:`*`\ , :func:`/` and :func:`sqrt`\ ) and type conversion.
+   Set the rounding mode of floating point type ``T``\ , controlling the rounding of basic arithmetic functions (:func:`+`\ , :func:`-`\ , :func:`*`\ , :func:`/` and :func:`sqrt`\ ) and type conversion. Other numerical functions may give incorrect or invalid values when using rounding modes other than the default ``RoundNearest``\ .
 
    Note that this may affect other types, for instance changing the rounding mode of ``Float64`` will change the rounding mode of ``Float32``\ . See :obj:`RoundingMode` for available modes.
+
+   .. warning::
+      This feature is still experimental, and may give unexpected or incorrect values.
+
 
 .. function:: setrounding(f::Function, T, mode)
 
@@ -383,6 +393,28 @@ General Number Functions and Constants
        setrounding(T, old)
 
    See :obj:`RoundingMode` for available rounding modes.
+
+   .. warning::
+      This feature is still experimental, and may give unexpected or incorrect values. A known problem is the interaction with compiler optimisations, e.g.
+
+      .. code-block:: julia
+
+          julia> setrounding(Float64,RoundDown) do
+              1.1 + 0.1
+          end
+          1.2000000000000002
+
+      Here the compiler is *constant folding*, that is evaluating a known constant expression at compile time, however the rounding mode is only changed at runtime, so this is not reflected in the function result. This can be avoided by moving constants outside the expression, e.g.
+
+      .. code-block:: julia
+
+          julia> x = 1.1; y = 0.1;
+
+          julia> setrounding(Float64,RoundDown) do
+              x + y
+          end
+          1.2
+
 
 .. function:: get_zero_subnormals() -> Bool
 
@@ -592,25 +624,25 @@ As ``BigInt`` represents unbounded integers, the interval must be specified (e.g
 
    Generate a ``BitArray`` of random boolean values.
 
-.. function:: randn([rng], [dims...])
+.. function:: randn([rng], [T=Float64], [dims...])
 
    .. Docstring generated from Julia source
 
-   Generate a normally-distributed random number with mean 0 and standard deviation 1. Optionally generate an array of normally-distributed random numbers.
+   Generate a normally-distributed random number of type ``T`` with mean 0 and standard deviation 1. Optionally generate an array of normally-distributed random numbers. The ``Base`` module currently provides an implementation for the types ``Float16``\ , ``Float32``\ , and ``Float64`` (the default).
 
-.. function:: randn!([rng], A::Array{Float64,N})
-
-   .. Docstring generated from Julia source
-
-   Fill the array ``A`` with normally-distributed (mean 0, standard deviation 1) random numbers. Also see the rand function.
-
-.. function:: randexp([rng], [dims...])
+.. function:: randn!([rng], A::AbstractArray) -> A
 
    .. Docstring generated from Julia source
 
-   Generate a random number according to the exponential distribution with scale 1. Optionally generate an array of such random numbers.
+   Fill the array ``A`` with normally-distributed (mean 0, standard deviation 1) random numbers. Also see the ``rand`` function.
 
-.. function:: randexp!([rng], A::Array{Float64,N})
+.. function:: randexp([rng], [T=Float64], [dims...])
+
+   .. Docstring generated from Julia source
+
+   Generate a random number of type ``T`` according to the exponential distribution with scale 1. Optionally generate an array of such random numbers. The ``Base`` module currently provides an implementation for the types ``Float16``\ , ``Float32``\ , and ``Float64`` (the default).
+
+.. function:: randexp!([rng], A::AbstractArray) -> A
 
    .. Docstring generated from Julia source
 
