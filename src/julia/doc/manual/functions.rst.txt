@@ -891,7 +891,6 @@
 -- consisting of ``f(vector1[i],vector2[i])`` for each index ``i``
 -- (throwing an exception if the vectors have different length).
 == 
-++ (TODO: 아래 번역)
 ++ 게다가, *중첩된* ``f.(args...)`` 호출은 하나의 ``broadcast`` 반복문으으로 
 ++ 녹아들어갈 수 있다. 
 ++ 예를 들어, ``sin.(cos.(X))``\ 는 ``broadcast(x -> sin(cos(x)), X)``\ 와 같고, 
