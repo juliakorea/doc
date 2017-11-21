@@ -1,3 +1,12 @@
+
+
+
+# https://github.com/juliakorea/translate-doc 로 옮깁니다 
+ - https://github.com/juliakorea/translate-doc
+
+
+
+
 줄리아 문서 번역소
 
 Linux, OSX: [![Build Status](https://api.travis-ci.org/juliakorea/doc.svg?branch=master)](https://travis-ci.org/juliakorea/doc)
